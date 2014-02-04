@@ -1,0 +1,22 @@
+#include <windows.h>
+
+101 ICON quickbms.ico
+1 VERSIONINFO
+FILEVERSION 0,0,0,0
+PRODUCTVERSION 0,0,0,0
+FILEOS VOS__WINDOWS32
+FILETYPE VFT_APP
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "CompanyName", "Luigi Auriemma\r\ne-mail: aluigi@autistici.org\r\nweb:    aluigi.org"
+            VALUE "FileDescription", "QuickBMS"
+            VALUE "FileVersion", "check it at runtime"
+            VALUE "LegalCopyright", "Luigi Auriemma"
+            VALUE "ProductName", "QuickBMS"
+            VALUE "Comments", "http://quickbms.aluigi.org"
+        END
+    END
+END
