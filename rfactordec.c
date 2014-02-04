@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2011 Luigi Auriemma
+    Copyright 2008-2013 Luigi Auriemma
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ typedef uint64_t    u64;
 
 
 
-#define VER         "0.2.1"
+#define VER         "0.2.2"
 #define PRINTF64(x) (u32)(((x) >> 32) & 0xffffffff), (u32)((x) & 0xffffffff)    // I64x, llx? blah
 
 
@@ -117,7 +117,8 @@ int main(int argc, char *argv[]) {
             encrypt     = 0,
             altmode     = 0,
             enctype     = 0,
-            force_sign  = 0;
+            force_sign  = 0,
+            dont_ask    = 0;
     u8      *buff,
             *data,
             *fin,
@@ -128,7 +129,7 @@ int main(int argc, char *argv[]) {
     setbuf(stderr, NULL);
 
     fputs("\n"
-        "ISI rFactor files decrypter/encrypter "VER"\n"
+        "ISI rFactor files decrypter/encrypter " VER "\n"
         "by Luigi Auriemma\n"
         "e-mail: aluigi@autistici.org\n"
         "web:    aluigi.org\n"
@@ -171,6 +172,7 @@ int main(int argc, char *argv[]) {
             "        at the moment only ARCA requires encrypted files to work, so if you\n"
             "        have modified the files of this game you need to use -e on them\n"
             "-F W    filter the input files using the W wildcard, example -F \"*.gmt\"\n"
+            "-y      force encryption for unlisted signatures without asking\n"
             "\n"
             "input and output file can be also the same, so it will be overwritten\n"
             "use - as output_file for selecting stdout\n"
@@ -185,10 +187,11 @@ int main(int argc, char *argv[]) {
             std_err("");
         }
         switch(argv[i][1]) {
-            case 'o': overwrite = 1;                break;
-            case 's': sign      = hex64(argv[++i]); break;
-            case 'e': encrypt   = 1;                break;
-            case 'F': filter_in_files   = argv[++i];    break;
+            case 'o': overwrite         = 1;                break;
+            case 's': sign              = hex64(argv[++i]); break;
+            case 'e': encrypt           = 1;                break;
+            case 'F': filter_in_files   = argv[++i];        break;
+            case 'y': dont_ask          = 1;                break;
             default: {
                 fprintf(stderr, "\nError: wrong command-line argument (%s)\n\n", argv[i]);
                 std_err("");
@@ -232,6 +235,7 @@ int main(int argc, char *argv[]) {
         fout = outdir;
     }
 
+    int finlen = strlen(fin);
 redo_scan:
     if(files) {
         fin = files[curr_file].name;
@@ -239,12 +243,18 @@ redo_scan:
         fprintf(stderr, "\n");
     }
     if(outdirlen) {
-        p = strrchr(fin, '\\');
-        if(!p) p = strrchr(fin, '/');
-        if(p) {
-            p++;
+        if(files) {
+            for(p = fin + finlen; *p; p++) {
+                if((*p != '\\') && (*p != '/')) break;
+            }
         } else {
-            p = fin;
+            p = strrchr(fin, '\\');
+            if(!p) p = strrchr(fin, '/');
+            if(p) {
+                p++;
+            } else {
+                p = fin;
+            }
         }
         mystrcpy(outdir + outdirlen, p, PATHSZ - outdirlen);
     }
@@ -286,6 +296,12 @@ redo:
     } else if(sign == 0x4b1dca9f960524e8LL) {
         fprintf(stderr, "- Game Stock Car\n");
         enctype = 1;
+    } else if(sign == 0x06a66ad328aeaed6LL) {
+        fprintf(stderr, "- Simulador Turismo Carretera 2012 encrypted file\n");
+        enctype = 1;
+    } else if(sign == 0x28b7856a3a5996daLL) {
+        fprintf(stderr, "- Game Stock Car: Formula Truck\n");
+        enctype = 1;
     } else if(force_sign) {
         fprintf(stderr, "- unknown game, force mode\n");
         altmode = 0;
@@ -302,13 +318,15 @@ redo:
                 goto redo;
             }
         }
-        fprintf(stderr, "\n"
-            "Error: the signature of the input file is not known\n"
-            "       if you are sure that the input file is encrypted contact me now!\n");
-        fprintf(stderr, "\n"
-            "       do you want to force the encryption using enctype 1 (y/N)?\n"
-            "       ");
-        if(get_yesno() != 'y') std_err("");
+        if(!dont_ask) {
+            fprintf(stderr, "\n"
+                "Error: the signature of the input file is not known\n"
+                "       if you are sure that the input file is encrypted contact me now!\n");
+            fprintf(stderr, "\n"
+                "       do you want to force the encryption using enctype 1 (y/N)?\n"
+                "       ");
+            if(get_yesno() != 'y') std_err("");
+        }
         force_sign = 1;
         free(buff);
         buff = NULL;
@@ -324,7 +342,7 @@ redo:
     if(skip) fprintf(stderr, "- bytes to not decrypt: %d\n", skip);
 
     fprintf(stderr, "- key %08x%08x\n", PRINTF64(key));
-    key = isi_key(enctype, key);
+    key = isi_key(enctype, key);    // WRONG key for re-encryption! I will work on it in future
     fprintf(stderr, "- encryption key %08x%08x\n", PRINTF64(key));
 
     fprintf(stderr, "- start %s\n", encrypt ? "encryption" : "decryption");
