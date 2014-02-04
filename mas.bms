@@ -1,0 +1,97 @@
+# ISI Gmotor engine MAS files (script 0.2a)
+#  works universally with any game included:
+#  ACTC, rFactor, ARCA, BMW M3, Sports Cart GT, NASCAR SimRacing/Thunder, F1 Challenge, SimRaceway and possibly others
+# script for QuickBMS http://quickbms.aluigi.org
+
+set MAS_TYPE0 binary "GMOTORMAS10\0\0\0\0\0"
+set MAS_TYPE1 binary "\xC8\xCF\xD2\xD8\xCE\xD8\xE6\xC9\xCA\xDD\xD8\xBE\xBB\xA6\xBF\x90"
+set MAS_TYPE3 binary "CUBEMAS4.10\0\0\0\0\0"
+set SRW_TYPE  binary "SRW0000"
+set FILES_SIZE long 256
+
+getdstring SIGN 16
+if SIGN == MAS_TYPE0
+    set MAS_TYPE long 0
+elif SIGN == MAS_TYPE1
+    set MAS_TYPE long 1
+    get DUMMY long
+elif SIGN == MAS_TYPE3
+    set MAS_TYPE long 3
+else
+    goto 0
+    getdstring SIGN 7
+    if SIGN == SRW_TYPE
+        print "use my simraceway.bms script on this archive\nthen use mas.bms on the obtained decrypted output file"
+        cleanexit
+    endif
+
+    goto 0
+    getdstring SIGN 3
+    if SIGN == "IFD"
+        get MAS_TYPE long   # ??? (tested with 1 only)
+        get DUMMY long
+    else
+        set MAS_TYPE long 2
+        set FILES_SIZE long 0x20
+        goto 0
+    endif
+endif
+print "set MAS_TYPE %MAS_TYPE%"
+
+get FILES long
+get DATA_SIZE long
+math ZSIZE = 0
+if SIGN == "IFD"
+    get ZSIZE long
+endif
+
+savepos OFFSET
+math BASE_OFF = FILES
+math BASE_OFF *= FILES_SIZE
+if ZSIZE == 0
+    log MEMORY_FILE OFFSET BASE_OFF
+else
+    clog MEMORY_FILE OFFSET ZSIZE BASE_OFF
+    math BASE_OFF = ZSIZE
+endif
+math BASE_OFF += OFFSET
+
+for i = 0 < FILES
+    if MAS_TYPE == 0
+        get DUMMY long MEMORY_FILE
+        get OFFSET long MEMORY_FILE
+        get SIZE long MEMORY_FILE
+        get ZSIZE long MEMORY_FILE
+        getdstring NAME 240 MEMORY_FILE
+    elif MAS_TYPE == 1
+        get DUMMY long MEMORY_FILE
+        getdstring NAME 236 MEMORY_FILE
+        get OFFSET long MEMORY_FILE
+        get SIZE long MEMORY_FILE
+        get ZSIZE long MEMORY_FILE
+        get DUMMY long MEMORY_FILE
+    elif MAS_TYPE == 2
+        getdstring NAME 0x10 MEMORY_FILE
+        get OFFSET long MEMORY_FILE
+        get SIZE long MEMORY_FILE
+        get ZSIZE long MEMORY_FILE
+        get DUMMY long MEMORY_FILE
+    elif MAS_TYPE == 3
+        get DUMMY long MEMORY_FILE
+        get OFFSET long MEMORY_FILE
+        get SIZE long MEMORY_FILE
+        get ZSIZE long MEMORY_FILE
+        get DUMMY long MEMORY_FILE
+        getdstring NAME 236 MEMORY_FILE
+    endif
+
+    math OFFSET += BASE_OFF
+    if ZSIZE == 0
+        math ZSIZE = SIZE
+    endif
+    if SIZE == ZSIZE
+        log NAME OFFSET SIZE
+    else
+        clog NAME OFFSET ZSIZE SIZE
+    endif
+next i
