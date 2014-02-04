@@ -41,6 +41,7 @@
     char *get_file(char *title, int multi);
 #else
     #include <unistd.h>
+    #include <dirent.h>
     #define PATHSLASH   '/'
     #define MAKEDIR(x)  mkdir(name, 0755)
 #endif
@@ -334,7 +335,7 @@ redo:
     }
 
     ext = get_ext(fin);
-    if(!stricmp(ext, "GMT")) {
+    if(!strcasecmp(ext, "GMT")) {
         skip = 4;
     } else {
         skip = 0;
