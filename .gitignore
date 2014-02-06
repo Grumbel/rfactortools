@@ -3,3 +3,4 @@
 *.o
 /rfactordec
 /quickbms/src/quickbms
+/build/
