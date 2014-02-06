@@ -20,46 +20,84 @@ import sys
 import struct
 import zlib
 import os
+import argparse
 
+mas_type0 = b"GMOTORMAS10\0\0\0\0\0"
 mas_type1 = b"\xC8\xCF\xD2\xD8\xCE\xD8\xE6\xC9\xCA\xDD\xD8\xBE\xBB\xA6\xBF\x90"
+mas_type3 = b"CUBEMAS4.10\0\0\0\0\0"
 
-def mas_pack(inputdir, masfile):
+def mas_pack(inputdir, masfile, mas_type):
     with open(masfile, "wb") as fout:
         files = os.listdir(inputdir)
         
-        fout.write(mas_type1)
+        if mas_type == 0:
+            fout.write(mas_type0)
+        elif mas_type == 1:
+            fout.write(mas_type1)
+        elif mas_type == 2:
+            fout.write(mas_type2)
+        elif mas_type == 3:
+            fout.write(mas_type3)
+        else:
+            raise RuntimeError("invalid map_type")
 
-        base_offset = 28 + len(files) * 256
+        if mas_type == 1:
+            base_offset = 28 + len(files) * 256
+        else:
+            base_offset = 24 + len(files) * 256
 
         file_table = []
         offset = 0
         fout.seek(base_offset)
         for name in files:
             filename = os.path.join(inputdir, name)
-           
+
             print("processing %s" % filename)
             with open(filename, "rb") as fin:
-               data = fin.read()
-               deflated_data = zlib.compress(data)
+                data = fin.read()
+                deflated_data = zlib.compress(data)
 
-               file_table.append((name, offset, len(data), len(deflated_data)))
-               fout.write(deflated_data)
-               offset += len(deflated_data)
+                file_table.append((name, offset, len(data), len(deflated_data)))
+                fout.write(deflated_data)
+                offset += len(deflated_data)
 
-        fout.seek(16)
         data_size = offset - base_offset
-        fout.write(struct.pack("<4xll", len(file_table), data_size))
+        if mas_type == 1:
+            fout.seek(20)
+        else:
+            fout.seek(16)
+        fout.write(struct.pack("<ll", len(file_table), data_size))
 
         # write file table to the start of the file
-        fout.seek(28)
+        if mas_type == 1:
+            fout.seek(28)
+        else:
+            fout.seek(24)
+
         for name, offset, size, zsize in file_table:
             print("%8d %8d %8d %s" % (offset, size, zsize, name))
-            fout.write(struct.pack("<4x236slll4x", bytearray(name, "ascii"), offset, size, zsize))
+
+            if mas_type == 0:
+                fout.write(struct.pack("<4xlll240s", offset, size, zsize, bytearray(name, "latin-1")))
+            elif mas_type == 1:
+                fout.write(struct.pack("<4x236slll4x", bytearray(name, "latin-1"), offset, size, zsize))
+            elif mas_type == 2:
+                fout.write(struct.pack("<4x16slll4x", bytearray(name, "latin-1"), offset, size, zsize))
+            elif mas_type == 3:
+                fout.write(struct.pack("<4xlll4x236s", bytearray(name, "latin-1"), offset, size, zsize))
+            else:
+                raise RuntimeError("invalid map_type")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: %s INPUTDIR OUTPUTMASFILE" % sys.argv[0])
-    else:
-        mas_pack(sys.argv[1], sys.argv[2])
+    parser = argparse.ArgumentParser(description='rFactor MAS packer')
+    parser.add_argument('INPUTDIR', action='store', type=str,
+                        help='directory to be packed')
+    parser.add_argument('MASFILE', action='store', type=str,
+                        help='output file')
+    parser.add_argument('-t', '--type', metavar='INT', action='store', type=int, default=1,
+                        help='MAS file type (0: GTL/GTR2, 1: rFactor, GSC2013)')
+    args = parser.parse_args()
+
+    mas_pack(args.INPUTDIR, args.MASFILE, args.type)
 
 # EOF #
