@@ -21,43 +21,68 @@ import struct
 import zlib
 import os
 
+mas_type0 = b"GMOTORMAS10\0\0\0\0\0"
 mas_type1 = b"\xC8\xCF\xD2\xD8\xCE\xD8\xE6\xC9\xCA\xDD\xD8\xBE\xBB\xA6\xBF\x90"
+mas_type3 = b"CUBEMAS4.10\0\0\0\0\0"
+
+def get_mas_type(signature):
+    if signature == mas_type0:
+        return 0
+    elif signature == mas_type1:
+        return 1
+    elif signature == mas_type3:
+        return 3
+    else:
+        raise RuntimeError("unknown mas type: %s" % signature)
 
 def mas_unpack(masfile, outdir):
     with open(masfile, "rb") as fin:
         signature = fin.read(16)
 
-        if signature != mas_type1:
-            print("unknown MAS type")
-        else:
+        mas_type = get_mas_type(signature)
+
+        if mas_type == 1:
             file_count, data_size = struct.unpack("<4xll", fin.read(12))
+        else:
+            file_count, data_size = struct.unpack("<ll", fin.read(8))
 
-            file_table = []
-            for i in range(0, file_count):
+        file_table = []
+        for i in range(0, file_count):
+
+            if mas_type == 0:
+                offset, size, zsize, name = struct.unpack("<4xlll240s", fin.read(256))
+            elif mas_type == 1:
                 name, offset, size, zsize = struct.unpack("<4x236slll4x", fin.read(256))
-                name = name.decode("ascii").rstrip('\0')
-                file_table.append((name, offset, size, zsize))
+            elif mas_type == 2:
+                name, offset, size, zsize = struct.unpack("<4x16slll4x", fin.read(256))
+            elif mas_type == 3:
+                name, offset, size, zsize = struct.unpack("<4xlll4x236s", fin.read(256))
+            else:
+                raise RuntimeError("invalid map_type")
 
-            # base_offset = 28 + file_count * 256
-            base_offset = fin.tell()
+            name = name.decode("latin-1").rstrip('\0')
+            file_table.append((name, offset, size, zsize))
 
-            # extracting the data
-            os.mkdir(outdir)
-            for name, offset, size, zsize in file_table:
-                fin.seek(base_offset + offset)
-                data = fin.read(zsize)
+        # base_offset = 28 + file_count * 256
+        base_offset = fin.tell()
 
-                outfile = os.path.join(outdir, name)
-                print("%8d %8d %8d %s" % (offset, size, zsize, outfile))
-                with open(outfile, "wb") as fout:
-                    inflated_data = zlib.decompress(data)
-                    if len(inflated_data) != size:
-                        raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), name, size))
-                    fout.write(inflated_data)
+        # extracting the data
+        os.mkdir(outdir)
+        for name, offset, size, zsize in file_table:
+            fin.seek(base_offset + offset)
+            data = fin.read(zsize)
+
+            outfile = os.path.join(outdir, name)
+            print("%8d %8d %8d %s" % (offset, size, zsize, outfile))
+            with open(outfile, "wb") as fout:
+                inflated_data = zlib.decompress(data)
+                if len(inflated_data) != size:
+                    raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), name, size))
+                fout.write(inflated_data)
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: %s MASFILE OUTDIR" % sys.argv[0])
+        print("Usage: %s [OPTION]... MASFILE OUTDIR" % sys.argv[0])
     else:
         mas_unpack(sys.argv[1], sys.argv[2])
 
