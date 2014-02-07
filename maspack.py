@@ -61,7 +61,7 @@ def mas_pack(inputdir, masfile, mas_type):
                 fout.write(deflated_data)
                 offset += len(deflated_data)
 
-        data_size = offset - base_offset
+        data_size = offset
         if mas_type == 1:
             fout.seek(20)
         else:
