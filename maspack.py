@@ -80,11 +80,11 @@ def mas_pack(inputdir, masfile, mas_type):
             if mas_type == 0:
                 fout.write(struct.pack("<4xlll240s", offset, size, zsize, bytearray(name, "latin-1")))
             elif mas_type == 1:
-                fout.write(struct.pack("<4x236slll4x", bytearray(name, "latin-1"), offset, size, zsize))
+                fout.write(struct.pack("<4x236slll4x", os.fsencode(name), offset, size, zsize))
             elif mas_type == 2:
-                fout.write(struct.pack("<4x16slll4x", bytearray(name, "latin-1"), offset, size, zsize))
+                fout.write(struct.pack("<4x16slll4x", os.fsencode(name), offset, size, zsize))
             elif mas_type == 3:
-                fout.write(struct.pack("<4xlll4x236s", bytearray(name, "latin-1"), offset, size, zsize))
+                fout.write(struct.pack("<4xlll4x236s", os.fsencode(name), offset, size, zsize))
             else:
                 raise RuntimeError("invalid map_type")
 
