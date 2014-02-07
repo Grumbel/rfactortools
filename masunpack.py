@@ -20,6 +20,7 @@ import sys
 import struct
 import zlib
 import os
+import argparse
 
 mas_type0 = b"GMOTORMAS10\0\0\0\0\0"
 mas_type1 = b"\xC8\xCF\xD2\xD8\xCE\xD8\xE6\xC9\xCA\xDD\xD8\xBE\xBB\xA6\xBF\x90"
@@ -69,23 +70,47 @@ def mas_unpack(masfile, outdir):
         base_offset = fin.tell()
 
         # extracting the data
-        os.mkdir(outdir)
-        for name, offset, size, zsize in file_table:
-            fin.seek(base_offset + offset)
-            data = fin.read(zsize)
+        if not outdir:
+            print("%-8s %-8s %-8s %-8s" % ("offset:", "size:", "zsize:", "name:"))
+            for name, offset, size, zsize in file_table:
+                print("%8d %8d %8d %s" % (offset, size, zsize, name))
 
-            outfile = os.path.join(outdir, name)
-            print("%8d %8d %8d %s" % (offset, size, zsize, outfile))
-            with open(outfile, "wb") as fout:
-                inflated_data = zlib.decompress(data)
-                if len(inflated_data) != size:
-                    raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), name, size))
-                fout.write(inflated_data)
+            print()
+            print("number of files:       %12d" % len(file_table))
+            print("header file_count:     %12d" % file_count)
+            print()
+            print("total extracted size:  %12d" % sum([s for (_, _, s, _) in file_table]))
+            print()
+            print("total compressed size: %12d" % sum([zs for (_, _, _, zs) in file_table]))
+            print("header data_size:      %12d" % data_size)
+
+        else:
+            os.mkdir(outdir)
+            for name, offset, size, zsize in file_table:
+                fin.seek(base_offset + offset)
+                data = fin.read(zsize)
+
+                outfile = os.path.join(outdir, name)
+                print("%8d %8d %8d %s" % (offset, size, zsize, outfile))
+                with open(outfile, "wb") as fout:
+                    inflated_data = zlib.decompress(data)
+                    if len(inflated_data) != size:
+                        raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), name, size))
+                    fout.write(inflated_data)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: %s [OPTION]... MASFILE OUTDIR" % sys.argv[0])
+    parser = argparse.ArgumentParser(description='rFactor MAS packer')
+    parser.add_argument('MASFILE', action='store', type=str,
+                        help='.mas file to unpack')
+    parser.add_argument('OUTDIR', action='store', type=str, nargs='?',
+                        help='output directory')
+    parser.add_argument('-l', '--list', action='store_true',
+                        help="list only, don't extract")
+    args = parser.parse_args()
+
+    if args.list:
+        mas_unpack(args.MASFILE, args.OUTDIR)
     else:
-        mas_unpack(sys.argv[1], sys.argv[2])
+        mas_unpack(args.MASFILE, args.OUTDIR)
 
 # EOF #
