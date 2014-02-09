@@ -112,6 +112,7 @@ def merge_command(source, target, dry_run, force):
         for fname in files:
             file_lst.append(os.path.relpath(os.path.join(path, fname), source))
 
+    # build directory hierachy
     for path in dir_lst:
         target_dir = os.path.join(target, path)
         if os.path.exists(target_dir):
@@ -122,6 +123,7 @@ def merge_command(source, target, dry_run, force):
             if not dry_run:
                 os.mkdir(target_dir)
 
+    # move files
     for path in file_lst:
         source_file = os.path.join(source, path)
         target_file = os.path.join(target, path)
@@ -137,6 +139,14 @@ def merge_command(source, target, dry_run, force):
             print("moving %s to %s" % (source_file, target_file))
             if not dry_run:
                 shutil.move(source_file, target_file)
+
+    # cleanup old hierachy
+    for path in reversed(dir_lst):
+        source_dir = os.path.join(source, path)
+        print("rmdir %s" % source_dir)
+        if not dry_run:
+            os.rmdir(source_dir)
+        os.rmdir(source)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='dirtool')
