@@ -7,6 +7,16 @@ for DIR in "$@"; do
     -iname "*.gdb" \
     -exec \
       sed -i "s/Filter Properties *=.*/Filter Properties = StockV8 \\*/" {} \;
+
+  find "${DIR}" \
+    -iname "*.veh" \
+    -exec \
+       sed -i 's/Classes="/Classes="reiza5, /' {} \;
+
+  find "${DIR}" \
+    -iname "*.gmt" \
+    -exec \
+      ./rfactordec -o -e -s 4b1dca9f960524e8 {} {} \;
 done
 
 # EOF #
