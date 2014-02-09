@@ -2,16 +2,26 @@
 
 set -e
 
-mas2files="./masunpack.py"
-files2mas="./maspack.py"
+for DIR in "$@"; do
+  find "${DIR}" \
+    -iname "*.gdb" \
+    -exec \
+      sed -i "s/Filter Properties *=.*/Filter Properties = StockV8 \\*/" {} \;
 
-for MASFILE in "$@"; do
-  TMPDIR="/tmp/rfactor-$(uuidgen)/"
+  find "${DIR}" \
+    -iname "*.veh" \
+    -exec \
+       sed -i 's/Classes="/Classes="reiza5, /' {} \;
 
-  "${mas2files}" "${MASFILE}" "${TMPDIR}"
-  find "${TMPDIR}" -type f -exec ./rfactordec -s 4b1dca9f960524e8 -e -o {} {} \;
-  "${files2mas}" "${TMPDIR}" "${MASFILE}"
-  rm -rfv "$TMPDIR"
+  find "${DIR}" \
+    -iname "*.gmt" \
+    -exec \
+      ./rfactordec -o -e -s 4b1dca9f960524e8 {} {} \;
+
+  find "${DIR}" \
+    -iname "*.mas" \
+    -exec \
+     ./rfactor-to-gsc2013-mas.sh {} \;
 done
 
 # EOF #
