@@ -104,12 +104,25 @@ def merge_command(source, target, dry_run, force):
     if not os.path.isdir(target):
         raise Exception("%s: must be a directory" % target)
 
-    lst = []
+    dir_lst = []
+    file_lst = []
     for path, dirs, files in os.walk(source):
+        for fname in dirs:
+            dir_lst.append(os.path.relpath(os.path.join(path, fname), source))
         for fname in files:
-            lst.append(os.path.relpath(os.path.join(path, fname), source))
+            file_lst.append(os.path.relpath(os.path.join(path, fname), source))
 
-    for path in lst:
+    for path in dir_lst:
+        target_dir = os.path.join(target, path)
+        if os.path.exists(target_dir):
+            if not os.path.isdir(target_dir):
+                raise Exception("%s: error: already exist and is not a directory" % target_dir)
+        else:
+            print("mkdir %s" % target_dir)
+            if not dry_run:
+                os.mkdir(target_dir)
+
+    for path in file_lst:
         source_file = os.path.join(source, path)
         target_file = os.path.join(target, path)
 
@@ -123,7 +136,6 @@ def merge_command(source, target, dry_run, force):
         else:
             print("moving %s to %s" % (source_file, target_file))
             if not dry_run:
-                os.makedirs(os.path.dirname(target_file), 0o777, True)
                 shutil.move(source_file, target_file)
 
 if __name__ == "__main__":
