@@ -146,7 +146,8 @@ def merge_command(source, target, dry_run, force):
         print("rmdir %s" % source_dir)
         if not dry_run:
             os.rmdir(source_dir)
-    os.rmdir(source)
+    if not dry_run:
+        os.rmdir(source)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='dirtool')
