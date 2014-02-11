@@ -40,7 +40,7 @@ class FileEntry:
     def __init__(self, *args):
         self.type, self.flags, self.name, self.offset, self.size, self.zsize = args
 
-def mas_unpack(masfile, outdir, verbose=False):
+def mas_unpack(masfile, outdir, verbose=False, with_filename=False):
     with open(masfile, "rb") as fin:
         signature = fin.read(16)
 
@@ -89,7 +89,10 @@ def mas_unpack(masfile, outdir, verbose=False):
                 print("header data_size:      %12d" % data_size)
             else:
                 for entry in file_table:
-                    print(entry.name)
+                    if with_filename:
+                        print("%s: %s" %  (masfile, entry.name))
+                    else:
+                        print(entry.name)
         else:
             os.mkdir(outdir)
             for entry in file_table:
@@ -112,13 +115,15 @@ if __name__ == "__main__":
                         help='output directory')
     parser.add_argument('-l', '--list', action='store_true',
                         help="list only, don't extract")
+    parser.add_argument('-H', '--with-filename', action='store_true', default=False,
+                        help="prefix listing with filename")
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help="be more verbose")
     args = parser.parse_args()
 
     if args.list:
-        mas_unpack(args.MASFILE, args.OUTDIR, args.verbose)
+        mas_unpack(args.MASFILE, args.OUTDIR, args.verbose, args.with_filename)
     else:
-        mas_unpack(args.MASFILE, args.OUTDIR, args.verbose)
+        mas_unpack(args.MASFILE, args.OUTDIR, args.verbose, args.with_filename)
 
 # EOF #
