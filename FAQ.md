@@ -1,15 +1,21 @@
 Frequently Asked Questions about converting rFactor mods 
 ========================================================
 
+## How do rFactor and GSC2013 differ?
+
+The overall file structure is the same for both. In GSC2013 the
+content of `.mas` files and `.gmt` files have to be encrypted. The
+`SearchPath` for `.mas` files is also handled differently and needs to
+be adopted when converting mods.
+
 ## What is the meaning the SearchPath in .gen files and of the VEHDIR and TEAMDIR variables?
 
-    SearchPath=<VEHDIR>
-    SearchPath=<TEAMDIR>
+* `<VEHDIR>` gets expanded to `[...]\GameData\Vehicles\`
+* `<TEAMDIR>` gets expanded to the directory where the `.veh` file is located
 
-SearchPath is completely ignored by GSC2013, instead it searches
-from the .gen file downwards the directory tree till it hits
-GameData/Vehicle/.
-
+In rFactor <VEHDIR> seems to get expanded to
+`[...]\GameData\Vehicles\{MODNAME}\` which makes it necessary to tweak
+the path in many mods.
 
 ## "Error loading texture *name*"
 
@@ -75,3 +81,30 @@ Loading screens are ~1024x768 (size can varry)
 
 Menu thumbnails are ~252x249 (size can varry)
 
+## Add-on cars show up in the Mini Challenge races in GSC2013, how to fix that?
+
+The `.veh` file contais `Category="PMC, CHEVROLET`
+
+## How are tracks asigned to karts or race cars?
+
+This is done via the `Filter Properties` setting in the `.gdb` file of
+the track. GSC2013 uses these settings:
+
+    Filter Properties = * StockV8
+
+    Filter Properties = * Kart
+
+rFactor mods use different ones, so they have to be changed to show up in GSC2013.
+
+## Sounds are not working when using older/newer GSC mods
+
+GSC2012 has sounds stored in `GameData\Sounds\StockCarV8`
+
+GSC2013 has sounds stored in `GameData\Sounds\`
+
+Move the sound into the proper directory to fix any issues.
+
+## Sound not working in converted rFactor mods
+
+The `.sfx` file defines which sounds are used, in some mods the file
+path needs to be changed to include the mod name.
