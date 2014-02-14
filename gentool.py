@@ -21,7 +21,7 @@ import re
 import os
 import ntpath
 
-keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=([^\s]+)+')
+keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
 comment_regex = re.compile(r'(.*?)(//.*)')
 section_start_regex = re.compile(r'\s*{')
 section_end_regex = re.compile(r'\s*}')
