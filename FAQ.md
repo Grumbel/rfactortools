@@ -108,3 +108,7 @@ Move the sound into the proper directory to fix any issues.
 
 The `.sfx` file defines which sounds are used, in some mods the file
 path needs to be changed to include the mod name.
+
+## GameStockCar2013 crashes when starting the mod
+
+No idea, happens with a tiny handful of mods.
