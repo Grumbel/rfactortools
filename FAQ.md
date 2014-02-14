@@ -152,3 +152,24 @@ Editing the `.scn` file of the track and removing the
 `INSTANCE=skyboxi { ... }` will make the error messages go away, it
 will however leave you without a sky. You can replace the `skyboxi`
 section and add a `sky.mas` file from another mod to get a sky back.
+
+## Part of the cockpit is cut off
+
+In the cars `.cam` file adjust the `ClipPlanes` for the `COCKPIT` camera:
+
+    LocalCam=COCKPIT
+    {
+      [...]
+      ClipPlanes=(0.0225000, 500.00000)
+      [...]
+    }
+    
+Making the left value smaller should reduce the distance where objects
+are cut off. The value must be positive and not null.
+
+## Parts of the car are visible in the mirror
+
+Editing your `.plr` file inside `USERDATA\(your name)` and changing
+the 15 in `Self In Cockpit Rearview="15"` to 0 might help. Not sure
+how to fix the mod itself, will probably need some tweaking of the
+VISGROUP.
