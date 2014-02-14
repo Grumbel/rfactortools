@@ -11,6 +11,10 @@ might not work in Windows.
 
 ## Tools
 
+### rfactor-to-gsc2013.sh
+
+This script will convert a rFactor mod's `GameData/` directory to GameStockCar2013.
+
 ### `masunpack.py`
 
 Allows you to unpack a `.mas` file or lists its content.
