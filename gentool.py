@@ -21,16 +21,18 @@ import re
 import os
 import ntpath
 
+from vfs import VFS
+
 keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
 comment_regex = re.compile(r'(.*?)(//.*)')
 section_start_regex = re.compile(r'\s*{')
 section_end_regex = re.compile(r'\s*}')
 
-def process_vehfile(filename):
+def process_vehfile(vfs, filename):
     # print("processing", filename)
     graphics_file = None
 
-    with open(filename, 'r', encoding='latin-1') as fin:
+    with vfs.open_read(filename, encoding='latin-1') as fin:
         for orig_line in fin.read().splitlines():
             line = orig_line
 
@@ -101,9 +103,9 @@ class SearchReplaceGenParser(GenParser):
         self.section = False
         print(orig)
 
-def process_genfile(filename, veh_directory, parser):
+def process_genfile(vfs, filename, veh_directory, parser):
     # print("processing", filename)
-    with open(filename, 'r', encoding='latin-1') as fin:
+    with vfs.open_read(filename, encoding='latin-1') as fin:
         for orig_line in fin.read().splitlines():
             line = orig_line
 
@@ -127,14 +129,17 @@ def process_genfile(filename, veh_directory, parser):
             else:
                 parser.on_unknown(orig_line)
 
-def find_file_backwards(dir, gen):
-    filename = os.path.join(dir, gen)
-    if os.path.exists(filename):
-        return filename
-    elif dir and dir != '/':
-        return find_file_backwards(os.path.dirname(dir), gen)
-    else:
-        raise Exception("error: couldn't find .gen file '%s'" % gen)
+def find_file_backwards(vfs, dir, gen):
+    while True:
+        filename = os.path.join(dir, gen)
+        if vfs.file_exists(filename):
+            return filename
+
+        newdir = os.path.dirname(dir)
+        if newdir == dir: # reached the root of the path
+            return None
+        else:
+            dir = newdir
 
 def find_vehdir(path):
     m = re.match(r'^(.*GameData/Vehicles)', path, re.IGNORECASE)
@@ -152,26 +157,30 @@ def process_directory(directory):
     gen_files = []
     veh_files = []
 
-    for path, dirs, files in os.walk(directory):
-        for fname in files:
-            ext = os.path.splitext(fname)[1].lower()
-            if ext == ".gen":
-                gen_files.append(os.path.join(path, fname))
-            elif ext == ".veh":
-                veh_files.append(os.path.join(path, fname))
+    vfs = VFS(directory)
 
-    print(veh_files)
+    for fname in vfs.files():
+        ext = os.path.splitext(fname)[1].lower()
+        if ext == ".gen":
+            gen_files.append(fname)
+        elif ext == ".veh":
+            veh_files.append(fname)
+
+    # print(veh_files)
+    errors = []
     for veh in veh_files:
         try:
             teamdir = os.path.dirname(veh)
             vehdir  = find_vehdir(os.path.dirname(veh))
 
-            gen = process_vehfile(veh)
-            gen = find_file_backwards(os.path.dirname(veh), gen)
+            gen_name = process_vehfile(vfs, veh)
+            gen = find_file_backwards(vfs, os.path.dirname(veh), gen_name)
+            if not gen:
+                raise Exception("%s: error: couldn't find .gen file '%s'" % (veh, gen_name))
             print("veh:", veh)
             print("gen:", gen)
             info = InfoGenParser()
-            process_genfile(gen, os.path.dirname(veh), info)
+            process_genfile(vfs, gen, os.path.dirname(veh), info)
             print("  SearchPath:", info.search_path)
             print("    MasFiles:", info.mas_files)
             print("    <VEHDIR>:", vehdir)
@@ -180,6 +189,15 @@ def process_directory(directory):
             print()
         except Exception as e:
             print("error:", e)
+            errors.append(e)
+
+    if errors:
+        print("Error summary:")
+        print("==============")
+        for e in errors:
+            print("error:", e)
+    else:
+        print("No errors")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor .veh/.gen processor')
