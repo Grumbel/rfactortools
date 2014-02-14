@@ -25,7 +25,7 @@ the .mas, check for .mas file naming conflicts.
 
 ## "Error loading mesh *name* to memory"
 
-A mesh file can't be found, either missing or a .mas name conflict.
+A mesh file can't be found, either missing or a `.mas` name conflict.
 
 
 ## "Wrong GMT Version(or GMT version not allowed)"
@@ -127,3 +127,28 @@ Adding a new `SearchPath` entry works something like this:
 
 Note that these are just rough examples, they might not work for your
 case.
+
+## What are the most common issues with vehicle conversion?
+
+Many mods contain a `cmaps.mas` that conflicts with the `cmaps.mas`
+provided by GameStockCar2013. Solution to that is to change all
+references to `cmaps.mas` in the mod by appending the name of the mod
+directory, i.e. in the `.gen` files `MASFile=cmaps.mas` would be
+changed into `MASFile=SRM_1990\\cmaps.mas`.
+
+The `SearchPath` also often needs the addition of the mod directory
+name, i.e. `SearchPath=<VEHDIR>\SomeDir` would become
+`SearchPath=<VEHDIR>\Modname\SomeDir`.
+
+Those two changes are all that should be needed for most vehicle mods.
+
+## What are the most common issues with track conversion?
+
+The skybox is handled slightly differently in rFactor and
+GameStockCar2013 and you will often get messages about `horizont.gmt`
+or broken `skyboxi`. 
+
+Editing the `.scn` file of the track and removing the
+`INSTANCE=skyboxi { ... }` will make the error messages go away, it
+will however leave you without a sky. You can replace the `skyboxi`
+section and add a `sky.mas` file from another mod to get a sky back.
