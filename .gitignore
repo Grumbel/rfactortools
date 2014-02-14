@@ -2,7 +2,7 @@
 *~
 *.o
 /rfactordec
-/quickbms/src/quickbms
+/other/quickbms/src/quickbms
 /build/
 /old/
 /__pycache__/
