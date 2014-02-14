@@ -83,7 +83,18 @@ Menu thumbnails are ~252x249 (size can varry)
 
 ## Add-on cars show up in the Mini Challenge races in GSC2013, how to fix that?
 
-The `.veh` file contais `Category="PMC, CHEVROLET`
+All the converted vehicle mods currently go into the `reiza5` class,
+which is used for the Minis. To fix that edit the `.veh` files in 
+`GameData/Vehicles/Mini_Challenge/` and change:
+
+    Classes="reiza5"
+
+to:
+
+    Classes="reiza5, MiniChallenge"
+
+There might be cleaner ways without modifying those files, but this
+seems to work, at least for single player.
 
 ## How are tracks asigned to karts or race cars?
 
@@ -152,6 +163,16 @@ Editing the `.scn` file of the track and removing the
 `INSTANCE=skyboxi { ... }` will make the error messages go away, it
 will however leave you without a sky. You can replace the `skyboxi`
 section and add a `sky.mas` file from another mod to get a sky back.
+See these links for more detailed instructions:
+
+* http://www.gtr3.co.uk/forum/index.php?t=msg&th=102&goto=710&#msg_710
+* http://www.gtr3.co.uk/forum/index.php?t=msg&th=114&goto=793&#msg_793
+
+In the `.gdb` file the `TestDaystart` might not be set, add a line
+`TestDaystart = 14:00` to cause tests not to start at the default
+value (9:00).
+
+In the `.tdf` the grip levels might need adjustments, i.e. change `RoadDryGrip=1.00` to something like 1.02-1.04
 
 ## Part of the cockpit is cut off
 
@@ -173,3 +194,9 @@ Editing your `.plr` file inside `USERDATA\(your name)` and changing
 the 15 in `Self In Cockpit Rearview="15"` to 0 might help. Not sure
 how to fix the mod itself, will probably need some tweaking of the
 VISGROUP.
+
+## Where can I find more info on conversion?
+
+This thread contains a lot more info on how to tweak specific things about tracks:
+
+* http://www.gtr3.co.uk/forum/index.php?t=msg&th=102
