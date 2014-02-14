@@ -112,3 +112,18 @@ path needs to be changed to include the mod name.
 ## GameStockCar2013 crashes when starting the mod
 
 No idea, happens with a tiny handful of mods.
+
+## Some files need modifications, how do I automate that?
+
+If a `.gen` files contains the line `MASFile=Season_1990` and you want
+to change it to `MASFile=SRM_1990\Season_1990` for all the .gen files
+you can do that with a simple call to `find` and `sed`, like this:
+
+    find .../GameData/ -name "*.gen" -exec sed -i "s/MASFile=Season_1990/MASFile=SRM_1990\\Season_1990/i" {} \;
+
+Adding a new `SearchPath` entry works something like this: 
+
+    find .../GameData/ -name "*.gen" -exec sed -i 's#SearchPath=<VEHDIR>#SearchPath=<VEHDIR>\nSearchPath=<VEHDIR>\\WRC_By_TeamFMR#i' {} \;
+
+Note that these are just rough examples, they might not work for your
+case.
