@@ -11,7 +11,7 @@ might not work in Windows.
 
 ## Tools
 
-### rfactor-to-gsc2013.sh
+### `rfactor-to-gsc2013.sh`
 
 This script will convert a rFactor mod's `GameData/` directory to GameStockCar2013.
 
@@ -23,6 +23,10 @@ Allows you to unpack a `.mas` file or lists its content.
 
 Allows you to pack files into a `.mas` file.
 
+### imgtool.py
+
+Allows you to rescale overlarge menu graphics to fit properly into GameStockCar2013.
+
 ### `rfactorcrypt.py`
 
 Used for encryption, decryption or inspection of rFactor related files.
@@ -33,15 +37,15 @@ Used by rfactorcrypt.py for the actual encryption/decryption, downloaded from:
 
 * http://aluigi.altervista.org/search.php?src=decrypter
 
-### other/MAS2Files.exe, other/Files2MAS.exe
+### `other/MAS2Files.exe`, `other/Files2MAS.exe`
 
 Mostly the same as maspack.py/masunpack.py, provided here for backup, originally downloaded from:
 
 * http://aluigi.org/misc/masfiles.zip
 
-### other/quickbms/
+### `other/quickbms/`
 
-Another `.mas` unpacker, downloaded from:
+Another `.mas` unpacker, originally downloaded from:
 
 * http://aluigi.altervista.org/quickbms.htm
 
@@ -62,7 +66,14 @@ This will *destructivly* convert the `GameData/` directory into
 GSC2013 format, `.mas` files will be overwritten with encrypted
 versions.
 
-The third step would be:
+Third step is:
+
+    ./imgtool.py .../GameData/
+
+This will rescale all the overlarge menu graphics so that they fit
+properly into GameStockCar2013.
+
+The fourth step is:
 
     ./gentool.py .../GameData/
 
