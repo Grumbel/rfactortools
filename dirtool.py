@@ -6,6 +6,9 @@ import hashlib
 import functools
 import shutil
 import filecmp
+from itertools import chain
+
+import vfs
 
 def hashfile(afile, hasher, blocksize=65536):
     buf = afile.read(blocksize)
@@ -13,6 +16,55 @@ def hashfile(afile, hasher, blocksize=65536):
         hasher.update(buf)
         buf = afile.read(blocksize)
         return hasher.digest()
+
+def get_hierachy(filename):
+    p = None
+    np = os.path.dirname(filename)
+    lst = []
+    while np and p != np:
+        p = np
+        lst.append(np)
+        np = os.path.dirname(np)
+    return lst
+
+def get_directory_list(files):
+    """
+    Returns the directory structure that holds files
+    """
+    return sorted(list(set(chain.from_iterable([get_hierachy(f) for f in files]))))
+
+def move_files(sourcedir, targetdir, files):
+    """
+    Moves files from sourcedir to targetdir while preserving their path structure, similar to 'rsync -R'
+    """
+
+    print("move_files(%s, %s, ...)" % (sourcedir, targetdir))
+
+    assert os.path.isdir(sourcedir)
+    assert not os.path.exists(targetdir) or os.path.isdir(targetdir)
+
+    # Create directory hierachy
+    dirs = get_directory_list(files)
+
+    if not os.path.exists(targetdir):
+        os.mkdir(targetdir)
+
+    for d in dirs:
+        path = os.path.join(targetdir, d)
+        print("creating %s" % path)
+        if not os.path.exists(path):
+            os.mkdir(path)
+        elif os.path.isdir(path):
+            pass
+        else:
+            raise Exception("%s: error: path already exist, but isn't a directory" % path)
+
+    # Move the files over
+    for f in files:
+        source_file = os.path.join(sourcedir, f)
+        target_file = os.path.join(targetdir, f)
+        print("moving %s to %s" % (source_file, target_file))
+        shutil.move(source_file, target_file)
 
 @functools.total_ordering
 class FileInfo:
@@ -81,22 +133,26 @@ def compare_command(path1, path2):
     for f in changes:
         print("~%s" % f)
 
-def extract_command(file1, file2, target):
-    pass
+def extract_diff_command(path1, path2, target):
+    """Run a diff between path1 and path2 and move all additions to target"""
 
-class VFS:
-    def remove_file(filename):
-        pass
+    if not os.path.isdir(path2):
+        raise Exception("%s: error must be a directory" % path2)
 
-    def move_file(source, target):
-        pass
+    if os.path.exists(target) and not os.path.isdir(target):
+        raise Exception("%s: error must be a directory" % target)
 
-class LoggingVFS:
-    def remove_file(filename):
-        print("removing %s" % filename)
+    finfo1 = fileinfo_from_path(path1)
+    finfo2 = fileinfo_from_path(path2)
 
-    def move_file(source, target):
-        print("moving %s to %s" % (source, target))
+    removals, additions, changes = compare_directories(finfo1, finfo2)
+
+    for fname in additions:
+        print(fname)
+
+    files = [f.filename for f in additions]
+
+    move_files(path2, target, files)
 
 def merge_command(source, target, dry_run, force):
     if not os.path.isdir(source):
@@ -152,7 +208,7 @@ def merge_command(source, target, dry_run, force):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='dirtool')
     parser.add_argument('COMMAND', action='store', type=str,
-                        help='diff, extract, merge')
+                        help='diff, extract-diff, merge')
     parser.add_argument('FILE1', action='store', type=str,
                         help='A directory')
     parser.add_argument('FILE2', action='store', type=str,
@@ -169,8 +225,8 @@ if __name__ == "__main__":
 
     if args.COMMAND == "diff":
         compare_command(args.FILE1, args.FILE2)
-    elif args.COMMAND == "extract":
-        extract_command(args.FILE1, args.FILE2, args.target)
+    elif args.COMMAND == "extract-diff":
+        extract_diff_command(args.FILE1, args.FILE2, args.target)
     elif args.COMMAND == "merge":
         merge_command(args.FILE1, args.FILE2, args.dry_run, args.force)
     else:
