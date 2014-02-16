@@ -30,9 +30,9 @@ def resize_to_fit(img, w, h):
         h_ratio = h / ih
 
         if w_ratio > h_ratio:
-            return img.resize((int(w * h_ratio), h), Image.ANTIALIAS)
+            return img.resize((int(iw * h_ratio), h), Image.ANTIALIAS)
         else:
-            return img.resize((w, int(h * w_ratio)), Image.ANTIALIAS)
+            return img.resize((w, int(ih * w_ratio)), Image.ANTIALIAS)
 
 def resize_to_fit_img_file(filename, w, h):
     img = Image.open(filename)
