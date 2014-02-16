@@ -65,7 +65,7 @@ def mas_unpack(masfile, outdir, verbose=False, with_filename=False):
                 raise RuntimeError("invalid map_type")
 
             # No support for ASCIZ strings struct.unpack, thus ugly hackery
-            entry.name = os.fsdecode(entry.name.split(b'\0', 1)[0])
+            entry.name = entry.name.split(b'\0', 1)[0].decode('latin-1')
 
             file_table.append(entry)
 
