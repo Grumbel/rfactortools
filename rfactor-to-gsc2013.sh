@@ -13,10 +13,12 @@ for DIR in "$@"; do
     -exec \
        sed -i 's/Classes="/Classes="reiza5, /' {} \;
 
+  ./imgtool.py "$DIR"
+
   find "${DIR}" \
     -iname "*.gmt" \
     -exec \
-      ./rfactordec -o -e -s 4b1dca9f960524e8 {} {} \;
+      ./rfactorcrypt.py -e {} \;
 
   find "${DIR}" \
     -iname "*.mas" \
