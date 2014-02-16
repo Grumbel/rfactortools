@@ -20,7 +20,7 @@ import argparse
 import re
 import os
 import ntpath
-
+from io import StringIO
 from vfs import VFS
 
 keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
@@ -69,41 +69,92 @@ class GenParser:
 
 class InfoGenParser(GenParser):
     def __init__(self):
-        self.section = False
+        self.section = 0
         self.search_path = []
         self.mas_files = []
+        self.has_skyboxi = None
 
     def on_key_value(self, key, value, comment, orig):
-        if not self.section:
+        if self.section == 0:
             if key.lower() == "masfile":
                 self.mas_files.append(value)
             elif key.lower() == "searchpath":
                 self.search_path.append(value)
+            elif key.lower() == "instance" and value.lower() == "skyboxi":
+                self.has_skyboxi = True
             else:
                 pass
 
     def on_section_start(self, comment, orig):
-        self.section = True
+        self.section += 1
 
     def on_section_end(self, comment, orig):
-        self.section = False
+        self.section -= 1
 
 class SearchReplaceGenParser(GenParser):
-    def __init__(self):
-        self.section = False
+    def __init__(self, fout):
+        self.fout = fout
+
+        self.section = 0
+        self.search_path = None
+        self.mas_files = None
+
+        self.delete_search_path = False
+        self.delete_mas_file = False
+
+        self.delete_next_section = False
 
     def on_key_value(self, key, value, comment, orig):
-        print(orig)
+        if self.section == 0:
+            if key.lower() == "instance" and value.lower() == "skyboxi":
+                self.delete_next_section = True
+            elif key.lower() == "masfile":
+                if self.search_path != None:
+                    for p in self.mas_files:
+                        self.fout.write("MASFile=%s\n" % p)
+
+                    self.mas_files = None
+                    self.delete_mas_file = True
+
+                elif not self.delete_mas_file:
+                    self.fout.write(orig + '\n')
+
+            elif key.lower() == "searchpath":
+                if self.search_path != None:
+                    for p in self.search_path:
+                        self.fout.write("SearchPath=%s\n" % p)
+
+                    self.search_path = None
+                    self.delete_search_path = True
+
+                elif not self.delete_search_path:
+                    self.fout.write(orig + '\n')
+
+            else:
+                self.fout.write(orig + '\n')
+        else:
+            if self.delete_next_section and self.section > 0:
+                pass
+            else:
+                self.fout.write(orig + '\n')
 
     def on_section_start(self, comment, orig):
-        self.section = True
-        print(orig)
+        self.section += 1
+        if not self.delete_next_section:
+            self.fout.write(orig + '\n')
 
     def on_section_end(self, comment, orig):
-        self.section = False
-        print(orig)
+        self.section -= 1
+        if not self.delete_next_section:
+            self.fout.write(orig + '\n')
+        else:
+            if self.delete_next_section and self.section == 0:
+                self.delete_next_section = False
 
-def process_genfile(vfs, filename, veh_directory, parser):
+    def on_unknown(self, orig):
+        self.fout.write(orig + '\n')
+
+def process_genfile(vfs, filename, parser):
     # print("processing", filename)
     with vfs.open_read(filename, encoding='latin-1') as fin:
         for orig_line in fin.read().splitlines():
@@ -144,18 +195,29 @@ def find_file_backwards(vfs, dir, gen):
 def find_vehdir(path):
     m = re.match(r'^(.*GameData/Vehicles)', path, re.IGNORECASE)
     if m:
-        print(m.group(1))
         return m.group(1)
     else:
         raise Exception("couldn't locate <VEHDIR> in %s" % path)
 
-def verify_gen(search_path, mas_files, vehdir, teamdir):
-    for mas in mas_files:
-        pass
+def modify_track_file(vfs, scn):
+    with open("/tmp/out.scn", "w") as fout:
+        sr_parser = SearchReplaceGenParser(fout)
+        # sr_parser.mas_files   =
+        # sr_parser.search_path =
+        process_genfile(vfs, scn, sr_parser)
+
+def modify_vehicle_file(vfs, gen, search_path, mas_files, vehdir, teamdir):
+    with open("/tmp/out.gen", "w") as fout:
+        sr_parser = SearchReplaceGenParser(fout)
+        sr_parser.mas_files   = mas_files
+        sr_parser.search_path = search_path
+        process_genfile(vfs, gen, sr_parser)
 
 def process_directory(directory):
     gen_files = []
     veh_files = []
+    gdb_files = []
+    scn_files = []
 
     vfs = VFS(directory)
 
@@ -165,9 +227,32 @@ def process_directory(directory):
             gen_files.append(fname)
         elif ext == ".veh":
             veh_files.append(fname)
+        elif ext == ".scn":
+            scn_files.append(fname)
+        elif ext == ".gdb":
+            gdb_files.append(fname)
 
     # print(veh_files)
     errors = []
+    for gdb in gdb_files:
+        try:
+            trackdir = os.path.dirname(gdb)
+            scn = os.path.splitext(gdb)[0] + ".scn"
+
+            info = InfoGenParser()
+            process_genfile(vfs, scn, info)
+            print("[Track]")
+            print("  gdb: %s" % gdb)
+            print("  scn: %s" % scn)
+            print("  SearchPath:", info.search_path)
+            print("    MasFiles:", info.mas_files)
+            print()
+            modify_track_file(vfs, scn)
+
+        except Exception as e:
+            print("error:", e)
+            errors.append(e)
+
     for veh in veh_files:
         try:
             teamdir = os.path.dirname(veh)
@@ -177,16 +262,19 @@ def process_directory(directory):
             gen = find_file_backwards(vfs, os.path.dirname(veh), gen_name)
             if not gen:
                 raise Exception("%s: error: couldn't find .gen file '%s'" % (veh, gen_name))
-            print("veh:", veh)
-            print("gen:", gen)
+            print("[Vehicle]")
+            print("  veh:", veh)
+            print("  gen:", gen)
             info = InfoGenParser()
-            process_genfile(vfs, gen, os.path.dirname(veh), info)
+            process_genfile(vfs, gen, info)
             print("  SearchPath:", info.search_path)
             print("    MasFiles:", info.mas_files)
             print("    <VEHDIR>:", vehdir)
             print("   <TEAMDIR>:", teamdir)
-            verify_gen(info.search_path, info.mas_files, vehdir, teamdir)
             print()
+
+            modify_vehicle_file(vfs, gen, info.search_path, info.mas_files, vehdir, teamdir)
+
         except Exception as e:
             print("error:", e)
             errors.append(e)
