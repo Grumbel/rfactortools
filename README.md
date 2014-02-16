@@ -7,7 +7,7 @@ this point not 100% automatic for all mods, but it will get you most
 of the way. The file `FAQ.md` provides solutions for common problems.
 
 These tools are written and tested in Linux only at this point, they
-might not work in Windows.
+might not work in Windows. They require `python3` and `python3-pil`.
 
 ## Tools
 
@@ -17,7 +17,7 @@ This script will convert a rFactor mod's `GameData/` directory to GameStockCar20
 
 ### `masunpack.py`
 
-Allows you to unpack a `.mas` file or lists its content.
+Allows you to unpack a `.mas` file or list its content.
 
 ### `maspack.py`
 

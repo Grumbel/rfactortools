@@ -130,7 +130,7 @@ If a `.gen` files contains the line `MASFile=Season_1990` and you want
 to change it to `MASFile=SRM_1990\Season_1990` for all the .gen files
 you can do that with a simple call to `find` and `sed`, like this:
 
-    find .../GameData/ -name "*.gen" -exec sed -i "s/MASFile=Season_1990/MASFile=SRM_1990\\Season_1990/i" {} \;
+    find .../GameData/ -name "*.gen" -exec sed -i 's/MASFile=Season_1990/MASFile=SRM_1990\\Season_1990/i' {} \;
 
 Adding a new `SearchPath` entry works something like this: 
 
@@ -145,7 +145,7 @@ Many mods contain a `cmaps.mas` that conflicts with the `cmaps.mas`
 provided by GameStockCar2013. Solution to that is to change all
 references to `cmaps.mas` in the mod by appending the name of the mod
 directory, i.e. in the `.gen` files `MASFile=cmaps.mas` would be
-changed into `MASFile=SRM_1990\\cmaps.mas`.
+changed into `MASFile=SRM_1990\cmaps.mas`.
 
 The `SearchPath` also often needs the addition of the mod directory
 name, i.e. `SearchPath=<VEHDIR>\SomeDir` would become
@@ -172,7 +172,11 @@ In the `.gdb` file the `TestDaystart` might not be set, add a line
 `TestDaystart = 14:00` to cause tests not to start at the default
 value (9:00).
 
-In the `.tdf` the grip levels might need adjustments, i.e. change `RoadDryGrip=1.00` to something like 1.02-1.04
+In the `.tdf` the grip levels might need adjustments, i.e. change
+`RoadDryGrip=1.00` to something like 1.02-1.04.
+
+The game might complain about missing RACEGROOVE.dds or SKIDHARD.dds,
+copy those files over into the directory of the `.scn` file.
 
 ## Part of the cockpit is cut off
 
@@ -186,7 +190,8 @@ In the cars `.cam` file adjust the `ClipPlanes` for the `COCKPIT` camera:
     }
     
 Making the left value smaller should reduce the distance where objects
-are cut off. The value must be positive and not null.
+are cut off. The value must be positive and not null. To small values
+will lead to z-fighting graphic errors on the track.
 
 ## Parts of the car are visible in the mirror
 
@@ -200,3 +205,18 @@ VISGROUP.
 This thread contains a lot more info on how to tweak specific things about tracks:
 
 * http://www.gtr3.co.uk/forum/index.php?t=msg&th=102
+
+## The tires on a vehicle flicker
+
+The `.gen` file for the vehicle likely contains a conditonal mesh entry, like this:
+
+    [...]
+    Instance=RFTIRE
+    {
+      Moveable=True
+      <MAX>  <COMPOUND0EXISTS> MeshFile=<COMPOUND0>1_RF.GMT CollTarget=False [...]
+    [...]
+
+No idea how to properly adopt that to GSC2013, but cutting down the
+entries to a single tire type should work, but then you won't get to
+see different tire profiles for different tire types.
