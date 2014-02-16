@@ -9,7 +9,7 @@ for MASFILE in "$@"; do
   TMPDIR="/tmp/rfactor-$(uuidgen)/"
 
   "${mas2files}" "${MASFILE}" "${TMPDIR}"
-  find "${TMPDIR}" -type f -exec ./rfactorcrypt.py -e {} {} \;
+  find "${TMPDIR}" -type f -exec ./rfactorcrypt.py -e {} \;
   "${files2mas}" "${TMPDIR}" "${MASFILE}"
   rm -rfv "$TMPDIR"
 done
