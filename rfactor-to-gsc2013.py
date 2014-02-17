@@ -22,11 +22,13 @@ import re
 import sys
 import subprocess
 
+import imgtool
+
 def rfactor_to_gsc2013_gdb(filename):
-    with open(filename, "r") as fin:
+    with open(filename, "rt") as fin:
         lines = fin.readlines()
 
-    with open(filename, "w") as fout:
+    with open(filename, "wt", newline='\r\n') as fout:
         for line in lines:
             line = re.sub(r'Filter Properties *=.*',
                           r'Filter Properties = StockV8 \\*/',
@@ -34,12 +36,12 @@ def rfactor_to_gsc2013_gdb(filename):
             fout.write(line)
 
 def rfactor_to_gsc2013_veh(filename):
-    with open(filename, "r") as fin:
+    with open(filename, "rt") as fin:
         lines = fin.readlines()
 
-    with open(filename, "w") as fout:
+    with open(filename, "wt", newline='\r\n') as fout:
         for line in lines:
-            line = re.sub(r'Classes=',
+            line = re.sub(r'Classes="',
                           r'Classes="reiza5, ',
                           line, flags=re.IGNORECASE)
             fout.write(line)
@@ -64,8 +66,8 @@ def rfactor_to_gsc2013(directory):
                 rfactor_to_gsc2013_gmt(filename)
             elif ext == ".mas":
                 rfactor_to_gsc2013_mas(filename)
-                
-    subprocess.check_call(["./imgtool.py", directory])
+
+    imgtool.process_directory(directory)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor to GSC2013 converter')
