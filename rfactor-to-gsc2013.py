@@ -22,7 +22,9 @@ import re
 import sys
 import subprocess
 
+import tempfile
 import imgtool
+import shutil
 
 def rfactor_to_gsc2013_gdb(filename):
     with open(filename, "rt") as fin:
@@ -50,7 +52,25 @@ def rfactor_to_gsc2013_gmt(filename):
     subprocess.check_call(["./rfactorcrypt.py", "-e", filename])
     
 def rfactor_to_gsc2013_mas(filename):
-    subprocess.check_call(["./rfactor-to-gsc2013-mas.sh", filename])
+    tmpdir = os.path.join(tempfile.mkdtemp(prefix='rfactortools-'), "mas")
+
+    print("mas unpacking %s to %s" % (filename, tmpdir))
+    subprocess.check_call(["./masunpack.py", filename, tmpdir])
+
+    print("encrypting files")
+    lst = []
+    for path, dirs, files in os.walk(tmpdir):
+        for fname in files:
+            lst.append(os.path.join(path, fname))
+
+    for i, f in enumerate(lst):
+        print("processing %d/%d: %s" % (i, len(files), f))
+        subprocess.check_call(["./rfactorcrypt.py", "-e", f]) #, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,)
+
+    print("mas packing %s to %s" % (tmpdir, filename))
+    subprocess.check_call(["./maspack.py", tmpdir, filename])
+
+    shutil.rmtree(tmpdir)
 
 def rfactor_to_gsc2013(directory):
     for path, dirs, files in os.walk(directory):
