@@ -25,9 +25,11 @@ def rfactor_crypt_info(filename):
         return sign, key
 
 def rfactor_decrypt(filename):
+    # not using .check_call() as rfactordec reports wrong exit codes
     subprocess.call(["./rfactordec", "-o", filename, filename])
 
 def rfactor_encrypt(filename):
+    # not using .check_call() as rfactordec reports wrong exit codes
     subprocess.call(["./rfactordec", "-s", "4b1dca9f960524e8", "-e", "-o", filename, filename])
 
 if __name__ == "__main__":

@@ -22,108 +22,7 @@ import zlib
 import os
 import argparse
 
-mas_type0 = b"GMOTORMAS10\0\0\0\0\0"
-mas_type1 = b"\xC8\xCF\xD2\xD8\xCE\xD8\xE6\xC9\xCA\xDD\xD8\xBE\xBB\xA6\xBF\x90"
-mas_type3 = b"CUBEMAS4.10\0\0\0\0\0"
-
-class FileType:
-    UNKNOWN = 0
-    MISC = 16 # BIK, GFX, PSD, PSH, RTF, TXT, VSH
-    GMT  = 17 
-    BMP  = 18 
-    SCN  = 19 
-    TGA  = 20 
-    PNG  = 21 
-    JPG  = 22 
-    # DDS  = 23 # FIXME: might need to inspect file content to tell the difference
-    DDS  = 55
-
-def get_file_type(filename):
-    ext = os.path.splitext(filename)[1].lower()
-
-    if ext == ".bik" or  ext == ".gfx" or ext == ".psd"  or ext == ".rtf" or ext == ".txt" or ext == ".vsh":
-        return FileType.MISC
-    elif ext == ".gmt":
-        return FileType.GMT
-    elif ext == ".bmp":
-        return FileType.BMP
-    elif ext == ".scn":
-        return FileType.SCN
-    elif ext == ".tga":
-        return FileType.TGA
-    elif ext == ".png":
-        return FileType.PNG
-    elif ext == ".jpg":
-        return FileType.JPG
-    elif ext == ".dds":
-        return FileType.DDS # FIXME: need to handle the other DDS
-    else:
-        print("%s: warning: unknown file type" % filename)
-        return FileType.UNKNOWN
-
-def mas_pack(files, masfile, mas_type, files_from_file=True):
-    with open(masfile, "wb") as fout:
-        if mas_type == 0:
-            fout.write(mas_type0)
-        elif mas_type == 1:
-            fout.write(mas_type1)
-        elif mas_type == 2:
-            fout.write(mas_type2)
-        elif mas_type == 3:
-            fout.write(mas_type3)
-        else:
-            raise RuntimeError("invalid map_type")
-
-        if mas_type == 1:
-            base_offset = 28 + len(files) * 256
-        else:
-            base_offset = 24 + len(files) * 256
-
-        file_table = []
-        offset = 0
-        fout.seek(base_offset)
-        for filename in files:
-            print("processing %s" % filename)
-            name = os.path.basename(filename)
-            file_type = get_file_type(filename)
-            flags = 0
-
-            with open(filename, "rb") as fin:
-                data = fin.read()
-                deflated_data = zlib.compress(data)
-
-                file_table.append((file_type, flags, name, offset, len(data), len(deflated_data)))
-                fout.write(deflated_data)
-                offset += len(deflated_data)
-
-        data_size = offset
-        if mas_type == 1:
-            fout.seek(20)
-        else:
-            fout.seek(16)
-        fout.write(struct.pack("<ll", len(file_table), data_size))
-
-        # write file table to the start of the file
-        if mas_type == 1:
-            fout.seek(28)
-        else:
-            fout.seek(24)
-
-        for file_type, flags, name, offset, size, zsize in file_table:
-            print("%8d %8d %8d %s" % (offset, size, zsize, name))
-
-            name_bytes = name.encode("latin-1", "replace")
-
-            if mas_type == 0:
-                fout.write(struct.pack("<4xlll240s", offset, size, zsize, name_bytes))
-            elif mas_type == 1:
-                fout.write(struct.pack("<BBxx236slll4x", file_type, flags, name_bytes, offset, size, zsize))
-            elif mas_type == 2:
-                fout.write(struct.pack("<4x16slll4x", name_bytes, offset, size, zsize))
-            elif mas_type == 3:
-                fout.write(struct.pack("<4xlll4x236s", name_bytes, offset, size, zsize))
-            else:
-                raise RuntimeError("invalid map_type")
+import rfactortools
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor MAS packer')
@@ -143,6 +42,6 @@ if __name__ == "__main__":
     else:
         files = [os.path.join(args.INPUTDIR, name) for name in sorted(os.listdir(args.INPUTDIR))]
 
-    mas_pack(files, args.MASFILE, args.type)
+    rfactortools.mas_pack(files, args.MASFILE, args.type)
 
 # EOF #

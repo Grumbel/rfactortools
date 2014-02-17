@@ -23,6 +23,10 @@ class VFS:
     """Simple virtual file system that is case insensitive"""
     
     def __init__(self, directory):
+        """
+        Creates a VFS rooted in 'directory'
+        """
+
         self._files = {}
 
         for path, dirs, files in os.walk(directory):

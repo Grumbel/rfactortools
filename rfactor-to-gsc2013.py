@@ -89,6 +89,8 @@ def rfactor_to_gsc2013(directory):
 
     imgtool.process_directory(directory)
 
+    # delete GameData/Shared/coreshader.mas if it exists
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor to GSC2013 converter')
     parser.add_argument('DIRECTORY', action='store', type=str, nargs='+',
