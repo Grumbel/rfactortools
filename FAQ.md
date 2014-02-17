@@ -200,23 +200,26 @@ the 15 in `Self In Cockpit Rearview="15"` to 0 might help. Not sure
 how to fix the mod itself, will probably need some tweaking of the
 VISGROUP.
 
-## Where can I find more info on conversion?
-
-This thread contains a lot more info on how to tweak specific things about tracks:
-
-* http://www.gtr3.co.uk/forum/index.php?t=msg&th=102
-
 ## The tires on a vehicle flicker
 
-The `.gen` file for the vehicle likely contains a conditonal mesh entry, like this:
+The `.gen` file for the vehicle likely contains a series of conditonal mesh entries, like this:
 
     [...]
     Instance=RFTIRE
     {
       Moveable=True
       <MAX>  <COMPOUND0EXISTS> MeshFile=<COMPOUND0>1_RF.GMT CollTarget=False [...]
+      <MAX>  <COMPOUND1EXISTS> MeshFile=<COMPOUND1>1_RF.GMT CollTarget=False [...]
+      <MAX>  <COMPOUND2EXISTS> MeshFile=<COMPOUND2>1_RF.GMT CollTarget=False [...]
     [...]
 
 No idea how to properly adopt that to GSC2013, but cutting down the
 entries to a single tire type should work, but then you won't get to
 see different tire profiles for different tire types.
+
+## Where can I find more info on conversion?
+
+This thread contains a lot more info on how to tweak specific things about tracks:
+
+* http://www.gtr3.co.uk/forum/index.php?t=msg&th=102
+* http://yoss.free.fr/rfactornfr/Modding_Tutorial_Website/overview.shtml

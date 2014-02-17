@@ -1,17 +1,18 @@
 # rFactor Tools
 
-This is a collections of tools for manipulating and converting rFactor
-related files. Main use of these tools right now is semi-automatic
-conversion of rFactor mods over to GameStockCar2013. Conversion is at
-this point not 100% automatic for all mods, but it will get you most
-of the way. The file `FAQ.md` provides solutions for common problems.
+rFactorTools is a collections of tools for manipulating and converting
+rFactor related files. Main use of these tools right now is
+semi-automatic conversion of rFactor mods over to GameStockCar2013.
+Conversion is at this point not 100% automatic for all mods, but it
+will get you most of the way. The file `FAQ.md` provides solutions for
+common problems.
 
 These tools are written and tested in Linux only at this point, they
 might not work in Windows. They require `python3` and `python3-pil`.
 
 ## Tools
 
-### `rfactor-to-gsc2013.sh`
+### `rfactor-to-gsc2013.py`
 
 This script will convert a rFactor mod's `GameData/` directory to GameStockCar2013.
 
@@ -60,7 +61,7 @@ extracted as usual.
 
 Second step is running:
 
-    ./rfactor-to-gsc2013.sh .../GameData/
+    ./rfactor-to-gsc2013.py .../GameData/
 
 This will *destructivly* convert the `GameData/` directory into
 GSC2013 format, `.mas` files will be overwritten with encrypted
