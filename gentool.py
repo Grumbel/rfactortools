@@ -25,6 +25,9 @@ from vfs import VFS
 
 import rfactortools
 
+def nt2os_path(path):
+    return path.replace(ntpath.sep, os.path.sep)
+
 def process_vehfile(vfs, filename):
     keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
     comment_regex = re.compile(r'(.*?)(//.*)')
@@ -49,7 +52,7 @@ def process_vehfile(vfs, filename):
                 if key.lower() == "graphics":
                     graphics_file = value.strip()
 
-    return graphics_file.replace(ntpath.sep, os.path.sep)
+    return nt2os_path(graphics_file)
 
 def find_file_backwards(vfs, dir, gen):
     while True:

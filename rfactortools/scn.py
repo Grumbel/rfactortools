@@ -17,11 +17,16 @@
 ##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+import ntpath
+import os
 
 keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
 comment_regex = re.compile(r'(.*?)(//.*)')
 section_start_regex = re.compile(r'\s*{')
 section_end_regex = re.compile(r'\s*}')
+
+def nt2os_path(path):
+    return path.replace(ntpath.sep, os.path.sep)
 
 class ScnParser:
     def __init__(self):
@@ -49,9 +54,9 @@ class InfoScnParser(ScnParser):
     def on_key_value(self, key, value, comment, orig):
         if self.section == 0:
             if key.lower() == "masfile":
-                self.mas_files.append(value)
+                self.mas_files.append(nt2os_path(value))
             elif key.lower() == "searchpath":
-                self.search_path.append(value)
+                self.search_path.append(nt2os_path(value))
             elif key.lower() == "instance" and value.lower() == "skyboxi":
                 self.has_skyboxi = True
             else:
@@ -83,7 +88,7 @@ class SearchReplaceScnParser(ScnParser):
             elif key.lower() == "masfile":
                 if self.search_path != None:
                     for p in self.mas_files:
-                        self.fout.write("MASFile=%s\n" % p)
+                        self.fout.write("MASFile=%s\n" % ntpath.normpath(p))
 
                     self.mas_files = None
                     self.delete_mas_file = True
@@ -94,7 +99,7 @@ class SearchReplaceScnParser(ScnParser):
             elif key.lower() == "searchpath":
                 if self.search_path != None:
                     for p in self.search_path:
-                        self.fout.write("SearchPath=%s\n" % p)
+                        self.fout.write("SearchPath=%s\n" % ntpath.normpath(p))
 
                     self.search_path = None
                     self.delete_search_path = True
