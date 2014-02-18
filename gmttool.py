@@ -33,19 +33,62 @@ def process_gmt(filename, verbose=False):
         print()
 
         fin.seek(372)
-        d_obj_count, d_offset = struct.unpack("<II", fin.read(8))
-        print("%8d  %8d" % (d_obj_count, d_obj_count))
-        print("%8d  %8d" % struct.unpack("<II", fin.read(8)))
-        print("%8d  %8d" % struct.unpack("<II", fin.read(8)))
-        print("%8d  %8d" % struct.unpack("<II", fin.read(8)))
+        d_obj_count, d_offset, \
+        d_obj1_count, d_offset1, \
+        d_obj2_count, d_offset2, \
+        d_obj3_count, d_offset3 = struct.unpack("<IIIIIIII", fin.read(32))
+        print("%8d  %8d" % (d_obj_count, d_offset))
+        print("%8d  %8d" % (d_obj1_count, d_offset1))
+        print("%8d  %8d" % (d_obj2_count, d_offset2))
+        print("%8d  %8d" % (d_obj3_count, d_offset3))
 
-        fin.seek(404)
-        print("Name:", repr(asciz2py(fin.read(64))))
 
         fin.seek(d_obj_offset)
         d_num1, d_num2, d_num3 = struct.unpack("<HHI", fin.read(8))
         print("numbers:", d_num1, d_num2, d_num3)
 
+        fin.seek(404)
+        print("Name:", repr(asciz2py(fin.read(64))))
+
+        # parse some floats
+        fin.seek(d_offset1+4)
+        for i in range(0, d_obj1_count):
+            d_f_nums = struct.unpack("<HHHHIIffff", fin.read(32))
+            print("1 %8d %s" % (i, d_f_nums))
+        print()
+
+        # parse some more floats
+        fin.seek(d_offset2+4)
+        for i in range(0, d_obj2_count):
+            d_f_nums = struct.unpack("<fffI", fin.read(16))
+            print("2 %8d %s" % (i, d_f_nums))
+        print()
+
+        # parse even more floats
+        fin.seek(d_offset3)
+        for i in range(0, d_num1+3):
+            d_f_nums = struct.unpack("<ffffffII", fin.read(32))
+            print("3 %8d %10.4f %10.4f %10.4f %10.4f %10.4f %10.4f %8d %8d" % ((i,) + d_f_nums))
+        print()
+
+        for i in range(0, d_num1+2):
+            d_f_nums = struct.unpack("<ffffffII", fin.read(32))
+            print("4 %8d %10.4f %10.4f %10.4f %10.4f %10.4f %10.4f %8d %8d" % ((i,) + d_f_nums))
+        print()
+
+        for i in range(0, d_obj1_count):
+            d_f_nums = struct.unpack("<HHH", fin.read(6))
+            print("5 %8d %s" % (i, d_f_nums))
+        print()
+
+        print("Current Offset:", fin.tell())
+
+        #for i in range(0, d_obj1_count*5):
+        #    d_f_nums = struct.unpack("<HHHHHH", fin.read(12))
+        #    print("6 %8d %s" % (i, d_f_nums))
+
+
+        fin.seek(d_obj_offset)
         for obj_idx in range(0, d_obj_count):
             d_obj_name = asciz2py(struct.unpack("60s", fin.read(60))[0])
             print("obj:", repr(d_obj_name))
@@ -63,33 +106,50 @@ def process_gmt(filename, verbose=False):
             for tex_idx in range(0, d_tex_count):
                 print("  tex:", fin.read(64))
 
-                d = fin.read(4)
-                print(struct.unpack("<HH", d))
-                d_tex_payload = struct.unpack("<I", d)[0]
-                print("    tex_payload:", d_tex_payload)
+                d_tex_type, d_tex_something = struct.unpack("<HH", fin.read(4))
+                print("    tex_type:", d_tex_type, d_tex_something)
 
-                if d_tex_payload == 32793:
+                # ffff ffff
+                # 0200 0000
+                # 0200 0000
+                # 0000 0000
+                # 0100 0000
+                # 0600 0000
+                # 0000 803f
+                # 0100 0000
+                # 0000 0000
+                # 0100 0000 
+                # 0000 0000
+                # ....
+
+                def block_fmt(str):
+                    for i, c in enumerate(str):
+                        sys.stdout.write("%02x " % c)
+                        if (i+1) % 4 == 0:
+                            sys.stdout.write(" ")
+
+                        if (i+1) % 16 == 0:
+                            sys.stdout.write("\n")
+                    sys.stdout.write("\n")
+
+                if d_tex_type == 32793:
                     # this one is for Sky.gmt
                     d_tex_rest = fin.read(144)
-                    # print("  rest:", d_tex_rest)
+                    print("  rest:", block_fmt(d_tex_rest))
                     
-                elif d_tex_payload == 24 or d_tex_payload == 152:
-                    d_tex_rest = fin.read(104)
-                    # print("    rest:", d_tex_rest)
+                elif d_tex_type == 24 or d_tex_type == 152:
+                    d_tex_rest = fin.read(104) # fin.read(128)
+                    print("    rest:", block_fmt(d_tex_rest))
                     
-                elif d_tex_payload == 131096:
+                elif d_tex_type == 26: # 131096
                     d_tex_rest = fin.read(104)
-                    print("    rest:", d_tex_rest)
-
-                elif d_tex_payload == 131098:
-                    d_tex_rest = fin.read(104)
-                    print("    rest:", d_tex_rest)
+                    print("    rest:", block_fmt(d_tex_rest))
                     
                 else:
-                    d_tex_rest = fin.read(255)
-                    print("    rest:", d_tex_rest)
+                    # d_tex_rest = fin.read(255)
+                    # print("    rest:", block_fmt(d_tex_rest))
 
-                    raise Exception("unknown tex_payload value: %s" % d_tex_payload)
+                    raise Exception("unknown tex_payload value: %s" % d_tex_type)
 
         if verbose:
             fin.seek(0)
