@@ -49,7 +49,7 @@ def process_vehfile(vfs, filename):
                 if key.lower() == "graphics":
                     graphics_file = value.strip()
 
-        return graphics_file
+    return graphics_file.replace(ntpath.sep, os.path.sep)
 
 def find_file_backwards(vfs, dir, gen):
     while True:
