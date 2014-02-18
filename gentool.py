@@ -71,14 +71,14 @@ def find_vehdir(path):
         raise Exception("couldn't locate <VEHDIR> in %s" % path)
 
 def modify_track_file(vfs, scn):
-    with open("/tmp/out.scn", "w") as fout:
+    with open("/tmp/out.scn", "wt", encoding="latin-1", errors="replace") as fout:
         sr_parser = rfactortools.SearchReplaceScnParser(fout)
         # sr_parser.mas_files   =
         # sr_parser.search_path =
         rfactortools.process_scnfile(vfs, scn, sr_parser)
         
 def modify_vehicle_file(vfs, gen, search_path, mas_files, vehdir, teamdir):
-    with open("/tmp/out.gen", "w") as fout:
+    with open("/tmp/out.gen", "wt", encoding="latin-1", errors="replace") as fout:
         sr_parser = rfactortools.SearchReplaceScnParser(fout)
         sr_parser.mas_files   = mas_files
         sr_parser.search_path = search_path
