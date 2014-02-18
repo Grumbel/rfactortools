@@ -27,10 +27,10 @@ import imgtool
 import shutil
 
 def rfactor_to_gsc2013_gdb(filename):
-    with open(filename, "rt") as fin:
+    with open(filename, "rt", encoding="latin-1") as fin:
         lines = fin.readlines()
 
-    with open(filename, "wt", newline='\r\n') as fout:
+    with open(filename, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
         for line in lines:
             line = re.sub(r'Filter Properties *=.*',
                           r'Filter Properties = StockV8 \\*/',
@@ -38,10 +38,10 @@ def rfactor_to_gsc2013_gdb(filename):
             fout.write(line)
 
 def rfactor_to_gsc2013_veh(filename):
-    with open(filename, "rt") as fin:
+    with open(filename, "rt", encoding="latin-1") as fin:
         lines = fin.readlines()
 
-    with open(filename, "wt", newline='\r\n') as fout:
+    with open(filename, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
         for line in lines:
             line = re.sub(r'Classes="',
                           r'Classes="reiza5, ',
