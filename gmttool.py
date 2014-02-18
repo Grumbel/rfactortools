@@ -32,6 +32,12 @@ def process_gmt(filename, verbose=False):
         print("%8d  %8d" % (d_obj_offset, d_32))
         print()
 
+        fin.seek(8)
+        print("bounding box: %10.4f" % struct.unpack("<f", fin.read(4)))
+        for i in range(0, 33):
+            print("%8d) %10.4f  %10.4f  %10.4f" % ((i,) + struct.unpack("<fff", fin.read(12))))
+        print()
+
         fin.seek(372)
         d_obj_count, d_offset, \
         d_obj1_count, d_offset1, \
@@ -54,31 +60,31 @@ def process_gmt(filename, verbose=False):
         fin.seek(d_offset1+4)
         for i in range(0, d_obj1_count):
             d_f_nums = struct.unpack("<HHHHIIffff", fin.read(32))
-            print("1 %8d %s" % (i, d_f_nums))
+            print("1 %8d) %s" % (i, d_f_nums))
         print()
 
         # parse some more floats
         fin.seek(d_offset2+4)
         for i in range(0, d_obj2_count):
             d_f_nums = struct.unpack("<fffI", fin.read(16))
-            print("2 %8d %s" % (i, d_f_nums))
+            print("2 %8d) %s" % (i, d_f_nums))
         print()
 
         # parse even more floats
         fin.seek(d_offset3)
         for i in range(0, d_num1+3):
             d_f_nums = struct.unpack("<ffffffII", fin.read(32))
-            print("3 %8d %10.4f %10.4f %10.4f %10.4f %10.4f %10.4f %8d %8d" % ((i,) + d_f_nums))
+            print("3 %8d) %10.4f %10.4f %10.4f %10.4f %10.4f %10.4f %8d %8d" % ((i,) + d_f_nums))
         print()
 
         for i in range(0, d_num1+2):
             d_f_nums = struct.unpack("<ffffffII", fin.read(32))
-            print("4 %8d %10.4f %10.4f %10.4f %10.4f %10.4f %10.4f %8d %8d" % ((i,) + d_f_nums))
+            print("4 %8d) %10.4f %10.4f %10.4f %10.4f %10.4f %10.4f %8d %8d" % ((i,) + d_f_nums))
         print()
 
         for i in range(0, d_obj1_count):
             d_f_nums = struct.unpack("<HHH", fin.read(6))
-            print("5 %8d %s" % (i, d_f_nums))
+            print("5 %8d) %s" % (i, d_f_nums))
         print()
 
         print("Current Offset:", fin.tell())
@@ -88,9 +94,11 @@ def process_gmt(filename, verbose=False):
         #    print("6 %8d %s" % (i, d_f_nums))
 
 
-        fin.seek(d_obj_offset)
+        fin.seek(d_obj_offset+8)
         for obj_idx in range(0, d_obj_count):
-            d_obj_name = asciz2py(struct.unpack("60s", fin.read(60))[0])
+            d = fin.read(60)
+            print(d)
+            d_obj_name = asciz2py(struct.unpack("60s", d)[0])
             print("obj:", repr(d_obj_name))
 
             fin.read(92)
@@ -135,15 +143,18 @@ def process_gmt(filename, verbose=False):
                 if d_tex_type == 32793:
                     # this one is for Sky.gmt
                     d_tex_rest = fin.read(144)
-                    print("  rest:", block_fmt(d_tex_rest))
+                    print("  rest:")
+                    block_fmt(d_tex_rest)
                     
                 elif d_tex_type == 24 or d_tex_type == 152:
                     d_tex_rest = fin.read(104) # fin.read(128)
-                    print("    rest:", block_fmt(d_tex_rest))
+                    print("  rest:")
+                    block_fmt(d_tex_rest)
                     
                 elif d_tex_type == 26: # 131096
                     d_tex_rest = fin.read(104)
-                    print("    rest:", block_fmt(d_tex_rest))
+                    print("  rest:")
+                    block_fmt(d_tex_rest)
                     
                 else:
                     # d_tex_rest = fin.read(255)
