@@ -26,7 +26,7 @@ section_start_regex = re.compile(r'\s*{')
 section_end_regex = re.compile(r'\s*}')
 
 def nt2os_path(path):
-    return path.replace(ntpath.sep, os.path.sep)
+    return os.path.normpath(path.replace(ntpath.sep, os.path.sep))
 
 class ScnParser:
     def __init__(self):
@@ -54,7 +54,10 @@ class InfoScnParser(ScnParser):
     def on_key_value(self, key, value, comment, orig):
         if self.section == 0:
             if key.lower() == "masfile":
-                self.mas_files.append(nt2os_path(value))
+                value = nt2os_path(value)
+                if os.path.isabs(value):
+                    value = value[1:]
+                self.mas_files.append(value)
             elif key.lower() == "searchpath":
                 self.search_path.append(nt2os_path(value))
             elif key.lower() == "instance" and value.lower() == "skyboxi":

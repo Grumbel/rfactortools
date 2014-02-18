@@ -87,6 +87,29 @@ def modify_vehicle_file(vfs, gen, search_path, mas_files, vehdir, teamdir):
         sr_parser.search_path = search_path
         rfactortools.process_scnfile(vfs, gen, sr_parser)
 
+def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
+    errors = []
+
+    def expand_path(p):
+        p = re.sub(r'<VEHDIR>', vehdir + "/", p)
+        p = re.sub(r'<TEAMDIR>', teamdir + "/", p)
+        return p
+
+    search_path = [ expand_path(p) for p in search_path ]
+
+    for mas in mas_files:
+        mas_found = False
+        for d in search_path:
+            f = os.path.join(d, mas)
+            if vfs.file_exists(f):
+                mas_found = True
+                break
+        if not mas_found:
+            print("error: couldn't locate %s" % mas)
+            errors.append("error: couldn't locate %s" % mas)
+
+    return errors
+
 def process_directory(directory):
     gen_files = []
     veh_files = []
@@ -141,10 +164,12 @@ def process_directory(directory):
             print("  gen:", gen)
             info = rfactortools.InfoScnParser()
             rfactortools.process_scnfile(vfs, gen, info)
-            print("  SearchPath:", info.search_path)
-            print("    MasFiles:", info.mas_files)
             print("    <VEHDIR>:", vehdir)
             print("   <TEAMDIR>:", teamdir)
+            print("  SearchPath:", info.search_path)
+            print("    MasFiles:", info.mas_files)
+            for err in gen_check_errors(vfs, info.search_path, info.mas_files, vehdir, teamdir):
+                errors.append("%s: %s" % (gen, err))
             print()
 
             modify_vehicle_file(vfs, gen, info.search_path, info.mas_files, vehdir, teamdir)
