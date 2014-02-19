@@ -1,6 +1,8 @@
 /.sconsign.dblite
 *~
 *.o
+*.so
+*.os
 /rfactordec
 /other/quickbms/src/quickbms
 /build/
