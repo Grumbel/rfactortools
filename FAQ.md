@@ -240,3 +240,8 @@ No idea, might be a bug in the original mod.
 ## Right suspension is missing from open wheel cars
 
 No idea, happens in multiple mods, so it might be more then a random mod bug.
+
+## The track is to bright
+
+Find the `.scn` file for the track and edit the `Light` section, the
+intensity value should be 1.0 or smaller.
