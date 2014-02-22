@@ -21,7 +21,6 @@ import re
 import os
 import ntpath
 from io import StringIO
-from vfs import VFS
 
 import rfactortools
 
@@ -136,7 +135,7 @@ def process_veh_file(vfs, veh, fix, errors):
         modify_vehicle_file(vfs, gen, info.search_path, info.mas_files, vehdir, teamdir)
 
 def process_directory(directory, fix):
-    vfs = VFS(directory)
+    vfs = rfactortools.VFS(directory)
 
     gen_files = []
     veh_files = []

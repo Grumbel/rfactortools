@@ -8,8 +8,6 @@ import shutil
 import filecmp
 from itertools import chain
 
-import vfs
-
 def hashfile(afile, hasher, blocksize=65536):
     buf = afile.read(blocksize)
     while len(buf) > 0:

@@ -19,5 +19,18 @@ __all__ = [ "gen", "mas" ]
 from .scn import ScnParser, InfoScnParser, SearchReplaceScnParser, process_scnfile
 from .mas import mas_pack, mas_unpack
 from .veh import process_vehfile
+from .vfs import VFS
+
+games = \
+{
+    0x38af5637e81bc9a0: 'rFactor',
+    0x2eb8f5cc9b14ea3b: 'ARCA Sim Racing',
+    0x6a9d37283a9f3d9f: 'Simulador Turismo Carretera',
+    0xde4139f961fa2817: 'Top Race Simulador 2009',
+    0x38af3150902cc55b: 'Superleague Formula',
+    0x4b1dca9f960524e8: 'Game Stock Car',
+    0x06a66ad328aeaed6: 'Simulador Turismo Carretera 2012',
+    0x28b7856a3a5996da: 'Game Stock Car: Formula Truck'
+}
 
 # EOF #
