@@ -33,10 +33,10 @@ typedef uint16_t    u16;
 typedef uint32_t    u32;
 typedef uint64_t    u64;
 
-u64  isi_keyz(int enctype, u64 key, u64 ret, int n);
-u64  isi_key(int enctype, u64 key);
-void isi_crypt(int enctype, u8 *output, const u8 *input, int len, u64 key, int encrypt);
-u64  isi_crypt2(int enctype, int pos, u64 key);
+static u64  isi_keyz(int enctype, u64 key, u64 ret, int n);
+static u64  isi_key(int enctype, u64 key);
+static void isi_crypt(int enctype, u8 *output, const u8 *input, int len, u64 key, int encrypt);
+static u64  isi_crypt2(int enctype, int pos, u64 key);
 
 typedef struct _GameSignature
 {
@@ -45,7 +45,7 @@ typedef struct _GameSignature
   const char* name;
 } GameSignature;
 
-static GameSignature game_signatures[] = 
+static GameSignature game_signatures[] =
 {
   { 0x38af5637e81bc9a0, 0, "rFactor" },
   { 0x2eb8f5cc9b14ea3b, 0, "ARCA Sim Racing" },
@@ -69,7 +69,7 @@ static const GameSignature* isi_game_from_sign(u64 sign)
   return NULL;
 }
 
-u64 isi_keyz(int enctype, u64 key, u64 ret, int n)
+static u64 isi_keyz(int enctype, u64 key, u64 ret, int n)
 {
   static const u64 keyz0[8][6] = {
     { 0xe56f8aa2ed826faaLL, 0x2f777cf9c70031d8LL, 0x12b42c082f7753a9LL, 0xe5c4f0aca218138dLL, 0xff00000000000000LL, 0x00000000000000ffLL },
@@ -139,12 +139,12 @@ u64 isi_keyz(int enctype, u64 key, u64 ret, int n)
   return ret;
 }
 
-u64 isi_key(int enctype, u64 key)
+static u64 isi_key(int enctype, u64 key)
 {
   return isi_keyz(enctype, key, 0, 0);
 }
 
-void isi_crypt(int enctype, u8* output, const u8* input, int len, u64 key, int encrypt)
+static void isi_crypt(int enctype, u8* output, const u8* input, int len, u64 key, int encrypt)
 {
   u64 t = 0;
   u64 n;
@@ -188,7 +188,7 @@ void isi_crypt(int enctype, u8* output, const u8* input, int len, u64 key, int e
   }
 }
 
-u64 isi_crypt2(int enctype, int pos, u64 key)
+static inline u64 isi_crypt2(int enctype, int pos, u64 key)
 {
   static const u8 table0[8] = { 0x00, 0x28, 0x18, 0x08, 0x20, 0x38, 0x10, 0x30 };
   static const u8 table1[8] = { 0x38, 0x20, 0x30, 0x10, 0x28, 0x00, 0x08, 0x18 };
@@ -204,7 +204,7 @@ u64 isi_crypt2(int enctype, int pos, u64 key)
   return((((u64)0x000000ff000000ffLL << t) & key) >> t);
 }
 
-PyObject*
+static PyObject*
 rfactor_decrypt_c(const char* input, int length, int skip)
 {
   assert(length >= 16);
@@ -216,7 +216,7 @@ rfactor_decrypt_c(const char* input, int length, int skip)
 
   u64 key  = *((u64*)&header[8]);
   u64 sign = *((u64*)&header[0]) ^ key;
- 
+
   const GameSignature* game = isi_game_from_sign(sign);
   if (!game)
   {
@@ -226,23 +226,25 @@ rfactor_decrypt_c(const char* input, int length, int skip)
   else
   {
     key = isi_key(game->enctype, key);
-  
+
     PyObject* result = PyBytes_FromStringAndSize(NULL, content_length);
-    char* output = PyBytes_AsString(result);
+    if (result)
+    {
+      char* output = PyBytes_AsString(result);
 
-    memcpy(output, content, skip);
-    isi_crypt(game->enctype, 
-              (u8*)output  + skip,
-              (u8*)content + skip,
-              content_length - skip, 
-              key,
-              0);
-
+      memcpy(output, content, skip);
+      isi_crypt(game->enctype,
+                (u8*)output  + skip,
+                (u8*)content + skip,
+                content_length - skip,
+                key,
+                0);
+    }
     return result;
   }
 }
 
-PyObject*
+static PyObject*
 rfactor_encrypt_c(const char* input, int length, u64 key, u64 sign, int skip)
 {
   assert(length >= 16);
@@ -256,25 +258,24 @@ rfactor_encrypt_c(const char* input, int length, u64 key, u64 sign, int skip)
   }
   else
   {
-    printf("skip:   %d\n", skip);
-    printf("key:  %llx\n", key);
-    printf("sign: %llx\n", sign);
-
     PyObject* result = PyBytes_FromStringAndSize(NULL, length + 16);
-    char* output = PyBytes_AsString(result);
+    if (result)
+    {
+      char* output = PyBytes_AsString(result);
 
-    *((u64*)output) = sign ^ key;
-    *((u64*)(output + 8)) = key;
+      *((u64*)output) = sign ^ key;
+      *((u64*)(output + 8)) = key;
 
-    isi_crypt(game->enctype, (u8*)output + skip + 16, (u8*)input + skip, length - skip, key, 1);
-
-    return result;   
+      memcpy(output+16, input, skip);
+      isi_crypt(game->enctype, (u8*)output+16 + skip, (u8*)input + skip, length - skip, key, 1);
+    }
+    return result;
   }
 }
 
 // Python Bindings -----------------------------------------------------
 
-PyObject*
+static PyObject*
 rfactor_encrypt(PyObject* self, PyObject* args)
 {
   const char* input;
@@ -305,7 +306,7 @@ rfactor_encrypt(PyObject* self, PyObject* args)
   return result;
 }
 
-PyObject*
+static PyObject*
 rfactor_decrypt(PyObject* self, PyObject* args)
 {
   const char* input;
