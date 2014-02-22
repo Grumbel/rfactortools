@@ -23,7 +23,7 @@ def rfactor_decrypt_legacy(filename):
     # not using .check_call() as rfactordec reports wrong exit codes
     subprocess.call(["./rfactordec", "-o", filename, filename])
 
-def rfactor_encrypt(filename, key = 0):
+def rfactor_encrypt(filename, key):
     with open(filename, 'rb') as fin:
         encrypted_data = rfactorcrypt.encrypt(fin.read(), key, 0x4b1dca9f960524e8, get_skip(filename))
     with open(filename, 'wb') as fout:
@@ -52,7 +52,7 @@ if __name__ == "__main__":
                         help="decrypt files")
     parser.add_argument('-l', '--legacy', action='store_true', default=False,
                         help="use legacy encryption")
-    parser.add_argument('-k', '--key', default=0, type=lambda s: int(s, 0),
+    parser.add_argument('-k', '--key', default=1, type=lambda s: int(s, 0),
                         help="use key for encryption")
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help="be more verbose")
