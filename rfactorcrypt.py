@@ -15,26 +15,25 @@ def get_skip(filename):
     else:
         return 0
 
-if False: # old encryption
-    def rfactor_decrypt(filename):
-        # not using .check_call() as rfactordec reports wrong exit codes
-        subprocess.call(["./rfactordec", "-o", filename, filename])
+def rfactor_decrypt_legacy(filename):
+    # not using .check_call() as rfactordec reports wrong exit codes
+    subprocess.call(["./rfactordec", "-o", filename, filename])
 
-    def rfactor_encrypt(filename):
-        # not using .check_call() as rfactordec reports wrong exit codes
-        subprocess.call(["./rfactordec", "-s", "4b1dca9f960524e8", "-e", "-o", filename, filename])
-else: # new encryption
-    def rfactor_encrypt(filename):
-        with open(filename, 'rb') as fin:
-            encrypted_data = rfactorcrypt.encrypt(fin.read(), 0, 0x4b1dca9f960524e8, get_skip(filename))
-        with open(filename, 'wb') as fout:
-            fout.write(encrypted_data)
+def rfactor_encrypt_legacy(filename):
+    # not using .check_call() as rfactordec reports wrong exit codes
+    subprocess.call(["./rfactordec", "-s", "4b1dca9f960524e8", "-e", "-o", filename, filename])
 
-    def rfactor_decrypt(filename):
-        with open(filename, 'rb') as fin:
-            decrypted_data = rfactorcrypt.decrypt(fin.read(), get_skip(filename))
-        with open(filename, 'wb') as fout:
-            fout.write(decrypted_data)
+def rfactor_encrypt(filename):
+    with open(filename, 'rb') as fin:
+        encrypted_data = rfactorcrypt.encrypt(fin.read(), 0, 0x4b1dca9f960524e8, get_skip(filename))
+    with open(filename, 'wb') as fout:
+        fout.write(encrypted_data)
+
+def rfactor_decrypt(filename):
+    with open(filename, 'rb') as fin:
+        decrypted_data = rfactorcrypt.decrypt(fin.read(), get_skip(filename))
+    with open(filename, 'wb') as fout:
+        fout.write(decrypted_data)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor MAS packer')
@@ -46,9 +45,18 @@ if __name__ == "__main__":
                         help="encrypt files")
     parser.add_argument('-d', '--decrypt', action='store_true',
                         help="decrypt files")
+    parser.add_argument('-l', '--legacy', action='store_true', default=False,
+                        help="use legacy encryption")
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help="be more verbose")
     args = parser.parse_args()
+
+    if args.legacy:
+        encrypt = rfactor_encrypt_legacy
+        decrypt = rfactor_decrypt_legacy
+    else:
+        encrypt = rfactor_encrypt
+        decrypt = rfactor_decrypt
 
     for filename in args.FILE:
         sign, key = rfactortools.crypt_info_from_file(filename)
@@ -57,13 +65,13 @@ if __name__ == "__main__":
         if args.encrypt:
             # decrypt file completely before reencryption
             while rfactortools.games.get(sign):
-                rfactor_decrypt(filename)
+                decrypt(filename)
                 sign, key = rfactortools.crypt_info_from_file(filename)
-            rfactor_encrypt(filename)
+            encrypt(filename)
         elif args.decrypt:
             # decrypt file completely
             while rfactortools.games.get(sign):
-                rfactor_decrypt(filename)
+                decrypt(filename)
                 sign, key = rfactortools.crypt_info_from_file(filename)
 
 # EOF #
