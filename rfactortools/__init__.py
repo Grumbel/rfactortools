@@ -18,5 +18,6 @@ __all__ = [ "gen", "mas" ]
 
 from .scn import ScnParser, InfoScnParser, SearchReplaceScnParser, process_scnfile
 from .mas import mas_pack, mas_unpack
+from .veh import process_vehfile
 
 # EOF #

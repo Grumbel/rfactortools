@@ -28,26 +28,44 @@ class VFS:
         """
 
         self._files = {}
+        self._directories = {}
 
         for path, dirs, files in os.walk(directory):
+            for d in dirs:
+                fullpath = os.path.normpath(os.path.join(path, d))
+                self._directories[fullpath.lower()] = fullpath
+
             for fname in files:
                 fullpath = os.path.normpath(os.path.join(path, fname))
                 self._files[fullpath.lower()] = fullpath
 
+    def directory_exists(self, path):
+        try:
+            _ = self.lookup_directory(path)
+            return True
+        except:
+            return False
+
     def file_exists(self, path):
         try:
-            _ = self.lookup(path)
+            _ = self.lookup_file(path)
             return True
         except:
             return False
 
     def open_read(self, path, encoding=None):
-        return open(self.lookup(path), 'r', encoding=encoding)
+        return open(self.lookup_file(path), 'r', encoding=encoding)
 
     def open_write(self, path, encoding=None):
-        return open(self.lookup(path), 'w', encoding=encoding)
+        return open(self.lookup_file(path), 'w', encoding=encoding)
 
-    def lookup(self, path):
+    def lookup_directory(self, path):
+        try:
+            return self._directories[os.path.normpath(path).lower()]
+        except:
+            raise Exception("%s: VFS couldn't locate directory" % path)
+
+    def lookup_file(self, path):
         try:
             return self._files[os.path.normpath(path).lower()]
         except:
