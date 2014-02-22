@@ -6,31 +6,35 @@ import argparse
 import struct
 import subprocess
 
-games = \
-{
-    0x38af5637e81bc9a0: 'rFactor',
-    0x2eb8f5cc9b14ea3b: 'ARCA Sim Racing',
-    0x6a9d37283a9f3d9f: 'Simulador Turismo Carretera',
-    0xde4139f961fa2817: 'Top Race Simulador 2009',
-    0x38af3150902cc55b: 'Superleague Formula',
-    0x4b1dca9f960524e8: 'Game Stock Car',
-    0x06a66ad328aeaed6: 'Simulador Turismo Carretera 2012',
-    0x28b7856a3a5996da: 'Game Stock Car: Formula Truck'
-}
+import rfactortools
+import rfactorcrypt
 
-def rfactor_crypt_info(filename):
-    with open(filename, 'rb') as fin:
-        sign, key = struct.unpack("<QQ", fin.read(16))
-        sign ^= key;
-        return sign, key
+def get_skip(filename):
+    if os.path.splitext(filename)[1].lower() == ".gmt":
+        return 4
+    else:
+        return 0
 
-def rfactor_decrypt(filename):
-    # not using .check_call() as rfactordec reports wrong exit codes
-    subprocess.call(["./rfactordec", "-o", filename, filename])
+if False: # old encryption
+    def rfactor_decrypt(filename):
+        # not using .check_call() as rfactordec reports wrong exit codes
+        subprocess.call(["./rfactordec", "-o", filename, filename])
 
-def rfactor_encrypt(filename):
-    # not using .check_call() as rfactordec reports wrong exit codes
-    subprocess.call(["./rfactordec", "-s", "4b1dca9f960524e8", "-e", "-o", filename, filename])
+    def rfactor_encrypt(filename):
+        # not using .check_call() as rfactordec reports wrong exit codes
+        subprocess.call(["./rfactordec", "-s", "4b1dca9f960524e8", "-e", "-o", filename, filename])
+else: # new encryption
+    def rfactor_encrypt(filename):
+        with open(filename, 'rb') as fin:
+            encrypted_data = rfactorcrypt.encrypt(fin.read(), 0, 0x4b1dca9f960524e8, get_skip(filename))
+        with open(filename, 'wb') as fout:
+            fout.write(encrypted_data)
+
+    def rfactor_decrypt(filename):
+        with open(filename, 'rb') as fin:
+            decrypted_data = rfactorcrypt.decrypt(fin.read(), get_skip(filename))
+        with open(filename, 'wb') as fout:
+            fout.write(decrypted_data)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor MAS packer')
@@ -47,19 +51,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     for filename in args.FILE:
-        sign, key = rfactor_crypt_info(filename)
-        print("%016x %016x '%s' '%s'" % (sign, key, games.get(sign), filename))
+        sign, key = rfactortools.crypt_info_from_file(filename)
+        print("sign:%016x key:%016x '%s' '%s'" % (sign, key, rfactortools.games.get(sign), filename))
 
         if args.encrypt:
             # decrypt file completely before reencryption
-            while games.get(sign):
+            while rfactortools.games.get(sign):
                 rfactor_decrypt(filename)
-                sign, key = rfactor_crypt_info(filename)
+                sign, key = rfactortools.crypt_info_from_file(filename)
             rfactor_encrypt(filename)
         elif args.decrypt:
             # decrypt file completely
-            while games.get(sign):
+            while rfactortools.games.get(sign):
                 rfactor_decrypt(filename)
-                sign, key = rfactor_crypt_info(filename)
+                sign, key = rfactortools.crypt_info_from_file(filename)
 
 # EOF #
