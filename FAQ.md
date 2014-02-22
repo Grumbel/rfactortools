@@ -96,7 +96,7 @@ to:
 There might be cleaner ways without modifying those files, but this
 seems to work, at least for single player.
 
-## How are tracks asigned to karts or race cars?
+## How are tracks assigned to karts or race cars?
 
 This is done via the `Filter Properties` setting in the `.gdb` file of
 the track. GSC2013 uses these settings:
@@ -118,7 +118,9 @@ Move the sound into the proper directory to fix any issues.
 ## Sound not working in converted rFactor mods
 
 The `.sfx` file defines which sounds are used, in some mods the file
-path needs to be changed to include the mod name.
+path needs to be changed to include the mod name. Other mods might
+depend on a base mod that contains all the sound and not contain sound
+files themselves.
 
 ## GameStockCar2013 crashes when starting the mod
 
@@ -223,3 +225,18 @@ This thread contains a lot more info on how to tweak specific things about track
 
 * http://www.gtr3.co.uk/forum/index.php?t=msg&th=102
 * http://yoss.free.fr/rfactornfr/Modding_Tutorial_Website/overview.shtml
+
+## Cockpit camera positions seems broken (too low, too high, too shifted too left/right)?
+
+No idea, might be bugs in the original mod. GSC2013 allows you to
+adjust the seat position to fix that or if that isn't enough you can
+turn on the free camera and navigate with the numpad into a better
+position (hold `Shift` for slower movement).
+
+## Steering wheel rotation is broken, rotation axis is wrong.
+
+No idea, might be a bug in the original mod.
+
+## Right suspension is missing from open wheel cars
+
+No idea, happens in multiple mods, so it might be more then a random mod bug.
