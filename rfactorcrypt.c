@@ -16,8 +16,13 @@
 **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// This module is based rfactordec.c by Luigi Auriemma
+//
+//  This Python module is based rfactordec.c by Luigi Auriemma:
+//
+//    http://aluigi.altervista.org/search.php?src=decrypter
+//
 
+#include <assert.h>
 #include <Python.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -30,19 +35,38 @@ typedef uint64_t    u64;
 
 u64  isi_keyz(int enctype, u64 key, u64 ret, int n);
 u64  isi_key(int enctype, u64 key);
-void isi_crypt(int enctype, u8 *output, u8 *input, int len, u64 key, int encrypt);
+void isi_crypt(int enctype, u8 *output, const u8 *input, int len, u64 key, int encrypt);
 u64  isi_crypt2(int enctype, int pos, u64 key);
-void std_err(const char* err);
 
-void std_err(const char* err)
+typedef struct _GameSignature
 {
-  if(err) {
-    if(err[0]) fprintf(stderr, "\nError: %s\n", err);
-  } else {
-    perror("\nError");
-  }
+  u64 key;
+  int enctype;
+  const char* name;
+} GameSignature;
 
-  exit(1);
+static GameSignature game_signatures[] = 
+{
+  { 0x38af5637e81bc9a0, 0, "rFactor" },
+  { 0x2eb8f5cc9b14ea3b, 0, "ARCA Sim Racing" },
+  { 0x6a9d37283a9f3d9f, 0, "Simulador Turismo Carretera" },
+  { 0xde4139f961fa2817, 0, "Top Race Simulador 2009" },
+  { 0x38af3150902cc55b, 1, "Superleague Formula" },
+  { 0x4b1dca9f960524e8, 1, "Game Stock Car" },
+  { 0x06a66ad328aeaed6, 1, "Simulador Turismo Carretera 2012" },
+  { 0x28b7856a3a5996da, 1, "Game Stock Car: Formula Truck" }
+};
+
+static const GameSignature* isi_game_from_sign(u64 sign)
+{
+  for(int i = 0; i < sizeof(game_signatures)/sizeof(GameSignature); ++i)
+  {
+    if (game_signatures[i].key == sign)
+    {
+      return &game_signatures[i];
+    }
+  }
+  return NULL;
 }
 
 u64 isi_keyz(int enctype, u64 key, u64 ret, int n)
@@ -88,8 +112,7 @@ u64 isi_keyz(int enctype, u64 key, u64 ret, int n)
     case 0: keyz = (u64 *)keyz0[n]; break;
     case 1: keyz = (u64 *)keyz1[n]; break;
     default: {
-      fprintf(stderr, "\nError: unsupported enctype %d in isi_keyz\n", enctype);
-      std_err("");
+      assert(!"unsupported enctype");
     }
   }
 
@@ -121,19 +144,14 @@ u64 isi_key(int enctype, u64 key)
   return isi_keyz(enctype, key, 0, 0);
 }
 
-void isi_crypt(int enctype, u8* output, u8* input, int len, u64 key, int encrypt)
+void isi_crypt(int enctype, u8* output, const u8* input, int len, u64 key, int encrypt)
 {
-  u64 t;
-  u64 i;
+  u64 t = 0;
   u64 n;
   u64 c;
-  u64 mask;
-  int x;
+  u64 mask = 1;
+  int x = 0;
   int blocksz = 0;
-
-  t    = 0;
-  x    = 0;
-  mask = 1;
 
   if(len < 0) return;
 
@@ -141,13 +159,12 @@ void isi_crypt(int enctype, u8* output, u8* input, int len, u64 key, int encrypt
     case 0: blocksz = 0x40; break;
     case 1: blocksz = 0x80; break;
     default: {
-      fprintf(stderr, "\nError: unsupported enctype %d in isi_crypt\n", enctype);
-      std_err("");
+      assert(!"unsupported enctype");
     }
   }
 
   n = len % blocksz;
-  for(i = 0; i < n; i++) {
+  for(int i = 0; i < n; i++) {
     c = input[x];
     output[x] = isi_crypt2(enctype, x, key) ^ c;
     if(encrypt) c = output[x];
@@ -161,7 +178,7 @@ void isi_crypt(int enctype, u8* output, u8* input, int len, u64 key, int encrypt
     t    = 0;
     n++;
     mask = 1 << (n & 7);
-    for(i = 0; i < blocksz; i++) {
+    for(int i = 0; i < blocksz; i++) {
       c = input[x];
       output[x] = isi_crypt2(enctype, x, key) ^ c;
       if(encrypt) c = output[x];
@@ -181,23 +198,145 @@ u64 isi_crypt2(int enctype, int pos, u64 key)
     case 0: t = table0[pos & 7];    break;
     case 1: t = table1[key & 7];    break;
     default: {
-      fprintf(stderr, "\nError: unsupported enctype %d in isi_crypt2\n", enctype);
-      std_err("");
+      assert(!"unsupported enctype");
     }
   }
   return((((u64)0x000000ff000000ffLL << t) & key) >> t);
 }
 
-// Python Bindings
+PyObject*
+rfactor_decrypt_c(const char* input, int length, int skip)
+{
+  assert(length >= 16);
+  assert(skip == 0 || skip == 4);
+
+  const char* header  = input;
+  const char* content = input + 16;
+  int content_length = length - 16;
+
+  u64 key  = *((u64*)&header[8]);
+  u64 sign = *((u64*)&header[0]) ^ key;
+ 
+  const GameSignature* game = isi_game_from_sign(sign);
+  if (!game)
+  {
+    PyErr_SetString(PyExc_RuntimeError, "unknown game signature");
+    return NULL;
+  }
+  else
+  {
+    key = isi_key(game->enctype, key);
+  
+    PyObject* result = PyBytes_FromStringAndSize(NULL, content_length);
+    char* output = PyBytes_AsString(result);
+
+    memcpy(output, content, skip);
+    isi_crypt(game->enctype, 
+              (u8*)output  + skip,
+              (u8*)content + skip,
+              content_length - skip, 
+              key,
+              0);
+
+    return result;
+  }
+}
+
+PyObject*
+rfactor_encrypt_c(const char* input, int length, u64 key, u64 sign, int skip)
+{
+  assert(length >= 16);
+  assert(skip == 0 || skip == 4);
+
+  const GameSignature* game = isi_game_from_sign(sign);
+  if (!game)
+  {
+    PyErr_SetString(PyExc_RuntimeError, "unknown game signature");
+    return NULL;
+  }
+  else
+  {
+    printf("skip:   %d\n", skip);
+    printf("key:  %llx\n", key);
+    printf("sign: %llx\n", sign);
+
+    PyObject* result = PyBytes_FromStringAndSize(NULL, length + 16);
+    char* output = PyBytes_AsString(result);
+
+    *((u64*)output) = sign ^ key;
+    *((u64*)(output + 8)) = key;
+
+    isi_crypt(game->enctype, (u8*)output + skip + 16, (u8*)input + skip, length - skip, key, 1);
+
+    return result;   
+  }
+}
+
+// Python Bindings -----------------------------------------------------
 
 PyObject*
 rfactor_encrypt(PyObject* self, PyObject* args)
 {
-  return Py_None;
+  const char* input;
+  int   length;
+  unsigned long long key;
+  unsigned long long sign;
+  int   skip;
+
+  if (!PyArg_ParseTuple(args, "s#KKi", &input, &length, &key, &sign, &skip))
+  {
+    return NULL;
+  }
+
+  if (length < 16)
+  {
+    PyErr_SetString(PyExc_RuntimeError, "input to small for decryption, must be at least 16 bytes");
+    return NULL;
+  }
+
+  if (skip != 0 && skip != 4)
+  {
+    PyErr_SetString(PyExc_RuntimeError, "only skip values of 0 and 4 are supported");
+    return NULL;
+  }
+
+  PyObject* result = rfactor_encrypt_c(input, length, key, sign, skip);
+
+  return result;
+}
+
+PyObject*
+rfactor_decrypt(PyObject* self, PyObject* args)
+{
+  const char* input;
+  int   length;
+  int   skip;
+
+  if (!PyArg_ParseTuple(args, "s#i", &input, &length, &skip))
+  {
+    return NULL;
+  }
+
+  if (length < 16)
+  {
+    PyErr_SetString(PyExc_RuntimeError, "input to small for decryption, must be at least 16 bytes");
+    return NULL;
+  }
+
+  if (skip != 0 && skip != 4)
+  {
+    PyErr_SetString(PyExc_RuntimeError, "only skip values of 0 and 4 are supported");
+    return NULL;
+  }
+
+  PyObject* result = rfactor_decrypt_c(input, length, skip);
+
+  return result;
 }
 
 static PyMethodDef rfactorcrypt_methods[] = {
-  { "encrypt",    rfactor_encrypt,    METH_VARARGS, "Adjust GdkPixbuf color by applying a threshold" },
+  { "encrypt", rfactor_encrypt, METH_VARARGS, "Encrypt the given data" },
+  { "decrypt", rfactor_decrypt, METH_VARARGS, "Decrypt the given data" },
   { NULL, NULL, 0, NULL },
 };
 
