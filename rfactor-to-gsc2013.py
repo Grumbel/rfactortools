@@ -102,4 +102,6 @@ if __name__ == "__main__":
     for d in args.DIRECTORY:
         rfactor_to_gsc2013(d)
 
+    print("-- rfactor-to-gsc2013 conversion complete --")
+
 # EOF #
