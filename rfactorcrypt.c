@@ -266,6 +266,8 @@ rfactor_encrypt_c(const char* input, int length, u64 key, u64 sign, int skip)
       *((u64*)output) = sign ^ key;
       *((u64*)(output + 8)) = key;
 
+      key = isi_key(game->enctype, key);
+
       memcpy(output+16, input, skip);
       isi_crypt(game->enctype, (u8*)output+16 + skip, (u8*)input + skip, length - skip, key, 1);
     }
