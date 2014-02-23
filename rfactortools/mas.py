@@ -182,7 +182,7 @@ def mas_list(masfile, verbose=False, with_filename=False):
             else:
                 print(entry.name)
 
-def mas_unpack(masfile, outdir):
+def mas_unpack(masfile, outdir, verbose=False):
     with open(masfile, "rb") as fin:
         file_table = mas_unpack_file_table(fin)
 
