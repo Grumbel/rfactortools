@@ -169,12 +169,12 @@ def mas_list(masfile, verbose=False, with_filename=False):
 
         print()
         print("number of files:       %12d" % len(file_table))
-        print("header file_count:     %12d" % file_count)
+        # print("header file_count:     %12d" % file_count)
         print()
         print("total extracted size:  %12d" % sum([e.size for e in file_table]))
         print()
         print("total compressed size: %12d" % sum([e.zsize for e in file_table]))
-        print("header data_size:      %12d" % data_size)
+        # print("header data_size:      %12d" % data_size)
     else:
         for entry in file_table:
             if with_filename:
@@ -194,7 +194,11 @@ def mas_unpack(masfile, outdir, verbose=False):
             outfile = os.path.join(outdir, entry.name)
             print("%8d %8d %8d %s" % (entry.offset, entry.size, entry.zsize, outfile))
             with open(outfile, "wb") as fout:
-                inflated_data = zlib.decompress(data)
+                if entry.size != entry.zsize:
+                    inflated_data = zlib.decompress(data)
+                else:
+                    inflated_data = data
+
                 if len(inflated_data) != entry.size:
                     raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), entry.name, entry.size))
                 fout.write(inflated_data)
@@ -211,7 +215,10 @@ def mas_unpack_to_data(masfile):
 
             print("%8d %8d %8d %s" % (entry.offset, entry.size, entry.zsize, entry.name))
 
-            inflated_data = zlib.decompress(data)
+            if entry.size != entry.zsize:
+                inflated_data = zlib.decompress(data)
+            else:
+                inflated_data = data
             
             if len(inflated_data) != entry.size:
                 raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), entry.name, entry.size))
