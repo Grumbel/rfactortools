@@ -53,7 +53,7 @@ def rfactor_to_gsc2013_gmt(filename):
     rfactortools.encrypt_file(filename, filename)
 
 def rfactor_to_gsc2013_mas(filename):
-    print("mas unpacking %s")
+    print("mas unpacking %s" % filename)
     mas_content = rfactortools.mas_unpack_to_data(filename)
 
     print("encrypting files")
