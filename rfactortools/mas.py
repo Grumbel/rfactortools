@@ -14,6 +14,7 @@
 ##  You should have received a copy of the GNU General Public License
 ##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from concurrent.futures import ThreadPoolExecutor
 import struct
 import os
 import zlib
@@ -25,12 +26,12 @@ mas_type3 = b"CUBEMAS4.10\0\0\0\0\0"
 class MASFileType:
     UNKNOWN = 0
     MISC = 16 # BIK, GFX, PSD, PSH, RTF, TXT, VSH
-    GMT  = 17 
-    BMP  = 18 
-    SCN  = 19 
-    TGA  = 20 
-    PNG  = 21 
-    JPG  = 22 
+    GMT  = 17
+    BMP  = 18
+    SCN  = 19
+    TGA  = 20
+    PNG  = 21
+    JPG  = 22
     # DDS  = 23 # FIXME: might need to inspect file content to tell the difference
     DDS  = 55
 
@@ -71,7 +72,9 @@ def get_file_type(filename):
         print("%s: warning: unknown file type" % filename)
         return MASFileType.UNKNOWN
 
-def mas_pack(files, masfile, mas_type, files_from_file=True):
+### MAS file packing
+def mas_pack_from_data(files, masfile, mas_type):
+    """files is a (filename, data) tuple"""
     with open(masfile, "wb") as fout:
         if mas_type == 0:
             fout.write(mas_type0)
@@ -92,19 +95,24 @@ def mas_pack(files, masfile, mas_type, files_from_file=True):
         file_table = []
         offset = 0
         fout.seek(base_offset)
-        for filename in files:
-            print("processing %s" % filename)
-            name = os.path.basename(filename)
-            file_type = get_file_type(filename)
+
+        compressed_files = []
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            for name, data in files:
+                print("compressing %s" % name)
+                compressed_files.append((name, data, executor.submit(zlib.compress, data)))
+        compressed_files = [ (name, data, deflated_data.result()) for name, data, deflated_data in compressed_files ]
+
+        for name, data, deflated_data in compressed_files:
+            print("packing %s" % name)
+            file_type = get_file_type(name)
             flags = 0
 
-            with open(filename, "rb") as fin:
-                data = fin.read()
-                deflated_data = zlib.compress(data)
+            # deflated_data = zlib.compress(data)
 
-                file_table.append((file_type, flags, name, offset, len(data), len(deflated_data)))
-                fout.write(deflated_data)
-                offset += len(deflated_data)
+            file_table.append((file_type, flags, name, offset, len(data), len(deflated_data)))
+            fout.write(deflated_data)
+            offset += len(deflated_data)
 
         data_size = offset
         if mas_type == 1:
@@ -134,7 +142,22 @@ def mas_pack(files, masfile, mas_type, files_from_file=True):
                 fout.write(struct.pack("<4xlll4x236s", name_bytes, offset, size, zsize))
             else:
                 raise RuntimeError("invalid map_type")
+    
 
+def mas_pack(files, masfile, mas_type):
+    files_with_data = []
+
+    for filename in files:
+        print("reading %s" % filename)
+        name = os.path.basename(filename)
+
+        with open(filename, "rb") as fin:
+            data = fin.read()
+            files_with_data.append((name, data))
+
+    mas_pack_from_data(files_with_data, masfile, mas_type)
+
+### MAS file unpacking and listing
 
 def on_file_table_print(fin, file_table, masfile, verbose=False, with_filename=False):
     if verbose:
