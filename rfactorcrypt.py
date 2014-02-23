@@ -7,7 +7,6 @@ import struct
 import subprocess
 
 import rfactortools
-import rfactorcrypt
 
 def rfactor_encrypt_legacy(filename, key):
     # not using .check_call() as rfactordec reports wrong exit codes
@@ -16,18 +15,6 @@ def rfactor_encrypt_legacy(filename, key):
 def rfactor_decrypt_legacy(filename):
     # not using .check_call() as rfactordec reports wrong exit codes
     subprocess.call(["./rfactordec", "-o", filename, filename])
-
-def rfactor_encrypt(filename, key = 0):
-    with open(filename, 'rb') as fin:
-        encrypted_data = rfactorcrypt.encrypt(fin.read(), key, 0x4b1dca9f960524e8, rfactortools.get_skip(filename))
-    with open(filename, 'wb') as fout:
-        fout.write(encrypted_data)
-
-def rfactor_decrypt(filename):
-    with open(filename, 'rb') as fin:
-        decrypted_data = rfactorcrypt.decrypt(fin.read(), rfactortools.get_skip(filename))
-    with open(filename, 'wb') as fout:
-        fout.write(decrypted_data)
 
 class store_int_from_hex(argparse.Action):
     def __call__(self, parser, namespace, values, option_string = None):
@@ -56,23 +43,16 @@ if __name__ == "__main__":
         encrypt = rfactor_encrypt_legacy
         decrypt = rfactor_decrypt_legacy
     else:
-        encrypt = rfactor_encrypt
-        decrypt = rfactor_decrypt
+        encrypt = lambda filename, key: rfactortools.encrypt_file(filename, filename, key, 0x4b1dca9f960524e8)
+        decrypt = lambda filename: rfactortools.decrypt_file(filename, filename)
 
     for filename in args.FILE:
         sign, key = rfactortools.crypt_info_from_file(filename)
         print("sign:%016x key:%016x '%s' '%s'" % (sign, key, rfactortools.games.get(sign), filename))
 
         if args.encrypt:
-            # decrypt file completely before reencryption
-            while rfactortools.games.get(sign):
-                decrypt(filename)
-                sign, key = rfactortools.crypt_info_from_file(filename)
             encrypt(filename, args.key)
         elif args.decrypt:
-            # decrypt file completely
-            while rfactortools.games.get(sign):
-                decrypt(filename)
-                sign, key = rfactortools.crypt_info_from_file(filename)
+            decrypt(filename)
 
 # EOF #

@@ -17,6 +17,8 @@
 import struct
 import os
 
+import rfactorcrypt
+
 games = \
 {
     0x38af5637e81bc9a0: 'rFactor',
@@ -28,6 +30,37 @@ games = \
     0x06a66ad328aeaed6: 'Simulador Turismo Carretera 2012',
     0x28b7856a3a5996da: 'Game Stock Car: Formula Truck'
 }
+
+def encrypt_data(data, key, sign, skip):
+    return rfactorcrypt.encrypt(data, key, sign, skip)
+
+def decrypt_data(data, skip):
+    # if data is already encrypted, unencrypt it before reencrypting it
+    while games.get(data):
+        data = rfactorcrypt.encrypt(data, skip)
+    return data
+
+def encrypt_file(input, output, key = 1, sign = 0x4b1dca9f960524e8):
+    skip = get_skip(input)
+    with open(input, 'rb') as fin:
+        data = fin.read()
+
+    data = decrypt_data(data, skip)
+
+    encrypted_data = encrypt_data(data, key, sign, skip)
+
+    with open(output, 'wb') as fout:
+        fout.write(encrypted_data)
+
+def decrypt_file(input, output):
+    skip = get_skip(input)
+    with open(input, 'rb') as fin:
+        data = fin.read()
+
+    data = rfactorcrypt.decrypt(data, skip)
+
+    with open(output, 'wb') as fout:
+        fout.write(data)
 
 def crypt_info(data):
     sign, key = struct.unpack("<QQ", data[0:16])

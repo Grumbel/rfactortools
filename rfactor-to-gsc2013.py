@@ -26,6 +26,8 @@ import tempfile
 import imgtool
 import shutil
 
+import rfactortools
+
 def rfactor_to_gsc2013_gdb(filename):
     with open(filename, "rt", encoding="latin-1") as fin:
         lines = fin.readlines()
@@ -49,8 +51,8 @@ def rfactor_to_gsc2013_veh(filename):
             fout.write(line)
 
 def rfactor_to_gsc2013_gmt(filename):
-    subprocess.check_call(["./rfactorcrypt.py", "-e", filename])
-    
+    rfactortools.encrypt_file(filename, filename)
+
 def rfactor_to_gsc2013_mas(filename):
     tmpdir = os.path.join(tempfile.mkdtemp(prefix='rfactortools-'), "mas")
 
@@ -65,7 +67,7 @@ def rfactor_to_gsc2013_mas(filename):
 
     for i, f in enumerate(lst):
         print("processing %d/%d: %s" % (i, len(files), f))
-        subprocess.check_call(["./rfactorcrypt.py", "-e", f]) #, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,)
+        rfactortools.encrypt_file(f, f)
 
     print("mas packing %s to %s" % (tmpdir, filename))
     subprocess.check_call(["./maspack.py", tmpdir, filename])

@@ -142,7 +142,7 @@ def mas_pack_from_data(files, masfile, mas_type):
                 fout.write(struct.pack("<4xlll4x236s", name_bytes, offset, size, zsize))
             else:
                 raise RuntimeError("invalid map_type")
-    
+
 
 def mas_pack(files, masfile, mas_type):
     files_with_data = []
