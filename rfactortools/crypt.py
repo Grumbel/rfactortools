@@ -36,8 +36,10 @@ def encrypt_data(data, key, sign, skip):
     return rfactorcrypt.encrypt(data, key, sign, skip)
 
 def decrypt_data(data, skip):
-    while games.get(data):
+    sign, key = crypt_info(data)
+    while games.get(sign):
         data = rfactorcrypt.decrypt(data, skip)
+        sign, key = crypt_info(data)
     return data
 
 def encrypt_file(input, output, key = 1, sign = 0x4b1dca9f960524e8):
@@ -57,7 +59,7 @@ def decrypt_file(input, output):
     with open(input, 'rb') as fin:
         data = fin.read()
 
-    data = rfactorcrypt.decrypt(data, skip)
+    data = decrypt_data(data, skip)
 
     with open(output, 'wb') as fout:
         fout.write(data)
