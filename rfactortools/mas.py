@@ -158,8 +158,10 @@ def mas_pack(files, masfile, mas_type):
     mas_pack_from_data(files_with_data, masfile, mas_type)
 
 ### MAS file unpacking and listing
+def mas_list(masfile, verbose=False, with_filename=False):
+    with open(masfile, "rb") as fin:
+        file_table = mas_unpack_file_table(fin)
 
-def on_file_table_print(fin, file_table, masfile, verbose=False, with_filename=False):
     if verbose:
         print("%6s %6s %-8s %-8s %-8s %-8s" % ("flags:", "type:", "offset:", "size:", "zsize:", "name:"))
         for entry in file_table:
@@ -180,61 +182,58 @@ def on_file_table_print(fin, file_table, masfile, verbose=False, with_filename=F
             else:
                 print(entry.name)
 
-def on_file_table_extract(fin, file_table, outdir):
-    os.mkdir(outdir)
-    for entry in file_table:
-        fin.seek(entry.offset)
-        data = fin.read(entry.zsize)
-
-        outfile = os.path.join(outdir, entry.name)
-        print("%8d %8d %8d %s" % (entry.offset, entry.size, entry.zsize, outfile))
-        with open(outfile, "wb") as fout:
-            inflated_data = zlib.decompress(data)
-            if len(inflated_data) != entry.size:
-                raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), entry.name, entry.size))
-            fout.write(inflated_data)
-
-def mas_list(masfile, verbose=False, with_filename=False):
-    mas_unpack_with_callback(masfile, lambda fin, t: on_file_table_print(fin, t, masfile, verbose, with_filename))
-
 def mas_unpack(masfile, outdir, verbose=False):
-    mas_unpack_with_callback(masfile, lambda fin, t: on_file_table_extract(fin, t, outdir))
-
-def mas_unpack_with_callback(masfile, on_file_table):
     with open(masfile, "rb") as fin:
-        signature = fin.read(16)
+        file_table = mas_unpack_file_table(fin)
 
-        mas_type = get_mas_type(signature)
-
-        if mas_type == 1:
-            file_count, data_size = struct.unpack("<4xll", fin.read(12))
-        else:
-            file_count, data_size = struct.unpack("<ll", fin.read(8))
-
-        file_table = []
-        for i in range(0, file_count):
-            if mas_type == 0:
-                offset, size, zsize, name = struct.unpack("<4xlll240s", fin.read(256))
-            elif mas_type == 1:
-                entry = MASFileEntry(*struct.unpack("<BBxx236slll4x", fin.read(256)))
-            elif mas_type == 2:
-                name, offset, size, zsize = struct.unpack("<4x16slll4x", fin.read(256))
-            elif mas_type == 3:
-                name, offset, size, zsize = struct.unpack("<4xlll4x236s", fin.read(256))
-            else:
-                raise RuntimeError("invalid map_type")
-
-            # No support for ASCIZ strings struct.unpack, thus ugly hackery
-            entry.name = entry.name.split(b'\0', 1)[0].decode('latin-1')
-
-            file_table.append(entry)
-
-        # base_offset = 28 + file_count * 256
-        base_offset = fin.tell()
-
+        os.mkdir(outdir)
         for entry in file_table:
-            entry.offset += base_offset
+            fin.seek(entry.offset)
+            data = fin.read(entry.zsize)
 
-        on_file_table(fin, file_table)
+            outfile = os.path.join(outdir, entry.name)
+            print("%8d %8d %8d %s" % (entry.offset, entry.size, entry.zsize, outfile))
+            with open(outfile, "wb") as fout:
+                inflated_data = zlib.decompress(data)
+                if len(inflated_data) != entry.size:
+                    raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), entry.name, entry.size))
+                fout.write(inflated_data)
+
+
+def mas_unpack_file_table(fin):
+    signature = fin.read(16)
+
+    mas_type = get_mas_type(signature)
+
+    if mas_type == 1:
+        file_count, data_size = struct.unpack("<4xll", fin.read(12))
+    else:
+        file_count, data_size = struct.unpack("<ll", fin.read(8))
+
+    file_table = []
+    for i in range(0, file_count):
+        if mas_type == 0:
+            offset, size, zsize, name = struct.unpack("<4xlll240s", fin.read(256))
+        elif mas_type == 1:
+            entry = MASFileEntry(*struct.unpack("<BBxx236slll4x", fin.read(256)))
+        elif mas_type == 2:
+            name, offset, size, zsize = struct.unpack("<4x16slll4x", fin.read(256))
+        elif mas_type == 3:
+            name, offset, size, zsize = struct.unpack("<4xlll4x236s", fin.read(256))
+        else:
+            raise RuntimeError("invalid map_type")
+
+        # No support for ASCIZ strings struct.unpack, thus ugly hackery
+        entry.name = entry.name.split(b'\0', 1)[0].decode('latin-1')
+
+        file_table.append(entry)
+
+    # base_offset = 28 + file_count * 256
+    base_offset = fin.tell()
+
+    for entry in file_table:
+        entry.offset += base_offset
+
+    return file_table
 
 # EOF #
