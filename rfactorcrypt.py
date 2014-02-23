@@ -22,7 +22,7 @@ if __name__ == "__main__":
                         help="encrypt files")
     parser.add_argument('-d', '--decrypt', action='store_true',
                         help="decrypt files")
-    parser.add_argument('-k', '--key', default=0, type=lambda s: int(s, 0),
+    parser.add_argument('-k', '--key', default=1, type=lambda s: int(s, 0),
                         help="use key for encryption")
     parser.add_argument('-s', '--sign', default=0x4b1dca9f960524e8, type=lambda s: int(s, 0),
                         help="use signature for encryption")
