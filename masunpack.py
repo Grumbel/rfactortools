@@ -39,8 +39,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.list:
-        rfactortools.mas_unpack(args.MASFILE, args.OUTDIR, args.verbose, args.with_filename)
+        rfactortools.mas_list(args.MASFILE, args.verbose, args.with_filename)
     else:
-        rfactortools.mas_unpack(args.MASFILE, args.OUTDIR, args.verbose, args.with_filename)
+        rfactortools.mas_unpack(args.MASFILE, args.OUTDIR, args.verbose)
 
 # EOF #

@@ -135,7 +135,49 @@ def mas_pack(files, masfile, mas_type, files_from_file=True):
             else:
                 raise RuntimeError("invalid map_type")
 
-def mas_unpack(masfile, outdir, verbose=False, with_filename=False):
+
+def on_file_table_print(fin, file_table, masfile, verbose=False, with_filename=False):
+    if verbose:
+        print("%6s %6s %-8s %-8s %-8s %-8s" % ("flags:", "type:", "offset:", "size:", "zsize:", "name:"))
+        for entry in file_table:
+            print("%6x %6d %8d %8d %8d %s" % (entry.flags, entry.type, entry.offset, entry.size, entry.zsize, entry.name))
+
+        print()
+        print("number of files:       %12d" % len(file_table))
+        print("header file_count:     %12d" % file_count)
+        print()
+        print("total extracted size:  %12d" % sum([e.size for e in file_table]))
+        print()
+        print("total compressed size: %12d" % sum([e.zsize for e in file_table]))
+        print("header data_size:      %12d" % data_size)
+    else:
+        for entry in file_table:
+            if with_filename:
+                print("%s: %s" %  (masfile, entry.name))
+            else:
+                print(entry.name)
+
+def on_file_table_extract(fin, file_table, outdir):
+    os.mkdir(outdir)
+    for entry in file_table:
+        fin.seek(entry.offset)
+        data = fin.read(entry.zsize)
+
+        outfile = os.path.join(outdir, entry.name)
+        print("%8d %8d %8d %s" % (entry.offset, entry.size, entry.zsize, outfile))
+        with open(outfile, "wb") as fout:
+            inflated_data = zlib.decompress(data)
+            if len(inflated_data) != entry.size:
+                raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), entry.name, entry.size))
+            fout.write(inflated_data)
+
+def mas_list(masfile, verbose=False, with_filename=False):
+    mas_unpack_with_callback(masfile, lambda fin, t: on_file_table_print(fin, t, masfile, verbose, with_filename))
+
+def mas_unpack(masfile, outdir, verbose=False):
+    mas_unpack_with_callback(masfile, lambda fin, t: on_file_table_extract(fin, t, outdir))
+
+def mas_unpack_with_callback(masfile, on_file_table):
     with open(masfile, "rb") as fin:
         signature = fin.read(16)
 
@@ -167,39 +209,9 @@ def mas_unpack(masfile, outdir, verbose=False, with_filename=False):
         # base_offset = 28 + file_count * 256
         base_offset = fin.tell()
 
-        # extracting the data
-        if not outdir:
-            if verbose:
-                print("%6s %6s %-8s %-8s %-8s %-8s" % ("flags:", "type:", "offset:", "size:", "zsize:", "name:"))
-                for entry in file_table:
-                    print("%6x %6d %8d %8d %8d %s" % (entry.flags, entry.type, entry.offset, entry.size, entry.zsize, entry.name))
+        for entry in file_table:
+            entry.offset += base_offset
 
-                print()
-                print("number of files:       %12d" % len(file_table))
-                print("header file_count:     %12d" % file_count)
-                print()
-                print("total extracted size:  %12d" % sum([e.size for e in file_table]))
-                print()
-                print("total compressed size: %12d" % sum([e.zsize for e in file_table]))
-                print("header data_size:      %12d" % data_size)
-            else:
-                for entry in file_table:
-                    if with_filename:
-                        print("%s: %s" %  (masfile, entry.name))
-                    else:
-                        print(entry.name)
-        else:
-            os.mkdir(outdir)
-            for entry in file_table:
-                fin.seek(base_offset + entry.offset)
-                data = fin.read(entry.zsize)
-
-                outfile = os.path.join(outdir, entry.name)
-                print("%8d %8d %8d %s" % (entry.offset, entry.size, entry.zsize, outfile))
-                with open(outfile, "wb") as fout:
-                    inflated_data = zlib.decompress(data)
-                    if len(inflated_data) != entry.size:
-                        raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), entry.name, entry.size))
-                    fout.write(inflated_data)
+        on_file_table(fin, file_table)
 
 # EOF #
