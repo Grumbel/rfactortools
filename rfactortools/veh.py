@@ -20,13 +20,66 @@ import re
 import ntpath
 import os
 
+keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
+comment_regex = re.compile(r'(.*?)(//.*)')
+
+quoted_string_regex = re.compile(r'"(.*)"')
+
 def nt2os_path(path):
     return path.replace(ntpath.sep, os.path.sep)
 
-def process_vehfile(vfs, filename):
-    keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
-    comment_regex = re.compile(r'(.*?)(//.*)')
+class Veh:
+    def __init__(self):
+        self.filename = None
+        self.graphics_file = None
+        self.gen_string= None
+        self.sounds = None
+        self.cameras = None
+        self.upgrades = None
+        self.hd_vehicle = None
+        self.eye_point = None
+        self.team = None
+        self.description = None
+        self.category = None
+        self.classes = []
 
+def unquote(str):
+    m = quoted_string_regex.match(str)
+    if m:
+        return m.group(1)
+    return str
+
+def parse_vehfile(filename):
+    veh = Veh()
+    
+    veh.filename = filename
+    
+    with open(filename, 'rt', encoding='latin-1') as fin:
+        for orig_line in fin.read().splitlines():
+            line = orig_line
+
+            m = comment_regex.match(line)
+            if m:
+                comment = m.group(2)
+                line = m.group(1)
+            else:
+                comment = None
+
+            m = keyvalue_regex.match(line)
+            if m:
+                key, value = m.group(1), m.group(2)
+                if key.lower() == "graphics":
+                    veh.graphics_file = value.strip()
+                elif key.lower() == "classes":
+                    veh.classes = [c.strip() for c in value.split(",")]
+                elif key.lower() == "category":
+                    veh.category = [c.strip() for c in unquote(value).split(",")]
+                else:
+                    pass
+
+    return veh
+
+def process_vehfile(vfs, filename):
     # print("processing", filename)
     graphics_file = None
 

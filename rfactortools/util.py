@@ -1,4 +1,4 @@
-##  rFactor .gen file manipulation tool
+##  rFactor .scn/.gen file manipulation tool
 ##  Copyright (C) 2013 Ingo Ruhnke <grumbel@gmail.com>
 ##
 ##  This program is free software: you can redistribute it and/or modify
@@ -14,14 +14,17 @@
 ##  You should have received a copy of the GNU General Public License
 ##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = [ "gen", "mas" ]
+import os
 
-from .scn   import ScnParser, InfoScnParser, SearchReplaceScnParser, process_scnfile
-from .mas   import mas_pack, mas_unpack, mas_list, mas_pack_from_data, mas_unpack_to_data
-from .veh   import process_vehfile, parse_vehfile
-from .vfs   import VFS
-from .crypt import games, crypt_info, crypt_info_from_file, get_skip, \
-                   encrypt_file, encrypt_data, decrypt_file, decrypt_data
-from .util import find_files
+def find_files(directory, ext = None):
+    results = []
+    for path, dirs, files in os.walk(directory):
+        for fname in files:
+            if ext and os.path.splitext(fname)[1].lower() == ext:
+                results.append(os.path.join(path, fname))
+            elif ext == None:
+                results.append(os.path.join(path, fname))
+
+    return results
 
 # EOF #
