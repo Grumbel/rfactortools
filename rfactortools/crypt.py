@@ -15,6 +15,7 @@
 ##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import struct
+import os
 
 games = \
 {
@@ -36,5 +37,11 @@ def crypt_info(data):
 def crypt_info_from_file(filename):
     with open(filename, 'rb') as fin:
         return crypt_info(fin.read(16))
+
+def get_skip(filename):
+    if os.path.splitext(filename)[1].lower() == ".gmt":
+        return 4
+    else:
+        return 0
 
 # EOF #

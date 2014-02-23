@@ -9,12 +9,6 @@ import subprocess
 import rfactortools
 import rfactorcrypt
 
-def get_skip(filename):
-    if os.path.splitext(filename)[1].lower() == ".gmt":
-        return 4
-    else:
-        return 0
-
 def rfactor_encrypt_legacy(filename, key):
     # not using .check_call() as rfactordec reports wrong exit codes
     subprocess.call(["./rfactordec", "-s", "4b1dca9f960524e8", "-e", "-o", filename, filename])
@@ -25,13 +19,13 @@ def rfactor_decrypt_legacy(filename):
 
 def rfactor_encrypt(filename, key = 0):
     with open(filename, 'rb') as fin:
-        encrypted_data = rfactorcrypt.encrypt(fin.read(), key, 0x4b1dca9f960524e8, get_skip(filename))
+        encrypted_data = rfactorcrypt.encrypt(fin.read(), key, 0x4b1dca9f960524e8, rfactortools.get_skip(filename))
     with open(filename, 'wb') as fout:
         fout.write(encrypted_data)
 
 def rfactor_decrypt(filename):
     with open(filename, 'rb') as fin:
-        decrypted_data = rfactorcrypt.decrypt(fin.read(), get_skip(filename))
+        decrypted_data = rfactorcrypt.decrypt(fin.read(), rfactortools.get_skip(filename))
     with open(filename, 'wb') as fout:
         fout.write(decrypted_data)
 
@@ -57,8 +51,6 @@ if __name__ == "__main__":
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help="be more verbose")
     args = parser.parse_args()
-
-    print("KEY: %016x" % args.key)
 
     if args.legacy:
         encrypt = rfactor_encrypt_legacy
