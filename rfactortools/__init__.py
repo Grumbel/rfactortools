@@ -17,7 +17,7 @@
 __all__ = [ "gen", "mas" ]
 
 from .scn   import ScnParser, InfoScnParser, SearchReplaceScnParser, process_scnfile
-from .mas   import mas_pack, mas_unpack, mas_list
+from .mas   import mas_pack, mas_unpack, mas_list, mas_pack_from_data, mas_unpack_to_data
 from .veh   import process_vehfile
 from .vfs   import VFS
 from .crypt import games, crypt_info, crypt_info_from_file, get_skip, \

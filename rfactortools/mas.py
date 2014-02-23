@@ -73,7 +73,7 @@ def get_file_type(filename):
         return MASFileType.UNKNOWN
 
 ### MAS file packing
-def mas_pack_from_data(files, masfile, mas_type):
+def mas_pack_from_data(files, masfile, mas_type = 1):
     """files is a (filename, data) tuple"""
     with open(masfile, "wb") as fout:
         if mas_type == 0:
@@ -85,7 +85,7 @@ def mas_pack_from_data(files, masfile, mas_type):
         elif mas_type == 3:
             fout.write(mas_type3)
         else:
-            raise RuntimeError("invalid map_type")
+            raise RuntimeError("invalid mas_type: %s" % mas_type)
 
         if mas_type == 1:
             base_offset = 28 + len(files) * 256
@@ -182,7 +182,7 @@ def mas_list(masfile, verbose=False, with_filename=False):
             else:
                 print(entry.name)
 
-def mas_unpack(masfile, outdir, verbose=False):
+def mas_unpack(masfile, outdir):
     with open(masfile, "rb") as fin:
         file_table = mas_unpack_file_table(fin)
 
@@ -199,6 +199,26 @@ def mas_unpack(masfile, outdir, verbose=False):
                     raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), entry.name, entry.size))
                 fout.write(inflated_data)
 
+def mas_unpack_to_data(masfile):
+    with open(masfile, "rb") as fin:
+        file_table = mas_unpack_file_table(fin)
+
+        results = []
+
+        for entry in file_table:
+            fin.seek(entry.offset)
+            data = fin.read(entry.zsize)
+
+            print("%8d %8d %8d %s" % (entry.offset, entry.size, entry.zsize, entry.name))
+
+            inflated_data = zlib.decompress(data)
+            
+            if len(inflated_data) != entry.size:
+                raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), entry.name, entry.size))
+            
+            results.append((entry.name, inflated_data))
+
+        return results
 
 def mas_unpack_file_table(fin):
     signature = fin.read(16)

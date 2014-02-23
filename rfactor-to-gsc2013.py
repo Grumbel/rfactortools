@@ -20,7 +20,6 @@ import argparse
 import os
 import re
 import sys
-import subprocess
 
 import tempfile
 import imgtool
@@ -54,25 +53,17 @@ def rfactor_to_gsc2013_gmt(filename):
     rfactortools.encrypt_file(filename, filename)
 
 def rfactor_to_gsc2013_mas(filename):
-    tmpdir = os.path.join(tempfile.mkdtemp(prefix='rfactortools-'), "mas")
-
-    print("mas unpacking %s to %s" % (filename, tmpdir))
-    subprocess.check_call(["./masunpack.py", filename, tmpdir])
+    print("mas unpacking %s")
+    mas_content = rfactortools.mas_unpack_to_data(filename)
 
     print("encrypting files")
-    lst = []
-    for path, dirs, files in os.walk(tmpdir):
-        for fname in files:
-            lst.append(os.path.join(path, fname))
+    encrypted_mas_content = []
+    for i, (name, data) in enumerate(mas_content):
+        print("processing %d/%d: %s" % (i, len(mas_content), name))
+        encrypted_data = rfactortools.encrypt_data(data, 1, 0x4b1dca9f960524e8, rfactortools.get_skip(name))
+        encrypted_mas_content.append((name, encrypted_data))
 
-    for i, f in enumerate(lst):
-        print("processing %d/%d: %s" % (i, len(files), f))
-        rfactortools.encrypt_file(f, f)
-
-    print("mas packing %s to %s" % (tmpdir, filename))
-    subprocess.check_call(["./maspack.py", tmpdir, filename])
-
-    shutil.rmtree(tmpdir)
+    rfactortools.mas_pack_from_data(encrypted_mas_content, filename)
 
 def rfactor_to_gsc2013(directory):
     for path, dirs, files in os.walk(directory):

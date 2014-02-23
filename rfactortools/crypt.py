@@ -32,12 +32,12 @@ games = \
 }
 
 def encrypt_data(data, key, sign, skip):
+    data = decrypt_data(data, skip)
     return rfactorcrypt.encrypt(data, key, sign, skip)
 
 def decrypt_data(data, skip):
-    # if data is already encrypted, unencrypt it before reencrypting it
     while games.get(data):
-        data = rfactorcrypt.encrypt(data, skip)
+        data = rfactorcrypt.decrypt(data, skip)
     return data
 
 def encrypt_file(input, output, key = 1, sign = 0x4b1dca9f960524e8):
