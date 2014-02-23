@@ -20,12 +20,15 @@ import argparse
 import os
 import re
 import sys
+from collections import defaultdict
 
 import tempfile
 import imgtool
 import shutil
 
 import rfactortools
+
+########################################################################
 
 def rfactor_to_gsc2013_gdb(filename):
     with open(filename, "rt", encoding="latin-1") as fin:
@@ -65,12 +68,22 @@ def rfactor_to_gsc2013_mas(filename):
 
     rfactortools.mas_pack_from_data(encrypted_mas_content, filename)
 
+########################################################################
+
 def rfactor_to_gsc2013(directory):
     for path, dirs, files in os.walk(directory):
-        for fname in files:
-            filename = os.path.join(path, fname)
-            ext = os.path.splitext(filename)[1].lower()
+        for d in dirs:
+            pass
 
+        files_by_type = defaultdict(list)
+        for fname in files:
+            filename = os.path.normpath(os.path.join(path, fname))
+            ext = os.path.splitext(filename)[1].lower()
+            files_by_type[ext].append(filename)
+
+    for ext, files in files_by_type.items():
+        for i, filename in enumerate(files):
+            print("Processing %s file %d/%d: %s" % (ext, i+1, len(files), filename))
             if ext == ".gdb":
                 rfactor_to_gsc2013_gdb(filename)
             elif ext == ".veh":
@@ -79,6 +92,8 @@ def rfactor_to_gsc2013(directory):
                 rfactor_to_gsc2013_gmt(filename)
             elif ext == ".mas":
                 rfactor_to_gsc2013_mas(filename)
+            else:
+                pass
 
     imgtool.process_directory(directory)
 
