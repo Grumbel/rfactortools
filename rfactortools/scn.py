@@ -152,7 +152,7 @@ def process_scnfile(vfs, filename, parser):
             m_sec_stop  = section_end_regex.match(line)
             if m:
                 key, value = m.group(1), m.group(2)
-                parser.on_key_value(key, value, comment, orig_line)
+                parser.on_key_value(key, value.strip(), comment, orig_line)
             elif m_sec_start:
                 parser.on_section_start(comment, orig_line)
             elif m_sec_stop:
