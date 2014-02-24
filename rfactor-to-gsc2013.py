@@ -30,32 +30,32 @@ import rfactortools
 
 ########################################################################
 
-def rfactor_to_gsc2013_gdb(filename):
+def rfactor_to_gsc2013_gdb(filename, target_file):
     with open(filename, "rt", encoding="latin-1") as fin:
         lines = fin.readlines()
 
-    with open(filename, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
+    with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
         for line in lines:
             line = re.sub(r'Filter Properties *=.*',
                           r'Filter Properties = StockV8 \\*/',
                           line, flags=re.IGNORECASE)
             fout.write(line)
 
-def rfactor_to_gsc2013_veh(filename):
+def rfactor_to_gsc2013_veh(filename, target_file):
     with open(filename, "rt", encoding="latin-1") as fin:
         lines = fin.readlines()
 
-    with open(filename, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
+    with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
         for line in lines:
             line = re.sub(r'Classes="',
                           r'Classes="reiza5, ',
                           line, flags=re.IGNORECASE)
             fout.write(line)
 
-def rfactor_to_gsc2013_gmt(filename):
-    rfactortools.encrypt_file(filename, filename)
+def rfactor_to_gsc2013_gmt(filename, target_file):
+    rfactortools.encrypt_file(filename, target_file)
 
-def rfactor_to_gsc2013_mas(filename):
+def rfactor_to_gsc2013_mas(filename, target_file):
     print("mas unpacking %s" % filename)
     mas_content = rfactortools.mas_unpack_to_data(filename)
 
@@ -66,49 +66,75 @@ def rfactor_to_gsc2013_mas(filename):
         encrypted_data = rfactortools.encrypt_data(data, 1, 0x4b1dca9f960524e8, rfactortools.get_skip(name))
         encrypted_mas_content.append((name, encrypted_data))
 
-    rfactortools.mas_pack_from_data(encrypted_mas_content, filename)
+    rfactortools.mas_pack_from_data(encrypted_mas_content, target_file)
 
 ########################################################################
 
-def rfactor_to_gsc2013(directory):
-    for path, dirs, files in os.walk(directory):
-        for d in dirs:
-            pass
+def rfactor_to_gsc2013(source_directory, target_directory):
+    print("Converting %s to %s" % (source_directory, target_directory))
 
-        files_by_type = defaultdict(list)
+    # gather files and directories
+    dir_tree = []
+    files_by_type = defaultdict(list)
+
+    for path, dirs, files in os.walk(source_directory):
+        relpath = os.path.relpath(path, source_directory)
+
+        for d in dirs:
+            dir_tree.append(os.path.normpath(os.path.join(relpath, d)))
+
         for fname in files:
-            filename = os.path.normpath(os.path.join(path, fname))
+            filename = os.path.normpath(os.path.join(relpath, fname))
+
             ext = os.path.splitext(filename)[1].lower()
             files_by_type[ext].append(filename)
 
+    dir_tree.sort()
+
+    # create target directory hierachy
+    if not os.path.isdir(target_directory):
+        os.makedirs(os.path.normpath(target_directory))
+    for d in dir_tree:
+        t = os.path.join(target_directory, d)
+        print("creating %s" % t)
+        if not os.path.isdir(t):
+            os.mkdir(t)
+
+    # convert and copy files
     for ext, files in files_by_type.items():
         for i, filename in enumerate(files):
-            print("Processing %s file %d/%d: %s" % (ext, i+1, len(files), filename))
+            source_file = os.path.join(source_directory, filename)
+            target_file = os.path.join(target_directory, filename)
+
+            print("Processing '%s' file %d/%d: %s" % (ext, i+1, len(files), filename))
             if ext == ".gdb":
-                rfactor_to_gsc2013_gdb(filename)
+                rfactor_to_gsc2013_gdb(source_file, target_file)
             elif ext == ".veh":
-                rfactor_to_gsc2013_veh(filename)
+                rfactor_to_gsc2013_veh(source_file, target_file)
             elif ext == ".gmt":
-                rfactor_to_gsc2013_gmt(filename)
+                rfactor_to_gsc2013_gmt(source_file, target_file)
             elif ext == ".mas":
-                rfactor_to_gsc2013_mas(filename)
+                if filename.lower() == "shared/coreshader.mas":
+                    pass
+                else:
+                    rfactor_to_gsc2013_mas(source_file, target_file)
             else:
-                pass
+                shutil.copy(source_file, target_file)
 
-    imgtool.process_directory(directory)
-
-    # delete GameData/Shared/coreshader.mas if it exists
+    imgtool.process_directory(target_directory)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor to GSC2013 converter')
     parser.add_argument('DIRECTORY', action='store', type=str, nargs='+',
                         help='directory containing the mod')
+    parser.add_argument('-o', '--output', metavar='DIR', type=str, required=True,
+                        help="output directory")
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help="be more verbose")
     args = parser.parse_args()
 
     for d in args.DIRECTORY:
-        rfactor_to_gsc2013(d)
+        rfactor_to_gsc2013(d, args.output)
 
     print("-- rfactor-to-gsc2013 conversion complete --")
 
