@@ -56,6 +56,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor .veh/.gen processor')
     parser.add_argument('FILE', action='store', type=str, nargs='+',
                         help='.veh file or directory containing .veh files')
+    parser.add_argument('-t', '--tree', action='store_true', default=False,
+                        help="print tree")
     args = parser.parse_args()
 
     files = []
@@ -67,13 +69,14 @@ if __name__ == "__main__":
             
     vehs = [ process_vehfile(filename) for filename in files ]
 
-    for veh in vehs:
-        print("    file:", veh.filename)
-        print(" classes:", veh.classes)
-        print("graphics:", veh.graphics_file)
-        print("category:", veh.category)
-        print()
-
-    print_tree(vehs)
+    if args.tree:
+        print_tree(vehs)
+    else:
+        for veh in vehs:
+            print("    file:", veh.filename)
+            print(" classes:", veh.classes)
+            print("graphics:", veh.graphics_file)
+            print("category:", veh.category)
+            print()
 
 # EOF #
