@@ -291,12 +291,6 @@ rfactor_encrypt(PyObject* self, PyObject* args)
     return NULL;
   }
 
-  if (length < 16)
-  {
-    PyErr_SetString(PyExc_RuntimeError, "input to small for decryption, must be at least 16 bytes");
-    return NULL;
-  }
-
   if (skip != 0 && skip != 4)
   {
     PyErr_SetString(PyExc_RuntimeError, "only skip values of 0 and 4 are supported");

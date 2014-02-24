@@ -65,9 +65,12 @@ def decrypt_file(input, output):
         fout.write(data)
 
 def crypt_info(data):
-    sign, key = struct.unpack("<QQ", data[0:16])
-    sign ^= key;
-    return sign, key
+    if len(data) < 16:
+        return 0, 0
+    else:
+        sign, key = struct.unpack("<QQ", data[0:16])
+        sign ^= key;
+        return sign, key
 
 def crypt_info_from_file(filename):
     with open(filename, 'rb') as fin:
