@@ -24,7 +24,7 @@ Allows you to unpack a `.mas` file or list its content.
 
 Allows you to pack files into a `.mas` file.
 
-### imgtool.py
+### `imgtool.py`
 
 Allows you to rescale overlarge menu graphics to fit properly into GameStockCar2013.
 
