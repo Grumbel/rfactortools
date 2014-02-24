@@ -32,8 +32,15 @@ class Tree(defaultdict):
         self.value = value
  
 def print_tree_rec(tree, indent = ""):
-    for k, v in sorted(tree.items()):
-        print("%s+ %s" % (indent, k))
+    for i, (k, v) in enumerate(sorted(tree.items())):
+        if indent == "":
+            sym = ""
+        elif i < len(tree)-1:
+            sym = "├ "
+        else:
+            sym = "└ "
+
+        print("%s%s%s" % (indent, sym, k))
         print_tree_rec(v, indent + "  ")
 
 def print_tree(vehs):
