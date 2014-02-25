@@ -20,6 +20,7 @@ import argparse
 import os
 import re
 import cairo
+import math
 
 # [Waypoint]
 # trackstate=4543
@@ -86,11 +87,10 @@ class AIW:
         y2 = z
         for w in self.waypoints[1:]:
             x, y, z = w.pos
-            if w.branch_id == "(0)":
-                x1 = min(x1, x)
-                y1 = min(y1, z)
-                x2 = max(x2, x)
-                y2 = max(y2, z)
+            x1 = min(x1, x)
+            y1 = min(y1, z)
+            x2 = max(x2, x)
+            y2 = max(y2, z)
 
         return x1, y1, x2, y2
 
@@ -151,8 +151,12 @@ def parse_aiw(filename):
                     else:
                         pass # print("unhandled: \"%s\"" % key)
 
-    print(len(aiw.waypoints))
+    aiw.waypoints = list(filter(lambda w: w.branch_id == "(0)", aiw.waypoints))
+
     return aiw
+
+def point_distance(p1, p2):
+    return math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
 
 def print_aiw(aiw):
     width, height = 512, 512
@@ -178,19 +182,16 @@ def print_aiw(aiw):
     cr.translate((-x1 - w/2)*scale,
                  (-y1 - h/2)*scale)
 
-    if False:
-        cr.set_source_rgb(255, 0, 0)
-        cr.rectangle(x1*scale, y1*scale,
-                     w*scale, h*scale)
-        cr.fill()
-
     x, y, z = aiw.waypoints[0].pos
     cr.move_to(x * scale, z * scale)
     for w in aiw.waypoints[1:]:
         x, y, z = w.pos
-        if w.branch_id == "(0)":
-            cr.line_to(x * scale, z * scale)
-    cr.close_path() # FIXME: Don't do this on hillclimbs
+        cr.line_to(x * scale, z * scale)
+
+    # fudge factor to find hillclimb tracks that don't close
+    d = point_distance(aiw.waypoints[0].pos, aiw.waypoints[-1].pos)
+    if d < 200:
+        cr.close_path()
 
     cr.set_line_width(12.0)
     cr.set_source_rgb(0, 0, 0)
