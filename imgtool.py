@@ -20,6 +20,8 @@ from PIL import Image
 import os
 import argparse
 
+import rfactortools
+
 def resize_to_fit(img, w, h):
     iw, ih = img.size
 
@@ -44,17 +46,18 @@ def resize_to_fit_img_file(filename, w, h):
         print("ignoring %s %s" % (filename, img.size))
 
 def process_directory(directory):
-    for path, dirs, files in os.walk(directory):
-        for fname in files:
+    vfs = rfactortools.VFS(directory)
+
+    for fname in vfs.files():
             name, ext = os.path.splitext(fname)
             if ext.lower() == ".veh":
-                img = os.path.join(path, name + "number.tga")
-                if os.path.exists(img):
+                img = os.path.join(name + "number.tga")
+                if vfs.file_exists(img):
                     resize_to_fit_img_file(img, 252, 64)
                 
             elif ext.lower() == ".gdb":
-                img = os.path.join(path, name + "mini.tga")
-                if os.path.exists(img):
+                img = os.path.join(name + "mini.tga")
+                if vfs.file_exists(img):
                     resize_to_fit_img_file(img, 252, 249)
 
 if __name__ == "__main__":
