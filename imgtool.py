@@ -49,16 +49,16 @@ def process_directory(directory):
     vfs = rfactortools.VFS(directory)
 
     for fname in vfs.files():
-            name, ext = os.path.splitext(fname)
-            if ext.lower() == ".veh":
-                img = os.path.join(name + "number.tga")
-                if vfs.file_exists(img):
-                    resize_to_fit_img_file(img, 252, 64)
-                
-            elif ext.lower() == ".gdb":
-                img = os.path.join(name + "mini.tga")
-                if vfs.file_exists(img):
-                    resize_to_fit_img_file(img, 252, 249)
+        name, ext = os.path.splitext(fname)
+        if ext.lower() == ".veh":
+            img = os.path.join(name + "number.tga")
+            if vfs.file_exists(img):
+                resize_to_fit_img_file(img, 252, 64)
+
+        elif ext.lower() == ".gdb":
+            img = os.path.join(name + "mini.tga")
+            if vfs.file_exists(img):
+                resize_to_fit_img_file(img, 252, 249)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor thumbnail image resizer')
