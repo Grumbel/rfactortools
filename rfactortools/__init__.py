@@ -17,12 +17,13 @@
 __all__ = [ "gen", "mas" ]
 
 from .aiw   import parse_aiwfile, render_aiw
-from .scn   import ScnParser, InfoScnParser, SearchReplaceScnParser, process_scnfile
-from .mas   import mas_pack, mas_unpack, mas_list, mas_pack_from_data, mas_unpack_to_data
-from .veh   import process_vehfile, parse_vehfile
-from .vfs   import VFS
 from .crypt import games, crypt_info, crypt_info_from_file, get_skip, \
                    encrypt_file, encrypt_data, decrypt_file, decrypt_data
-from .util import find_files
+from .gsc2013 import rfactor_to_gsc2013
+from .mas   import mas_pack, mas_unpack, mas_list, mas_pack_from_data, mas_unpack_to_data
+from .scn   import ScnParser, InfoScnParser, SearchReplaceScnParser, process_scnfile
+from .util  import find_files
+from .veh   import process_vehfile, parse_vehfile
+from .vfs   import VFS
 
 # EOF #
