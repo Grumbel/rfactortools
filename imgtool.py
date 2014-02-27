@@ -53,12 +53,12 @@ def process_directory(directory):
         if ext.lower() == ".veh":
             img = os.path.join(name + "number.tga")
             if vfs.file_exists(img):
-                resize_to_fit_img_file(img, 252, 64)
+                resize_to_fit_img_file(vfs.lookup_file(img), 252, 64)
 
         elif ext.lower() == ".gdb":
             img = os.path.join(name + "mini.tga")
             if vfs.file_exists(img):
-                resize_to_fit_img_file(img, 252, 249)
+                resize_to_fit_img_file(vfs.lookup_file(img), 252, 249)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor thumbnail image resizer')
