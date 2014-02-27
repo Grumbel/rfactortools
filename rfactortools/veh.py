@@ -38,6 +38,7 @@ class Veh:
         self.upgrades = None
         self.hd_vehicle = None
         self.eye_point = None
+        self.driver = None
         self.team = None
         self.description = None
         self.category = None
@@ -74,6 +75,10 @@ def parse_vehfile(filename):
                     veh.classes = [c.strip() for c in value.split(",")]
                 elif key.lower() == "category":
                     veh.category = [c.strip() for c in unquote(value).split(",")]
+                elif key.lower() == "driver":
+                    veh.driver = unquote(value)
+                elif key.lower() == "team":
+                    veh.team = unquote(value)
                 else:
                     pass
 

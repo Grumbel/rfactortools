@@ -27,20 +27,27 @@ def process_vehfile(filename):
     return veh
    
 class Tree(defaultdict):
+    """A recursize defaultdict()"""
     def __init__(self, value=None):
         super(Tree, self).__init__(Tree)
         self.value = value
+        self.content = []
  
 def print_tree_rec(tree, indent = ""):
     for i, (k, v) in enumerate(sorted(tree.items())):
         if indent == "":
             sym = ""
+            symc = " ⋅ "
         elif i < len(tree)-1:
             sym = "├ "
+            symc = "│ ⋅ "
         else:
             sym = "└ "
+            symc = "  ⋅ "
 
-        print("%s%s%s" % (indent, sym, k))
+        print("%s%s[%s]" % (indent, sym, k))
+        for e in v.content:
+            print("%s%s%-30s %-30s %s" % (indent, symc, e.driver, e.team, e.filename))
         print_tree_rec(v, indent + "  ")
 
 def print_tree(vehs):
@@ -49,6 +56,7 @@ def print_tree(vehs):
         subtree = tree
         for cat in veh.category:
             subtree = subtree[cat]
+        subtree.content.append(veh)
 
     print_tree_rec(tree)
 
@@ -77,6 +85,7 @@ if __name__ == "__main__":
             print(" classes:", veh.classes)
             print("graphics:", veh.graphics_file)
             print("category:", veh.category)
+            print("    team:", veh.team)
             print()
 
 # EOF #
