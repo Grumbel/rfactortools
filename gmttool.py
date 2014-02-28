@@ -54,7 +54,8 @@ def process_gmt(filename, verbose=False):
         print("numbers:", d_num1, d_num2, d_num3)
 
         fin.seek(404)
-        print("Name:", repr(asciz2py(fin.read(64))))
+        print("Name:", fin.read(64))
+        print(struct.unpack("<HHffHH", fin.read(16))) # always: C8 CF D2 D8   CE D8 E6 C3 D6  DE D8 BE   BB A8 BF 90
 
         # parse some floats
         fin.seek(d_offset1+4)
