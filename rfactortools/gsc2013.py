@@ -63,6 +63,13 @@ def rfactor_to_gsc2013_mas(filename, target_file):
 
     rfactortools.mas_pack_from_data(encrypted_mas_content, target_file)
 
+def rfactor_to_gsc2013_tdf(source_file, target_file):
+    shutil.copy(source_file, target_file)
+
+    # TODO: insert check if additional textures are needed
+    shutil.copy("gsc2013/RACEGROOVE.dds", os.path.dirname(target_file))
+    shutil.copy("gsc2013/SKIDHARD.dds", os.path.dirname(target_file))
+
 ########################################################################
 
 def rfactor_to_gsc2013(source_directory, target_directory):
@@ -108,6 +115,8 @@ def rfactor_to_gsc2013(source_directory, target_directory):
                 rfactor_to_gsc2013_veh(source_file, target_file)
             elif ext == ".gmt":
                 rfactor_to_gsc2013_gmt(source_file, target_file)
+            elif ext == ".tdf":
+                rfactor_to_gsc2013_tdf(source_file, target_file)
             elif ext == ".mas":
                 if filename.lower() == "shared/coreshader.mas":
                     pass

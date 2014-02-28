@@ -23,6 +23,36 @@ comment_regex = re.compile(r'(.*?)(//.*)')
 section_start_regex = re.compile(r'\s*{')
 section_end_regex = re.compile(r'\s*}')
 
+skybox_rfactor = """Instance=skyboxi
+{
+  Moveable=True
+  MeshFile=skyboxi.gmt CollTarget=False HATTarget=False
+  Instance=Sky
+  {
+    Moveable=True
+    MeshFile=Sky.gmt CollTarget=False HATTarget=False
+  }
+}
+"""
+
+skybox_gsc2013 = """Instance=skyboxi
+{
+  Moveable=True
+  MeshFile=skyboxi.gmt CollTarget=False HATTarget=False Render=False
+  Instance=CLOUDS
+  {
+
+    Moveable=True
+    MeshFile=skyboxi.gmt CollTarget=False HATTarget=False
+    Instance=Sky
+    {
+      Moveable=True
+      MeshFile=Sky.gmt CollTarget=False HATTarget=False
+    }
+  }
+}
+"""
+
 def nt2os_path(path):
     return os.path.normpath(path.replace(ntpath.sep, os.path.sep))
 
