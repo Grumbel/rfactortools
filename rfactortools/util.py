@@ -23,7 +23,7 @@ def find_files(directory, ext=None):
         for fname in files:
             if ext and os.path.splitext(fname)[1].lower() == ext:
                 results.append(os.path.join(path, fname))
-            elif ext == None:
+            elif ext is None:
                 results.append(os.path.join(path, fname))
 
     return results
