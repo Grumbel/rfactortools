@@ -1,18 +1,18 @@
-##  rFactor .gen file manipulation tool
-##  Copyright (C) 2014 Ingo Ruhnke <grumbel@gmail.com>
-##
-##  This program is free software: you can redistribute it and/or modify
-##  it under the terms of the GNU General Public License as published by
-##  the Free Software Foundation, either version 3 of the License, or
-##  (at your option) any later version.
-##
-##  This program is distributed in the hope that it will be useful,
-##  but WITHOUT ANY WARRANTY; without even the implied warranty of
-##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##  GNU General Public License for more details.
-##
-##  You should have received a copy of the GNU General Public License
-##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# rFactor .gen file manipulation tool
+# Copyright (C) 2014 Ingo Ruhnke <grumbel@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from concurrent.futures import ThreadPoolExecutor
 import struct
@@ -23,21 +23,25 @@ mas_type0 = b"GMOTORMAS10\0\0\0\0\0"
 mas_type1 = b"\xC8\xCF\xD2\xD8\xCE\xD8\xE6\xC9\xCA\xDD\xD8\xBE\xBB\xA6\xBF\x90"
 mas_type3 = b"CUBEMAS4.10\0\0\0\0\0"
 
+
 class MASFileType:
     UNKNOWN = 0
-    MISC = 16 # BIK, GFX, PSD, PSH, RTF, TXT, VSH
-    GMT  = 17
-    BMP  = 18
-    SCN  = 19
-    TGA  = 20
-    PNG  = 21
-    JPG  = 22
+    MISC = 16  # BIK, GFX, PSD, PSH, RTF, TXT, VSH
+    GMT = 17
+    BMP = 18
+    SCN = 19
+    TGA = 20
+    PNG = 21
+    JPG = 22
     # DDS  = 23 # FIXME: might need to inspect file content to tell the difference
-    DDS  = 55
+    DDS = 55
+
 
 class MASFileEntry:
+
     def __init__(self, *args):
         self.type, self.flags, self.name, self.offset, self.size, self.zsize = args
+
 
 def get_mas_type(signature):
     if signature == mas_type0:
@@ -49,10 +53,11 @@ def get_mas_type(signature):
     else:
         raise RuntimeError("unknown mas type: %s" % signature)
 
+
 def get_file_type(filename):
     ext = os.path.splitext(filename)[1].lower()
 
-    if ext == ".bik" or  ext == ".gfx" or ext == ".psd"  or ext == ".rtf" or ext == ".txt" or ext == ".vsh":
+    if ext == ".bik" or ext == ".gfx" or ext == ".psd" or ext == ".rtf" or ext == ".txt" or ext == ".vsh":
         return MASFileType.MISC
     elif ext == ".gmt":
         return MASFileType.GMT
@@ -67,13 +72,15 @@ def get_file_type(filename):
     elif ext == ".jpg":
         return MASFileType.JPG
     elif ext == ".dds":
-        return MASFileType.DDS # FIXME: need to handle the other DDS
+        return MASFileType.DDS  # FIXME: need to handle the other DDS
     else:
         print("%s: warning: unknown file type" % filename)
         return MASFileType.UNKNOWN
 
-### MAS file packing
-def mas_pack_from_data(files, masfile, mas_type = 1):
+# MAS file packing
+
+
+def mas_pack_from_data(files, masfile, mas_type=1):
     """files is a (filename, data) tuple"""
     with open(masfile, "wb") as fout:
         if mas_type == 0:
@@ -101,7 +108,7 @@ def mas_pack_from_data(files, masfile, mas_type = 1):
             for name, data in files:
                 print("compressing %s" % name)
                 compressed_files.append((name, data, executor.submit(zlib.compress, data)))
-        compressed_files = [ (name, data, deflated_data.result()) for name, data, deflated_data in compressed_files ]
+        compressed_files = [(name, data, deflated_data.result()) for name, data, deflated_data in compressed_files]
 
         for name, data, deflated_data in compressed_files:
             print("packing %s" % name)
@@ -157,7 +164,9 @@ def mas_pack(files, masfile, mas_type):
 
     mas_pack_from_data(files_with_data, masfile, mas_type)
 
-### MAS file unpacking and listing
+# MAS file unpacking and listing
+
+
 def mas_list(masfile, verbose=False, with_filename=False):
     with open(masfile, "rb") as fin:
         file_table = mas_unpack_file_table(fin)
@@ -165,7 +174,8 @@ def mas_list(masfile, verbose=False, with_filename=False):
     if verbose:
         print("%6s %6s %-8s %-8s %-8s %-8s" % ("flags:", "type:", "offset:", "size:", "zsize:", "name:"))
         for entry in file_table:
-            print("%6x %6d %8d %8d %8d %s" % (entry.flags, entry.type, entry.offset, entry.size, entry.zsize, entry.name))
+            print("%6x %6d %8d %8d %8d %s" %
+                  (entry.flags, entry.type, entry.offset, entry.size, entry.zsize, entry.name))
 
         print()
         print("number of files:       %12d" % len(file_table))
@@ -178,9 +188,10 @@ def mas_list(masfile, verbose=False, with_filename=False):
     else:
         for entry in file_table:
             if with_filename:
-                print("%s: %s" %  (masfile, entry.name))
+                print("%s: %s" % (masfile, entry.name))
             else:
                 print(entry.name)
+
 
 def mas_unpack(masfile, outdir, verbose=False):
     with open(masfile, "rb") as fin:
@@ -200,8 +211,10 @@ def mas_unpack(masfile, outdir, verbose=False):
                     inflated_data = data
 
                 if len(inflated_data) != entry.size:
-                    raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), entry.name, entry.size))
+                    raise RuntimeError("invalid inflated size %d for %s should be %d" %
+                                       (len(inflated_data), entry.name, entry.size))
                 fout.write(inflated_data)
+
 
 def mas_unpack_to_data(masfile):
     with open(masfile, "rb") as fin:
@@ -219,13 +232,15 @@ def mas_unpack_to_data(masfile):
                 inflated_data = zlib.decompress(data)
             else:
                 inflated_data = data
-            
+
             if len(inflated_data) != entry.size:
-                raise RuntimeError("invalid inflated size %d for %s should be %d" % (len(inflated_data), entry.name, entry.size))
-            
+                raise RuntimeError("invalid inflated size %d for %s should be %d" %
+                                   (len(inflated_data), entry.name, entry.size))
+
             results.append((entry.name, inflated_data))
 
         return results
+
 
 def mas_unpack_file_table(fin):
     signature = fin.read(16)

@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 
-##  rFactor .scn/.gen file manipulation tool
-##  Copyright (C) 2013 Ingo Ruhnke <grumbel@gmail.com>
-##
-##  This program is free software: you can redistribute it and/or modify
-##  it under the terms of the GNU General Public License as published by
-##  the Free Software Foundation, either version 3 of the License, or
-##  (at your option) any later version.
-##
-##  This program is distributed in the hope that it will be useful,
-##  but WITHOUT ANY WARRANTY; without even the implied warranty of
-##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##  GNU General Public License for more details.
-##
-##  You should have received a copy of the GNU General Public License
-##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# rFactor .scn/.gen file manipulation tool
+# Copyright (C) 2013 Ingo Ruhnke <grumbel@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
 import re
@@ -24,6 +24,7 @@ from io import StringIO
 
 import rfactortools
 
+
 def find_file_backwards(vfs, dir, gen):
     while True:
         filename = os.path.join(dir, gen)
@@ -31,10 +32,11 @@ def find_file_backwards(vfs, dir, gen):
             return filename
 
         newdir = os.path.dirname(dir)
-        if newdir == dir: # reached the root of the path
+        if newdir == dir:  # reached the root of the path
             return None
         else:
             dir = newdir
+
 
 def find_vehdir(path):
     m = re.match(r'^(.*GameData/Vehicles)', path, re.IGNORECASE)
@@ -43,7 +45,8 @@ def find_vehdir(path):
     else:
         raise Exception("couldn't locate <VEHDIR> in %s" % path)
 
-## Editing ###################################################################
+# Editing ###################################################################
+
 
 def modify_track_file(vfs, scn):
     outfile = scn + ".new"
@@ -52,16 +55,18 @@ def modify_track_file(vfs, scn):
         # sr_parser.mas_files   =
         # sr_parser.search_path =
         rfactortools.process_scnfile(vfs, scn, sr_parser)
-        
+
+
 def modify_vehicle_file(vfs, gen, search_path, mas_files, vehdir, teamdir):
     outfile = gen + ".new"
     with open(outfile, "wt", encoding="latin-1", errors="replace") as fout:
         sr_parser = rfactortools.SearchReplaceScnParser(fout)
-        sr_parser.mas_files   = mas_files
+        sr_parser.mas_files = mas_files
         sr_parser.search_path = search_path
         rfactortools.process_scnfile(vfs, gen, sr_parser)
 
-##############################################################################
+#
+
 
 def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
     def expand_path(p):
@@ -69,7 +74,7 @@ def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
         p = re.sub(r'<TEAMDIR>', teamdir + "/", p)
         return p
 
-    expanded_search_path = [ expand_path(d) for d in search_path ]
+    expanded_search_path = [expand_path(d) for d in search_path]
 
     errors = []
 
@@ -91,7 +96,8 @@ def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
 
     return errors
 
-##############################################################################
+#
+
 
 def process_gdb_file(vfs, gdb, fix, errors):
     trackdir = os.path.dirname(gdb)
@@ -109,9 +115,10 @@ def process_gdb_file(vfs, gdb, fix, errors):
     if fix:
         modify_track_file(vfs, scn)
 
+
 def process_veh_file(vfs, veh, fix, errors):
     teamdir = os.path.dirname(veh)
-    vehdir  = find_vehdir(os.path.dirname(veh))
+    vehdir = find_vehdir(os.path.dirname(veh))
 
     gen_name = rfactortools.process_vehfile(vfs, veh)
     gen = find_file_backwards(vfs, os.path.dirname(veh), gen_name)
@@ -133,6 +140,7 @@ def process_veh_file(vfs, veh, fix, errors):
 
     if fix:
         modify_vehicle_file(vfs, gen, info.search_path, info.mas_files, vehdir, teamdir)
+
 
 def process_directory(directory, fix):
     vfs = rfactortools.VFS(directory)
@@ -162,7 +170,7 @@ def process_directory(directory, fix):
             process_gdb_file(vfs, gdb, fix, errors)
         except Exception as e:
             print("error:", e)
-            errors.append(e)           
+            errors.append(e)
 
     for veh in sorted(veh_files):
         try:

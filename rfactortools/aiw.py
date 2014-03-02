@@ -1,18 +1,18 @@
-##  rFactor .aiw file processing tool
-##  Copyright (C) 2014 Ingo Ruhnke <grumbel@gmail.com>
-##
-##  This program is free software: you can redistribute it and/or modify
-##  it under the terms of the GNU General Public License as published by
-##  the Free Software Foundation, either version 3 of the License, or
-##  (at your option) any later version.
-##
-##  This program is distributed in the hope that it will be useful,
-##  but WITHOUT ANY WARRANTY; without even the implied warranty of
-##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##  GNU General Public License for more details.
-##
-##  You should have received a copy of the GNU General Public License
-##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# rFactor .aiw file processing tool
+# Copyright (C) 2014 Ingo Ruhnke <grumbel@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import cairo
 import math
@@ -64,6 +64,7 @@ keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
 vec3_regex = re.compile(r'\((-?\d*(\.\d*)?),\s*(-?\d*(\.\d*)?),\s*(-?\d*(\.\d*)?)\)')
 int1_regex = re.compile(r'\((-?\d+)\)')
 
+
 def vec3(str):
     m = vec3_regex.match(str)
     if m:
@@ -74,6 +75,7 @@ def vec3(str):
     else:
         raise Exception("not a vec3: \"%s\"" % str)
 
+
 def int1(str):
     m = int1_regex.match(str)
     if m:
@@ -81,11 +83,13 @@ def int1(str):
     else:
         raise Exception("not a int1: \"%s\"" % str)
 
+
 class AIW:
+
     def __init__(self):
         self.waypoints = []
 
-    def get_waypoints(self, branch_id = 0):
+    def get_waypoints(self, branch_id=0):
         return list(filter(lambda w: w.branch_id == branch_id, self.waypoints))
 
     def get_bounding_box(self):
@@ -102,6 +106,7 @@ class AIW:
             y2 = max(y2, z)
 
         return x1, y1, x2, y2
+
 
 class Waypoint:
     # wp_pos=(1615.28,115.8291,1235.497)
@@ -133,6 +138,7 @@ class Waypoint:
         self.bitfields = None
         self.branch_id = None
 
+
 def parse_aiwfile(filename):
     aiw = AIW()
 
@@ -158,12 +164,14 @@ def parse_aiwfile(filename):
                     elif key == "wp_branchID":
                         waypoint.branch_id = int1(value)
                     else:
-                        pass # print("unhandled: \"%s\"" % key)                  
+                        pass  # print("unhandled: \"%s\"" % key)
 
     return aiw
 
+
 def point_distance(p1, p2):
-    return math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
+    return math.sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
+
 
 def draw_path(cr, scale, waypoints):
     x, y, z = waypoints[0].pos
@@ -176,6 +184,7 @@ def draw_path(cr, scale, waypoints):
     d = point_distance(waypoints[0].pos, waypoints[-1].pos)
     if d < 200:
         cr.close_path()
+
 
 def render_aiw(aiw, width=512, height=512):
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
@@ -195,10 +204,10 @@ def render_aiw(aiw, width=512, height=512):
     scale = min(sx, sy) * 0.9
 
     cr.save()
-    cr.translate(width/2, height/2)
+    cr.translate(width / 2, height / 2)
 
-    cr.translate((-x1 - w/2)*scale,
-                 (-y1 - h/2)*scale)
+    cr.translate((-x1 - w / 2) * scale,
+                 (-y1 - h / 2) * scale)
 
     for i in reversed(range(0, 1)):
         draw_path(cr, scale, aiw.get_waypoints(i))

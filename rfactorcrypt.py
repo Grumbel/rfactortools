@@ -7,8 +7,10 @@ import struct
 
 import rfactortools
 
+
 class store_int_from_hex(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string = None):
+
+    def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, int(values, 0))
         return
 

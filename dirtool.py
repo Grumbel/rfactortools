@@ -8,12 +8,14 @@ import shutil
 import filecmp
 from itertools import chain
 
+
 def hashfile(afile, hasher, blocksize=65536):
     buf = afile.read(blocksize)
     while len(buf) > 0:
         hasher.update(buf)
         buf = afile.read(blocksize)
         return hasher.digest()
+
 
 def get_hierachy(filename):
     p = None
@@ -25,11 +27,13 @@ def get_hierachy(filename):
         np = os.path.dirname(np)
     return lst
 
+
 def get_directory_list(files):
     """
     Returns the directory structure that holds files
     """
     return sorted(list(set(chain.from_iterable([get_hierachy(f) for f in files]))))
+
 
 def move_files(sourcedir, targetdir, files):
     """
@@ -64,16 +68,18 @@ def move_files(sourcedir, targetdir, files):
         print("moving %s to %s" % (source_file, target_file))
         shutil.move(source_file, target_file)
 
+
 @functools.total_ordering
 class FileInfo:
+
     def __init__(self, md5sum, filename):
-        self.md5sum   = md5sum
+        self.md5sum = md5sum
         self.filename = os.path.normpath(filename)
 
     def __eq__(self, other):
         # return (self.md5sum, self.filename) == (other.md5sum, other.filename)
         return self.filename == other.filename
-        
+
     def __lt__(self, other):
         # return (self.md5sum, self.filename) < (other.md5sum, other.filename)
         return self.filename < other.filename
@@ -87,6 +93,7 @@ class FileInfo:
     def __str__(self):
         return self.filename
 
+
 def fileinfo_from_path(path):
     if os.path.isdir(path):
         return fileinfo_from_directory(path)
@@ -95,10 +102,12 @@ def fileinfo_from_path(path):
     else:
         raise Exception("%s: error: unknown file type" % path)
 
+
 def fileinfo_from_md5sums(filename):
     with open(filename, "r") as fin:
         return [FileInfo(*e.split(None, 1)) for e in fin.read().splitlines()]
-        
+
+
 def fileinfo_from_directory(directory):
     lst = []
     for path, dirs, files in os.walk(directory):
@@ -106,16 +115,18 @@ def fileinfo_from_directory(directory):
             lst.append(FileInfo(None, os.path.relpath(os.path.join(path, fname), directory)))
     return lst
 
+
 def compare_directories(finfo1, finfo2):
     finfo1_set = set(finfo1)
     finfo2_set = set(finfo2)
 
     return (
-        sorted(finfo1_set.difference(finfo2_set)), # removals
-        sorted(finfo2_set.difference(finfo1_set)), # additions
-        [] # changes
+        sorted(finfo1_set.difference(finfo2_set)),  # removals
+        sorted(finfo2_set.difference(finfo1_set)),  # additions
+        []  # changes
     )
-        
+
+
 def compare_command(path1, path2):
     finfo1 = fileinfo_from_path(path1)
     finfo2 = fileinfo_from_path(path2)
@@ -130,6 +141,7 @@ def compare_command(path1, path2):
 
     for f in changes:
         print("~%s" % f)
+
 
 def extract_diff_command(path1, path2, target):
     """Run a diff between path1 and path2 and move all additions to target"""
@@ -151,6 +163,7 @@ def extract_diff_command(path1, path2, target):
     files = [f.filename for f in additions]
 
     move_files(path2, target, files)
+
 
 def merge_command(source, target, dry_run, force):
     if not os.path.isdir(source):
@@ -211,15 +224,15 @@ if __name__ == "__main__":
                         help='A directory')
     parser.add_argument('FILE2', action='store', type=str,
                         help='Another directory')
-    parser.add_argument('-c', '--checksum', action='store_true', 
+    parser.add_argument('-c', '--checksum', action='store_true',
                         help="Use checksum for comparism")
-    parser.add_argument('-t', '--target', metavar="DIR", action='store', 
+    parser.add_argument('-t', '--target', metavar="DIR", action='store',
                         help="Target directory for extract")
-    parser.add_argument('-f', '--force', action='store_true', 
+    parser.add_argument('-f', '--force', action='store_true',
                         help="Overwrite files in target directory")
     parser.add_argument('-n', '--dry-run', action='store_true',
                         help="don't act, just show actions")
-    args = parser.parse_args() 
+    args = parser.parse_args()
 
     if args.COMMAND == "diff":
         compare_command(args.FILE1, args.FILE2)

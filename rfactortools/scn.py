@@ -1,18 +1,18 @@
-##  rFactor .scn/.gen file manipulation tool
-##  Copyright (C) 2014 Ingo Ruhnke <grumbel@gmail.com>
-##
-##  This program is free software: you can redistribute it and/or modify
-##  it under the terms of the GNU General Public License as published by
-##  the Free Software Foundation, either version 3 of the License, or
-##  (at your option) any later version.
-##
-##  This program is distributed in the hope that it will be useful,
-##  but WITHOUT ANY WARRANTY; without even the implied warranty of
-##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##  GNU General Public License for more details.
-##
-##  You should have received a copy of the GNU General Public License
-##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# rFactor .scn/.gen file manipulation tool
+# Copyright (C) 2014 Ingo Ruhnke <grumbel@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
 import ntpath
@@ -53,10 +53,13 @@ skybox_gsc2013 = """Instance=skyboxi
 }
 """
 
+
 def nt2os_path(path):
     return os.path.normpath(path.replace(ntpath.sep, os.path.sep))
 
+
 class ScnParser:
+
     def __init__(self):
         pass
 
@@ -72,7 +75,9 @@ class ScnParser:
     def on_unknown(self, orig):
         pass
 
+
 class InfoScnParser(ScnParser):
+
     def __init__(self):
         self.section = 0
         self.search_path = []
@@ -99,7 +104,9 @@ class InfoScnParser(ScnParser):
     def on_section_end(self, comment, orig):
         self.section -= 1
 
+
 class SearchReplaceScnParser(ScnParser):
+
     def __init__(self, fout):
         self.fout = fout
 
@@ -162,6 +169,7 @@ class SearchReplaceScnParser(ScnParser):
     def on_unknown(self, orig):
         self.fout.write(orig + '\n')
 
+
 def process_scnfile(vfs, filename, parser):
     # print("processing", filename)
     with vfs.open_read(filename, encoding='latin-1') as fin:
@@ -177,7 +185,7 @@ def process_scnfile(vfs, filename, parser):
 
             m = keyvalue_regex.match(line)
             m_sec_start = section_start_regex.match(line)
-            m_sec_stop  = section_end_regex.match(line)
+            m_sec_stop = section_end_regex.match(line)
             if m:
                 key, value = m.group(1), m.group(2)
                 parser.on_key_value(key, value.strip(), comment, orig_line)

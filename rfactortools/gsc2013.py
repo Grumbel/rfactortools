@@ -1,18 +1,18 @@
-##  rFactor to GSC2013 converter
-##  Copyright (C) 2014 Ingo Ruhnke <grumbel@gmail.com>
-##
-##  This program is free software: you can redistribute it and/or modify
-##  it under the terms of the GNU General Public License as published by
-##  the Free Software Foundation, either version 3 of the License, or
-##  (at your option) any later version.
-##
-##  This program is distributed in the hope that it will be useful,
-##  but WITHOUT ANY WARRANTY; without even the implied warranty of
-##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##  GNU General Public License for more details.
-##
-##  You should have received a copy of the GNU General Public License
-##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# rFactor to GSC2013 converter
+# Copyright (C) 2014 Ingo Ruhnke <grumbel@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import defaultdict
 import os
@@ -23,7 +23,8 @@ import sys
 import imgtool
 import rfactortools
 
-########################################################################
+#
+
 
 def rfactor_to_gsc2013_gdb(filename, target_file):
     with open(filename, "rt", encoding="latin-1") as fin:
@@ -36,6 +37,7 @@ def rfactor_to_gsc2013_gdb(filename, target_file):
                           line, flags=re.IGNORECASE)
             fout.write(line)
 
+
 def rfactor_to_gsc2013_veh(filename, target_file):
     with open(filename, "rt", encoding="latin-1") as fin:
         lines = fin.readlines()
@@ -47,8 +49,10 @@ def rfactor_to_gsc2013_veh(filename, target_file):
                           line, flags=re.IGNORECASE)
             fout.write(line)
 
+
 def rfactor_to_gsc2013_gmt(filename, target_file):
     rfactortools.encrypt_file(filename, target_file)
+
 
 def rfactor_to_gsc2013_mas(filename, target_file):
     print("mas unpacking %s" % filename)
@@ -63,6 +67,7 @@ def rfactor_to_gsc2013_mas(filename, target_file):
 
     rfactortools.mas_pack_from_data(encrypted_mas_content, target_file)
 
+
 def rfactor_to_gsc2013_tdf(source_file, target_file):
     shutil.copy(source_file, target_file)
 
@@ -70,7 +75,8 @@ def rfactor_to_gsc2013_tdf(source_file, target_file):
     shutil.copy("gsc2013/RACEGROOVE.dds", os.path.dirname(target_file))
     shutil.copy("gsc2013/SKIDHARD.dds", os.path.dirname(target_file))
 
-########################################################################
+#
+
 
 def rfactor_to_gsc2013(source_directory, target_directory):
     print("Converting %s to %s" % (source_directory, target_directory))
@@ -108,7 +114,7 @@ def rfactor_to_gsc2013(source_directory, target_directory):
             source_file = os.path.join(source_directory, filename)
             target_file = os.path.join(target_directory, filename)
 
-            print("Processing '%s' file %d/%d: %s" % (ext, i+1, len(files), filename))
+            print("Processing '%s' file %d/%d: %s" % (ext, i + 1, len(files), filename))
             if ext == ".gdb":
                 rfactor_to_gsc2013_gdb(source_file, target_file)
             elif ext == ".veh":

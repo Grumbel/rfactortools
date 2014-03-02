@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 
-##  rFactor .scn/.gen file manipulation tool
-##  Copyright (C) 2013 Ingo Ruhnke <grumbel@gmail.com>
-##
-##  This program is free software: you can redistribute it and/or modify
-##  it under the terms of the GNU General Public License as published by
-##  the Free Software Foundation, either version 3 of the License, or
-##  (at your option) any later version.
-##
-##  This program is distributed in the hope that it will be useful,
-##  but WITHOUT ANY WARRANTY; without even the implied warranty of
-##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##  GNU General Public License for more details.
-##
-##  You should have received a copy of the GNU General Public License
-##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# rFactor .scn/.gen file manipulation tool
+# Copyright (C) 2013 Ingo Ruhnke <grumbel@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
 import os
@@ -22,23 +22,28 @@ import os
 from collections import defaultdict
 import rfactortools
 
+
 def process_vehfile(filename):
     veh = rfactortools.parse_vehfile(filename)
     return veh
-   
+
+
 class Tree(defaultdict):
+
     """A recursize defaultdict()"""
+
     def __init__(self, value=None):
         super(Tree, self).__init__(Tree)
         self.value = value
         self.content = []
- 
-def print_tree_rec(tree, indent = ""):
+
+
+def print_tree_rec(tree, indent=""):
     for i, (k, v) in enumerate(sorted(tree.items())):
         if indent == "":
             sym = ""
             symc = " ⋅ "
-        elif i < len(tree)-1:
+        elif i < len(tree) - 1:
             sym = "├ "
             symc = "│ ⋅ "
         else:
@@ -49,6 +54,7 @@ def print_tree_rec(tree, indent = ""):
         for e in v.content:
             print("%s%s%-30s %-30s %s" % (indent, symc, e.driver, e.team, e.filename))
         print_tree_rec(v, indent + "  ")
+
 
 def print_tree(vehs):
     tree = Tree()
@@ -74,8 +80,8 @@ if __name__ == "__main__":
             files += rfactortools.find_files(path, ".veh")
         else:
             files.append(path)
-            
-    vehs = [ process_vehfile(filename) for filename in files ]
+
+    vehs = [process_vehfile(filename) for filename in files]
 
     if args.tree:
         print_tree(vehs)

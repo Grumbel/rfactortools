@@ -1,26 +1,27 @@
 #!/usr/bin/env python3
 
-##  Race07 Tool
-##  Copyright (C) 2014 Ingo Ruhnke <grumbel@gmail.com>
-##
-##  This program is free software: you can redistribute it and/or modify
-##  it under the terms of the GNU General Public License as published by
-##  the Free Software Foundation, either version 3 of the License, or
-##  (at your option) any later version.
-##
-##  This program is distributed in the hope that it will be useful,
-##  but WITHOUT ANY WARRANTY; without even the implied warranty of
-##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##  GNU General Public License for more details.
-##
-##  You should have received a copy of the GNU General Public License
-##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Race07 Tool
+# Copyright (C) 2014 Ingo Ruhnke <grumbel@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
 
 import re
 import os
 import rfactortools
+
 
 def show_buildin_ids():
     if args.class_id:
@@ -44,12 +45,15 @@ def show_buildin_ids():
 keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
 comment_regex = re.compile(r'(.*?)(//.*)')
 
+
 class Car:
+
     def __init__(self):
         self.class_id = None
         self.model_id = None
         self.classes = None
         self.model = None
+
 
 def read_ids(filename):
     with open(filename, 'rt', encoding='latin-1') as fin:
@@ -76,8 +80,8 @@ def read_ids(filename):
             elif key == "modelid":
                 car.model_id = int(value)
             else:
-                pass # print("unhandled: \"%s\"" % key)
-        
+                pass  # print("unhandled: \"%s\"" % key)
+
     return car
 
 if __name__ == "__main__":

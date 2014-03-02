@@ -1,32 +1,34 @@
 #!/usr/bin/env python3
 
-##  rFactor .scn/.gen file manipulation tool
-##  Copyright (C) 2013 Ingo Ruhnke <grumbel@gmail.com>
-##
-##  This program is free software: you can redistribute it and/or modify
-##  it under the terms of the GNU General Public License as published by
-##  the Free Software Foundation, either version 3 of the License, or
-##  (at your option) any later version.
-##
-##  This program is distributed in the hope that it will be useful,
-##  but WITHOUT ANY WARRANTY; without even the implied warranty of
-##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##  GNU General Public License for more details.
-##
-##  You should have received a copy of the GNU General Public License
-##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# rFactor .scn/.gen file manipulation tool
+# Copyright (C) 2013 Ingo Ruhnke <grumbel@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
 import sys
 import struct
 import argparse
 
+
 def asciz2py(bytes):
     return bytes.split(b'\0', 1)[0].decode('latin-1')
 
+
 def process_gmt(filename, verbose=False):
     print("[[[ %s ]]]" % filename)
-    with open(filename, "rb") as fin:       
+    with open(filename, "rb") as fin:
         d_obj_offset, d_32 = struct.unpack("<II", fin.read(8))
 
         print("%8d  %8d" % (d_obj_offset, d_32))
@@ -40,14 +42,13 @@ def process_gmt(filename, verbose=False):
 
         fin.seek(372)
         d_obj_count, d_offset, \
-        d_obj1_count, d_offset1, \
-        d_obj2_count, d_offset2, \
-        d_obj3_count, d_offset3 = struct.unpack("<IIIIIIII", fin.read(32))
+            d_obj1_count, d_offset1, \
+            d_obj2_count, d_offset2, \
+            d_obj3_count, d_offset3 = struct.unpack("<IIIIIIII", fin.read(32))
         print("%8d  %8d" % (d_obj_count, d_offset))
         print("%8d  %8d" % (d_obj1_count, d_offset1))
         print("%8d  %8d" % (d_obj2_count, d_offset2))
         print("%8d  %8d" % (d_obj3_count, d_offset3))
-
 
         fin.seek(d_obj_offset)
         d_num1, d_num2, d_num3 = struct.unpack("<HHI", fin.read(8))
@@ -55,17 +56,17 @@ def process_gmt(filename, verbose=False):
 
         fin.seek(404)
         print("Name:", fin.read(64))
-        print(struct.unpack("<HHffHH", fin.read(16))) # always: C8 CF D2 D8   CE D8 E6 C3 D6  DE D8 BE   BB A8 BF 90
+        print(struct.unpack("<HHffHH", fin.read(16)))  # always: C8 CF D2 D8   CE D8 E6 C3 D6  DE D8 BE   BB A8 BF 90
 
         # parse some floats
-        fin.seek(d_offset1+4)
+        fin.seek(d_offset1 + 4)
         for i in range(0, d_obj1_count):
             d_f_nums = struct.unpack("<HHHHIIffff", fin.read(32))
             print("1 %8d) %s" % (i, d_f_nums))
         print()
 
         # parse some more floats
-        fin.seek(d_offset2+4)
+        fin.seek(d_offset2 + 4)
         for i in range(0, d_obj2_count):
             d_f_nums = struct.unpack("<fffI", fin.read(16))
             print("2 %8d) %s" % (i, d_f_nums))
@@ -73,12 +74,12 @@ def process_gmt(filename, verbose=False):
 
         # parse even more floats
         fin.seek(d_offset3)
-        for i in range(0, d_num1+3):
+        for i in range(0, d_num1 + 3):
             d_f_nums = struct.unpack("<ffffffII", fin.read(32))
             print("3 %8d) %10.4f %10.4f %10.4f %10.4f %10.4f %10.4f %8d %8d" % ((i,) + d_f_nums))
         print()
 
-        for i in range(0, d_num1+2):
+        for i in range(0, d_num1 + 2):
             d_f_nums = struct.unpack("<ffffffII", fin.read(32))
             print("4 %8d) %10.4f %10.4f %10.4f %10.4f %10.4f %10.4f %8d %8d" % ((i,) + d_f_nums))
         print()
@@ -90,12 +91,11 @@ def process_gmt(filename, verbose=False):
 
         print("Current Offset:", fin.tell())
 
-        #for i in range(0, d_obj1_count*5):
+        # for i in range(0, d_obj1_count*5):
         #    d_f_nums = struct.unpack("<HHHHHH", fin.read(12))
         #    print("6 %8d %s" % (i, d_f_nums))
 
-
-        fin.seek(d_obj_offset+8)
+        fin.seek(d_obj_offset + 8)
         for obj_idx in range(0, d_obj_count):
             d = fin.read(60)
             print(d)
@@ -127,17 +127,17 @@ def process_gmt(filename, verbose=False):
                 # 0000 803f
                 # 0100 0000
                 # 0000 0000
-                # 0100 0000 
+                # 0100 0000
                 # 0000 0000
                 # ....
 
                 def block_fmt(str):
                     for i, c in enumerate(str):
                         sys.stdout.write("%02x " % c)
-                        if (i+1) % 4 == 0:
+                        if (i + 1) % 4 == 0:
                             sys.stdout.write(" ")
 
-                        if (i+1) % 16 == 0:
+                        if (i + 1) % 16 == 0:
                             sys.stdout.write("\n")
                     sys.stdout.write("\n")
 
@@ -146,17 +146,17 @@ def process_gmt(filename, verbose=False):
                     d_tex_rest = fin.read(144)
                     print("  rest:")
                     block_fmt(d_tex_rest)
-                    
+
                 elif d_tex_type == 24 or d_tex_type == 152:
-                    d_tex_rest = fin.read(104) # fin.read(128)
+                    d_tex_rest = fin.read(104)  # fin.read(128)
                     print("  rest:")
                     block_fmt(d_tex_rest)
-                    
-                elif d_tex_type == 26: # 131096
+
+                elif d_tex_type == 26:  # 131096
                     d_tex_rest = fin.read(104)
                     print("  rest:")
                     block_fmt(d_tex_rest)
-                    
+
                 else:
                     # d_tex_rest = fin.read(255)
                     # print("    rest:", block_fmt(d_tex_rest))
@@ -169,8 +169,8 @@ def process_gmt(filename, verbose=False):
             while fin:
                 data = fin.read(4)
                 print("%08d    %8d %8d    %12d    %20.3f    %s" %
-                      (i*4, 
-                       struct.unpack("<HH", data)[0], 
+                      (i * 4,
+                       struct.unpack("<HH", data)[0],
                        struct.unpack("<HH", data)[1],
                        struct.unpack("<I", data)[0],
                        struct.unpack("<f", data)[0],
