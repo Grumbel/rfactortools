@@ -39,6 +39,7 @@ rfactorcrypt.py to check what the status of the file is and fix it.
 * .aiw: AI waypoints
 * .ani: animated flag marshals
 * .cam: camera positions
+* .car: Race07 analog to .veh
 * .cin: same as .grd in GameStockCar2013
 * .dds: DDS textures
 * .gdb: track file, contains rules, location, lighting, names, etc.
@@ -46,13 +47,13 @@ rfactorcrypt.py to check what the status of the file is and fix it.
 * .gmt: 3D models
 * .grd: pre race cutscene presentation script in Race07
 * .hat: compiled form of the .aiw file
+* .inccar: Race07 analog to .veh, gets included by .car files to share data between cars
 * .mas: zip-like archive file containing textures and 3D models
 * .scn: scene defintion file, used for tracks
 * .tdf: defines grip and track surfaces
 * .tga: textures
 * .trk: Race07 analog to .scn files
 * .veh: vehicle file
-
 
 ## How are vehicle menu graphics done in GameStockCar2013?
 
@@ -226,7 +227,7 @@ This thread contains a lot more info on how to tweak specific things about track
 * http://www.gtr3.co.uk/forum/index.php?t=msg&th=102
 * http://yoss.free.fr/rfactornfr/Modding_Tutorial_Website/overview.shtml
 
-## Cockpit camera positions seems broken (too low, too high, too shifted too left/right)?
+## Cockpit camera positions seems broken (too low, too high, shifted too left/right)?
 
 No idea, might be bugs in the original mod. GSC2013 allows you to
 adjust the seat position to fix that or if that isn't enough you can
