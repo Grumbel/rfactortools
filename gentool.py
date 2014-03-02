@@ -47,7 +47,7 @@ def find_vehdir(path):
 
 def modify_track_file(vfs, scn):
     outfile = scn + ".new"
-    with open(outfile, encoding="latin-1", errors="replace") as fout:
+    with open(outfile, "wt", encoding="latin-1", errors="replace") as fout:
         sr_parser = rfactortools.SearchReplaceScnParser(fout)
         # sr_parser.mas_files   =
         # sr_parser.search_path =
