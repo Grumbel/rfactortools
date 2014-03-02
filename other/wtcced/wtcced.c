@@ -38,6 +38,7 @@
     char *get_file(char *title, int multi);
 #else
     #include <unistd.h>
+    #include <dirent.h>
     #define stricmp     strcasecmp
     #define PATHSLASH   '/'
     #define MAKEDIR(x)  mkdir(name, 0755)

@@ -1,0 +1,4 @@
+env = Environment(CFLAGS=["-O2"], LIBS=["z"])
+env.Program("wtcced", ["blowfish.c", "wtcced.c"])
+
+# EOF #
