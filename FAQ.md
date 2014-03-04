@@ -181,6 +181,21 @@ In the `.tdf` the grip levels might need adjustments, i.e. change
 The game might complain about missing RACEGROOVE.dds or SKIDHARD.dds,
 copy those files over into the directory of the `.scn` file.
 
+## A track is complaining about missing `sky` texture
+
+Copy the unencrypted `sky00.dds`, `sky01.dds`, `sky02.dds`,
+`sky03.dds` and `sky04.dds` over to `GameData/Locations/`. Copying it
+over to the track's directory, into the same directory where the
+`.mas` files are, works too.
+
+The different sky textures are used for the different daytimes:
+
+* 00: dusk
+* 01: day
+* 02: clouds
+* 03: dawn
+* 04: night
+
 ## Part of the cockpit is cut off
 
 In the cars `.cam` file adjust the `ClipPlanes` for the `COCKPIT` camera:
