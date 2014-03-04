@@ -23,8 +23,6 @@ import sys
 import imgtool
 import rfactortools
 
-#
-
 
 def rfactor_to_gsc2013_gdb(filename, target_file):
     with open(filename, "rt", encoding="latin-1") as fin:
@@ -74,8 +72,6 @@ def rfactor_to_gsc2013_tdf(source_file, target_file):
     # TODO: insert check if additional textures are needed
     shutil.copy("gsc2013/RACEGROOVE.dds", os.path.dirname(target_file))
     shutil.copy("gsc2013/SKIDHARD.dds", os.path.dirname(target_file))
-
-#
 
 
 def rfactor_to_gsc2013(source_directory, target_directory):
