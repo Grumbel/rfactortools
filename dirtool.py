@@ -159,7 +159,7 @@ def compare_command(path1, path2):
         print("~%s" % f)
 
 
-def extract_diff_command(path1, path2, target):
+def extract_diff_command(path1, path2, target, dry_run):
     """Run a diff between path1 and path2 and move all additions to target"""
 
     if not os.path.isdir(path2):
@@ -178,7 +178,13 @@ def extract_diff_command(path1, path2, target):
 
     files = [f.filename for f in additions]
 
-    move_files(path2, target, files)
+    if dry_run:
+        for f in files:
+            source_file = os.path.join(sourcedir, f)
+            target_file = os.path.join(targetdir, f)
+            print("moving %s to %s" % (source_file, target_file))
+    else:
+        move_files(path2, target, files)
 
 
 def merge_command(source, target, dry_run, force):
@@ -253,7 +259,7 @@ if __name__ == "__main__":
     if args.COMMAND == "diff":
         compare_command(args.FILE1, args.FILE2)
     elif args.COMMAND == "extract-diff":
-        extract_diff_command(args.FILE1, args.FILE2, args.target)
+        extract_diff_command(args.FILE1, args.FILE2, args.target, args.dry_run)
     elif args.COMMAND == "merge":
         merge_command(args.FILE1, args.FILE2, args.dry_run, args.force)
     else:
