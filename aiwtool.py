@@ -16,9 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import argparse
+import PIL.Image
 
 import rfactortools
+
 
 if __name__ == "__main__":
     def size(s):
@@ -35,7 +38,10 @@ if __name__ == "__main__":
 
     aiw = rfactortools.parse_aiwfile(args.FILE)
     img = rfactortools.render_aiw(aiw, args.size[0], args.size[1])
-
     img.write_to_png(args.output)
+
+    pil_img = PIL.Image.open(args.output)
+    pil_img.save(args.output)
+
 
 # EOF #

@@ -19,6 +19,7 @@ import os
 import re
 import shutil
 import sys
+import PIL.Image
 
 import imgtool
 import rfactortools
@@ -34,6 +35,27 @@ def rfactor_to_gsc2013_gdb(filename, target_file):
                           r'Filter Properties = StockV8 \\*/',
                           line, flags=re.IGNORECASE)
             fout.write(line)
+
+
+def rfactor_to_gsc2013_aiw(source_file, target_file):
+    shutil.copy(source_file, target_file)
+
+    # generate the thumbnail if there isn't somebody already
+    rest, ext = os.path.splitext(source_file)
+    trest, text = os.path.splitext(target_file)
+    source_mini_file = os.path.join(rest + "mini.tga")
+    target_mini_file = os.path.join(trest + "mini.tga")
+
+    print("generating track thumbnail: %s" % target_mini_file)
+    if not rfactortools.lookup_path_icase(source_mini_file):
+        aiw = rfactortools.parse_aiwfile(source_file)
+        img = rfactortools.render_aiw(aiw, 252, 249)
+
+        # TODO: img.get_data() is not implemented in pycairo, thus we save
+        # to .png, load it and save as .tga again
+        img.write_to_png(target_mini_file)
+        pil_img = PIL.Image.open(target_mini_file)
+        pil_img.save(target_mini_file)
 
 
 def rfactor_to_gsc2013_veh(filename, target_file):
@@ -115,6 +137,8 @@ def rfactor_to_gsc2013(source_directory, target_directory):
                 rfactor_to_gsc2013_gdb(source_file, target_file)
             elif ext == ".veh":
                 rfactor_to_gsc2013_veh(source_file, target_file)
+            elif ext == ".aiw":
+                rfactor_to_gsc2013_aiw(source_file, target_file)
             elif ext == ".gmt":
                 rfactor_to_gsc2013_gmt(source_file, target_file)
             elif ext == ".tdf":
@@ -128,3 +152,5 @@ def rfactor_to_gsc2013(source_directory, target_directory):
                 shutil.copy(source_file, target_file)
 
     imgtool.process_directory(target_directory)
+
+# EOF #
