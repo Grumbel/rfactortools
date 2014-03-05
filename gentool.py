@@ -45,8 +45,6 @@ def find_vehdir(path):
     else:
         raise Exception("couldn't locate <VEHDIR> in %s" % path)
 
-# Editing ###################################################################
-
 
 def modify_track_file(vfs, scn):
     outfile = scn + ".new"
@@ -64,8 +62,6 @@ def modify_vehicle_file(vfs, gen, search_path, mas_files, vehdir, teamdir):
         sr_parser.mas_files = mas_files
         sr_parser.search_path = search_path
         rfactortools.process_scnfile(vfs, gen, sr_parser)
-
-#
 
 
 def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
@@ -95,8 +91,6 @@ def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
             errors.append("error: couldn't locate %s" % mas)
 
     return errors
-
-#
 
 
 def process_gdb_file(vfs, gdb, fix, errors):
@@ -192,6 +186,7 @@ def process_directory(directory, fix):
     else:
         print("No errors")
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor .veh/.gen processor')
     parser.add_argument('DIRECTORY', action='store', type=str,
@@ -207,5 +202,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     process_directory(args.DIRECTORY, args.fix)
+
 
 # EOF #

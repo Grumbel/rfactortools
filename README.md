@@ -10,6 +10,10 @@ common problems.
 These tools are written and tested in Linux only at this point, they
 might not work in Windows. They require `python3` and `python3-pil`.
 
+## Requirements
+
+Python3, Pillow, Cairo
+
 ## Tools
 
 ### `rfactor-to-gsc2013.py`
