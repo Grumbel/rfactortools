@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import os
 import argparse
 import hashlib
@@ -51,12 +52,15 @@ def get_directory_list(files):
     return sorted(list(set(chain.from_iterable([get_hierachy(f) for f in files]))))
 
 
-def move_files(sourcedir, targetdir, files):
+def move_files(sourcedir, targetdir, files, ignore_case):
     """
     Moves files from sourcedir to targetdir while preserving their path structure, similar to 'rsync -R'
     """
 
     print("move_files(%s, %s, ...)" % (sourcedir, targetdir))
+
+    # TODO: implement this
+    assert not args.ignore_case, "--ignore-case is not implemented for extract-diff"
 
     assert os.path.isdir(sourcedir)
     assert not os.path.exists(targetdir) or os.path.isdir(targetdir)
@@ -132,9 +136,13 @@ def fileinfo_from_directory(directory):
     return lst
 
 
-def compare_directories(finfo1, finfo2):
-    finfo1_set = set(finfo1)
-    finfo2_set = set(finfo2)
+def compare_directories(finfo1, finfo2, ignore_case=False):
+    if ignore_case:
+        finfo1_set = set([FileInfo(f.md5sum, f.filename.lower()) for f in finfo1])
+        finfo2_set = set([FileInfo(f.md5sum, f.filename.lower()) for f in finfo2])
+    else:
+        finfo1_set = set(finfo1)
+        finfo2_set = set(finfo2)
 
     return (
         sorted(finfo1_set.difference(finfo2_set)),  # removals
@@ -143,11 +151,11 @@ def compare_directories(finfo1, finfo2):
     )
 
 
-def compare_command(path1, path2):
+def compare_command(path1, path2, ignore_case):
     finfo1 = fileinfo_from_path(path1)
     finfo2 = fileinfo_from_path(path2)
 
-    removals, additions, changes = compare_directories(finfo1, finfo2)
+    removals, additions, changes = compare_directories(finfo1, finfo2, ignore_case)
 
     for f in removals:
         print("-%s" % f)
@@ -159,7 +167,7 @@ def compare_command(path1, path2):
         print("~%s" % f)
 
 
-def extract_diff_command(path1, path2, target, dry_run):
+def extract_diff_command(path1, path2, target, dry_run, ignore_case):
     """Run a diff between path1 and path2 and move all additions to target"""
 
     if not os.path.isdir(path2):
@@ -171,7 +179,7 @@ def extract_diff_command(path1, path2, target, dry_run):
     finfo1 = fileinfo_from_path(path1)
     finfo2 = fileinfo_from_path(path2)
 
-    removals, additions, changes = compare_directories(finfo1, finfo2)
+    removals, additions, changes = compare_directories(finfo1, finfo2, ignore_case)
 
     for fname in additions:
         print(fname)
@@ -184,7 +192,7 @@ def extract_diff_command(path1, path2, target, dry_run):
             target_file = os.path.join(targetdir, f)
             print("moving %s to %s" % (source_file, target_file))
     else:
-        move_files(path2, target, files)
+        move_files(path2, target, files, ignore_case)
 
 
 def merge_command(source, target, dry_run, force):
@@ -238,6 +246,7 @@ def merge_command(source, target, dry_run, force):
     if not dry_run:
         os.rmdir(source)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='dirtool')
     parser.add_argument('COMMAND', action='store', type=str,
@@ -254,12 +263,14 @@ if __name__ == "__main__":
                         help="Overwrite files in target directory")
     parser.add_argument('-n', '--dry-run', action='store_true',
                         help="don't act, just show actions")
+    parser.add_argument('-i', '--ignore-case', action='store_true',
+                        help="ignore case differences in filenames")
     args = parser.parse_args()
 
     if args.COMMAND == "diff":
-        compare_command(args.FILE1, args.FILE2)
+        compare_command(args.FILE1, args.FILE2, args.ignore_case)
     elif args.COMMAND == "extract-diff":
-        extract_diff_command(args.FILE1, args.FILE2, args.target, args.dry_run)
+        extract_diff_command(args.FILE1, args.FILE2, args.target, args.dry_run, args.ignore_case)
     elif args.COMMAND == "merge":
         merge_command(args.FILE1, args.FILE2, args.dry_run, args.force)
     else:
