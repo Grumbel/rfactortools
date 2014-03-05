@@ -25,132 +25,140 @@ import imgtool
 import rfactortools
 
 
-def rfactor_to_gsc2013_gdb(filename, target_file):
-    with open(filename, "rt", encoding="latin-1") as fin:
-        lines = fin.readlines()
+class rFactorToGSC2013:
+    """
+    Converter for rFactor vehicles and tracks to Game Stock Car 2013
+    """
 
-    with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
-        for line in lines:
-            line = re.sub(r'Filter Properties *=.*',
-                          r'Filter Properties = StockV8 \\*/',
-                          line, flags=re.IGNORECASE)
-            fout.write(line)
+    def __init__(self, source_directory):
+        self.source_directory = source_directory
 
+        # gather files and directories
+        self.dir_tree = []
+        self.files_by_type = defaultdict(list)
 
-def rfactor_to_gsc2013_aiw(source_file, target_file):
-    shutil.copy(source_file, target_file)
+        for path, dirs, files in os.walk(self.source_directory):
+            relpath = os.path.relpath(path, self.source_directory)
 
-    # generate the thumbnail if there isn't somebody already
-    rest, ext = os.path.splitext(source_file)
-    trest, text = os.path.splitext(target_file)
-    source_mini_file = os.path.join(rest + "mini.tga")
-    target_mini_file = os.path.join(trest + "mini.tga")
+            for d in dirs:
+                self.dir_tree.append(os.path.normpath(os.path.join(relpath, d)))
 
-    print("generating track thumbnail: %s" % target_mini_file)
-    if not rfactortools.lookup_path_icase(source_mini_file):
-        aiw = rfactortools.parse_aiwfile(source_file)
-        img = rfactortools.render_aiw(aiw, 252, 249)
+            for fname in files:
+                filename = os.path.normpath(os.path.join(relpath, fname))
 
-        # TODO: img.get_data() is not implemented in pycairo, thus we save
-        # to .png, load it and save as .tga again
-        img.write_to_png(target_mini_file)
-        pil_img = PIL.Image.open(target_mini_file)
-        pil_img.save(target_mini_file)
+                ext = os.path.splitext(filename)[1].lower()
+                self.files_by_type[ext].append(filename)
 
+        self.dir_tree.sort()
 
-def rfactor_to_gsc2013_veh(filename, target_file):
-    with open(filename, "rt", encoding="latin-1") as fin:
-        lines = fin.readlines()
+    def convert_gdb(self, filename, target_file):
+        with open(filename, "rt", encoding="latin-1") as fin:
+            lines = fin.readlines()
 
-    with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
-        for line in lines:
-            line = re.sub(r'Classes="',
-                          r'Classes="reiza5, ',
-                          line, flags=re.IGNORECASE)
-            fout.write(line)
+        with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
+            for line in lines:
+                line = re.sub(r'Filter Properties *=.*',
+                              r'Filter Properties = StockV8 \\*/',
+                              line, flags=re.IGNORECASE)
+                fout.write(line)
 
+    def convert_aiw(self, source_file, target_file):
+        shutil.copy(source_file, target_file)
 
-def rfactor_to_gsc2013_gmt(filename, target_file):
-    rfactortools.encrypt_file(filename, target_file)
+        # generate the thumbnail if there isn't somebody already
+        rest, ext = os.path.splitext(source_file)
+        trest, text = os.path.splitext(target_file)
+        source_mini_file = os.path.join(rest + "mini.tga")
+        target_mini_file = os.path.join(trest + "mini.tga")
 
+        print("generating track thumbnail: %s" % target_mini_file)
+        if not rfactortools.lookup_path_icase(source_mini_file):
+            aiw = rfactortools.parse_aiwfile(source_file)
+            img = rfactortools.render_aiw(aiw, 252, 249)
 
-def rfactor_to_gsc2013_mas(filename, target_file):
-    print("mas unpacking %s" % filename)
-    mas_content = rfactortools.mas_unpack_to_data(filename)
+            # TODO: img.get_data() is not implemented in pycairo, thus we save
+            # to .png, load it and save as .tga again
+            img.write_to_png(target_mini_file)
+            pil_img = PIL.Image.open(target_mini_file)
+            pil_img.save(target_mini_file)
 
-    print("encrypting files")
-    encrypted_mas_content = []
-    for i, (name, data) in enumerate(mas_content):
-        print("processing %d/%d: %s" % (i, len(mas_content), name))
-        encrypted_data = rfactortools.encrypt_data(data, 1, 0x4b1dca9f960524e8, rfactortools.get_skip(name))
-        encrypted_mas_content.append((name, encrypted_data))
+    def convert_veh(self, source_file, target_file):
+        with open(source_file, "rt", encoding="latin-1") as fin:
+            lines = fin.readlines()
 
-    rfactortools.mas_pack_from_data(encrypted_mas_content, target_file)
+        with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
+            for line in lines:
+                line = re.sub(r'Classes="',
+                              r'Classes="reiza5, ',
+                              line, flags=re.IGNORECASE)
+                fout.write(line)
 
+    def convert_gmt(self, source_file, target_file):
+        rfactortools.encrypt_file(source_file, target_file)
 
-def rfactor_to_gsc2013_tdf(source_file, target_file):
-    shutil.copy(source_file, target_file)
+    def convert_mas(self, source_file, target_file):
+        print("mas unpacking %s" % source_file)
+        mas_content = rfactortools.mas_unpack_to_data(source_file)
 
-    # TODO: insert check if additional textures are needed
-    shutil.copy("gsc2013/RACEGROOVE.dds", os.path.dirname(target_file))
-    shutil.copy("gsc2013/SKIDHARD.dds", os.path.dirname(target_file))
+        print("encrypting files")
+        encrypted_mas_content = []
+        for i, (name, data) in enumerate(mas_content):
+            print("processing %d/%d: %s" % (i, len(mas_content), name))
+            encrypted_data = rfactortools.encrypt_data(data, 1, 0x4b1dca9f960524e8, rfactortools.get_skip(name))
+            encrypted_mas_content.append((name, encrypted_data))
+
+        rfactortools.mas_pack_from_data(encrypted_mas_content, target_file)
+
+    def convert_tdf(self, source_file, target_file):
+        shutil.copy(source_file, target_file)
+
+        # TODO: insert check if additional textures are needed
+        shutil.copy("gsc2013/RACEGROOVE.dds", os.path.dirname(target_file))
+        shutil.copy("gsc2013/SKIDHARD.dds", os.path.dirname(target_file))
+
+    def convert_all(self, target_directory):
+        print("Converting %s to %s" % (self.source_directory, target_directory))
+
+        # create target directory hierachy
+        if not os.path.isdir(target_directory):
+            os.makedirs(os.path.normpath(target_directory))
+        for d in self.dir_tree:
+            t = os.path.join(target_directory, d)
+            print("creating %s" % t)
+            if not os.path.isdir(t):
+                os.mkdir(t)
+
+        # convert and copy files
+        for ext, files in self.files_by_type.items():
+            for i, filename in enumerate(files):
+                source_file = os.path.join(self.source_directory, filename)
+                target_file = os.path.join(target_directory, filename)
+
+                print("Processing '%s' file %d/%d: %s" % (ext, i + 1, len(files), filename))
+                if ext == ".gdb":
+                    self.convert_gdb(source_file, target_file)
+                elif ext == ".veh":
+                    self.convert_veh(source_file, target_file)
+                elif ext == ".aiw":
+                    self.convert_aiw(source_file, target_file)
+                elif ext == ".gmt":
+                    self.convert_gmt(source_file, target_file)
+                elif ext == ".tdf":
+                    self.convert_tdf(source_file, target_file)
+                elif ext == ".mas":
+                    if filename.lower() == "shared/coreshader.mas":
+                        pass
+                    else:
+                        self.convert_mas(source_file, target_file)
+                else:
+                    shutil.copy(source_file, target_file)
+
+        imgtool.process_directory(target_directory)
 
 
 def rfactor_to_gsc2013(source_directory, target_directory):
-    print("Converting %s to %s" % (source_directory, target_directory))
+    converter = rFactorToGSC2013(source_directory)
+    converter.convert_all(target_directory)
 
-    # gather files and directories
-    dir_tree = []
-    files_by_type = defaultdict(list)
-
-    for path, dirs, files in os.walk(source_directory):
-        relpath = os.path.relpath(path, source_directory)
-
-        for d in dirs:
-            dir_tree.append(os.path.normpath(os.path.join(relpath, d)))
-
-        for fname in files:
-            filename = os.path.normpath(os.path.join(relpath, fname))
-
-            ext = os.path.splitext(filename)[1].lower()
-            files_by_type[ext].append(filename)
-
-    dir_tree.sort()
-
-    # create target directory hierachy
-    if not os.path.isdir(target_directory):
-        os.makedirs(os.path.normpath(target_directory))
-    for d in dir_tree:
-        t = os.path.join(target_directory, d)
-        print("creating %s" % t)
-        if not os.path.isdir(t):
-            os.mkdir(t)
-
-    # convert and copy files
-    for ext, files in files_by_type.items():
-        for i, filename in enumerate(files):
-            source_file = os.path.join(source_directory, filename)
-            target_file = os.path.join(target_directory, filename)
-
-            print("Processing '%s' file %d/%d: %s" % (ext, i + 1, len(files), filename))
-            if ext == ".gdb":
-                rfactor_to_gsc2013_gdb(source_file, target_file)
-            elif ext == ".veh":
-                rfactor_to_gsc2013_veh(source_file, target_file)
-            elif ext == ".aiw":
-                rfactor_to_gsc2013_aiw(source_file, target_file)
-            elif ext == ".gmt":
-                rfactor_to_gsc2013_gmt(source_file, target_file)
-            elif ext == ".tdf":
-                rfactor_to_gsc2013_tdf(source_file, target_file)
-            elif ext == ".mas":
-                if filename.lower() == "shared/coreshader.mas":
-                    pass
-                else:
-                    rfactor_to_gsc2013_mas(source_file, target_file)
-            else:
-                shutil.copy(source_file, target_file)
-
-    imgtool.process_directory(target_directory)
 
 # EOF #
