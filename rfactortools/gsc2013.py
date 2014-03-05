@@ -20,6 +20,7 @@ import re
 import shutil
 import sys
 import PIL.Image
+import random
 
 import imgtool
 import rfactortools
@@ -32,6 +33,11 @@ class rFactorToGSC2013:
 
     def __init__(self, source_directory):
         self.source_directory = source_directory
+
+        # TODO: scan the directory for a usable modname, not all
+        # tracks and vehicles have one which makes this tricky, random
+        # string will be enough for the moment to avoid conflicts
+        self.mod_name = "RandomModName%0d" % random.randint(0, 2**32-1)
 
         # gather files and directories
         self.dir_tree = []
@@ -86,11 +92,24 @@ class rFactorToGSC2013:
         with open(source_file, "rt", encoding="latin-1") as fin:
             lines = fin.readlines()
 
+        team_suffix = " %s" % self.mod_name
         with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
             for line in lines:
-                line = re.sub(r'Classes="',
+                # reiza5 (Mini Challenge) is needed for the cars to
+                # show up in the car list
+                line = re.sub(r'^Classes="',
                               r'Classes="reiza5, ',
                               line, flags=re.IGNORECASE)
+
+                # Adding a suffix to Team is needed as conflicts in
+                # Team names lead to cars getting sorted into the
+                # wrong hierachy (e.g. a F1 car would show up in the
+                # wrong year of F1, as multiple F1 years share the
+                # same team names)
+                line = re.sub(r'^Team="([^"]*)"',
+                              r'Team="\1%s"' % team_suffix,
+                              line, flags=re.IGNORECASE)
+
                 fout.write(line)
 
     def convert_gmt(self, source_file, target_file):
