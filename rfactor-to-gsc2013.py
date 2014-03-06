@@ -26,16 +26,28 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor to GSC2013 converter')
     parser.add_argument('DIRECTORY', action='store', type=str, nargs='+',
                         help='directory containing the mod')
-    parser.add_argument('-o', '--output', metavar='DIR', type=str, required=True,
+    parser.add_argument('-o', '--output', metavar='DIR', type=str,
                         help="output directory")
+    parser.add_argument('-i', '--info', action='store_true', default=False,
+                        help="show info on the mod")
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help="be more verbose")
     args = parser.parse_args()
 
-    for directory in args.DIRECTORY:
-        rfactortools.rfactor_to_gsc2013(directory, args.output)
+    target_directory = args.output
 
-    print("-- rfactor-to-gsc2013 conversion complete --")
+    if args.info:
+        for source_directory in args.DIRECTORY:
+            converter = rfactortools.rFactorToGSC2013(source_directory)
+            converter.print_info()
+    else:
+        if not target_directory:
+            raise Exception("--output DIR must be set")
+        else:
+            for source_directory in args.DIRECTORY:
+                converter = rfactortools.rFactorToGSC2013(source_directory)
+                converter.convert_all(target_directory)
+                print("-- rfactor-to-gsc2013 conversion complete --")
 
 
 # EOF #

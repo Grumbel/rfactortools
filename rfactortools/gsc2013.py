@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 from collections import defaultdict
 import os
 import re
@@ -21,6 +22,7 @@ import shutil
 import sys
 import PIL.Image
 import random
+import pathlib
 
 import imgtool
 import rfactortools
@@ -32,7 +34,7 @@ class rFactorToGSC2013:
     """
 
     def __init__(self, source_directory):
-        self.source_directory = source_directory
+        self.source_directory = os.path.normpath(source_directory)
 
         # TODO: scan the directory for a usable modname, not all
         # tracks and vehicles have one which makes this tricky, random
@@ -56,6 +58,33 @@ class rFactorToGSC2013:
                 self.files_by_type[ext].append(filename)
 
         self.dir_tree.sort()
+
+        self._find_gamedata_directory()
+
+    def _find_gamedata_directory(self):
+        self.gamedata = []
+        basedir = os.path.basename(self.source_directory)
+        if basedir.lower() == "gamedata":
+            self.gamedata.append(self.source_directory)
+        else:
+            for d in self.dir_tree:
+                tail, head = os.path.split(d)
+                if head.lower() == "gamedata":
+                    self.gamedata.append(d)
+                elif head.lower() == "vehicles" or head.lower() == "locations":
+                    self.gamedata.append(tail)
+
+        # remove duplicate directories
+        self.gamedata = list(set(self.gamedata))        
+
+    def print_info(self):
+        vehicle_count = len(self.files_by_type['.veh'])
+        track_count = len(self.files_by_type['.gdb'])
+        print("Vehicles: %d" % vehicle_count)
+        print("  Tracks: %d" % track_count)
+
+        for d in self.gamedata:
+            print("GameData: \"%s\"" % d)
 
     def convert_gdb(self, filename, target_file):
         with open(filename, "rt", encoding="latin-1") as fin:
@@ -136,6 +165,7 @@ class rFactorToGSC2013:
         shutil.copy("gsc2013/SKIDHARD.dds", os.path.dirname(target_file))
 
     def convert_all(self, target_directory):
+        target_directory = os.path.normpath(target_directory)
         print("Converting %s to %s" % (self.source_directory, target_directory))
 
         # create target directory hierachy
@@ -173,11 +203,6 @@ class rFactorToGSC2013:
                     shutil.copy(source_file, target_file)
 
         imgtool.process_directory(target_directory)
-
-
-def rfactor_to_gsc2013(source_directory, target_directory):
-    converter = rFactorToGSC2013(source_directory)
-    converter.convert_all(target_directory)
 
 
 # EOF #
