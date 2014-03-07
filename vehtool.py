@@ -38,13 +38,13 @@ def print_tree_rec(tree, indent=""):
     for i, (k, v) in enumerate(sorted(tree.items())):
         if indent == "":
             sym = ""
-            symc = " ⋅ "
+            symc = " - "
         elif i < len(tree) - 1:
-            sym = "├ "
-            symc = "│ ⋅ "
+            sym = "+ "
+            symc = "| - "
         else:
-            sym = "└ "
-            symc = "  ⋅ "
+            sym = "+ "
+            symc = "  - "
 
         print("%s%s[%s]" % (indent, sym, k))
         for e in v.content:

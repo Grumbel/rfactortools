@@ -42,13 +42,13 @@ def minised_on_lines(lines, pattern, replacement, ignore_case):
             if replacement:
                 expanded = m.expand(replacement)
 
-                print("- %s%s%s%s%s" % (left, "→{", middle, "}←", right))
-                print("+ %s%s%s%s%s" % (left, "→{", expanded, "}←", right))
+                print("- %s%s%s%s%s" % (left, "{{{", middle, "}}}", right))
+                print("+ %s%s%s%s%s" % (left, "{{{", expanded, "}}}", right))
                 print()
 
                 result.append(left + expanded + right)
             else:
-                print("%s%s%s%s%s" % (left, "→{", middle, "}←", right))
+                print("%s%s%s%s%s" % (left, "{{{", middle, "}}}", right))
                 result.append(line)
         else:
             result.append(line)
