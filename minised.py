@@ -16,12 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import argparse
-import sys
+import fnmatch
+import os
 import re
+import sys
 
 
-def minised(lines, pattern, replacement, ignore_case):
+def minised_on_lines(lines, pattern, replacement, ignore_case):
     result = []
 
     flags = 0
@@ -36,19 +39,44 @@ def minised(lines, pattern, replacement, ignore_case):
             right = line[m.span()[1]:]
             middle = line[m.span()[0]:m.span()[1]]
 
-            replacement = m.expand(args.replace)
+            if replacement:
+                expanded = m.expand(replacement)
 
-            print("- %s%s%s%s%s" % (left, "→{", middle, "}←", right))
-            print("+ %s%s%s%s%s" % (left, "→{", replacement, "}←", right))
-            print()
+                print("- %s%s%s%s%s" % (left, "→{", middle, "}←", right))
+                print("+ %s%s%s%s%s" % (left, "→{", expanded, "}←", right))
+                print()
 
-            result.append(left + replacement + right)
+                result.append(left + expanded + right)
+            else:
+                print("%s%s%s%s%s" % (left, "→{", middle, "}←", right))
+                result.append(line)
         else:
             result.append(line)
 
     return result
 
-if __name__ == "__main__":
+
+def minised_on_file(filename, outfile, pattern, replace, ignore_case, dry_run):
+    if filename:
+        with open(filename, 'rt', encoding='latin-1') as fin:
+            lines = fin.read().splitlines()
+    else:
+        lines = sys.stdin.read().splitlines()
+
+    output = minised_on_lines(lines, pattern, replace, ignore_case)
+
+    if not dry_run:
+        if outfile:
+            with open(outfile, 'wt', newline='\r\n', encoding='latin-1', errors="replace") as fout:
+                for line in output:
+                    fout.write(line)
+                    fout.write("\n")
+        else:
+            for line in output:
+                print(line)
+
+
+def main():
     parser = argparse.ArgumentParser(description="A minimal sed-like tool")
     parser.add_argument('FILE', action='store', nargs='?',
                         help="files to process")
@@ -61,36 +89,53 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--pattern", metavar="PAT", type=str, required=True,
                         help="the search pattern expression")
     parser.add_argument("-r", "--replace", metavar="REPL", type=str,
-                        help="the replacement  expression")
+                        help="the replacement  expression, if not given just print the match")
+    parser.add_argument("-R", "--recursive", metavar="GLOB", type=str,
+                        help="interprets the FILE argument as perform replacement in all files matching GLOB")
     parser.add_argument("-I", "--ignore-case", action='store_true', default=False,
                         help="ignore case")
     parser.add_argument("-v", "--verbose", action='store_true', default=False,
                         help="display the replacements are performed")
     args = parser.parse_args()
 
-    if args.FILE:
-        with open(args.FILE, 'rt', encoding='latin-1') as fin:
-            lines = fin.read().splitlines()
+    if args.replace is None:
+        dry_run = True
     else:
-        lines = sys.stdin.read().splitlines()
+        dry_run = args.dry_run
 
-    output = minised(lines, args.pattern, args.replace, args.ignore_case)
-
-    if not args.dry_run:
+    if args.recursive is not None:
         if args.output:
-            outfile = args.output
+            raise Exception("can't use --output and recursive together")
+
+        for path, dirs, files in os.walk(args.FILE):
+            for fname in files:
+                filename = os.path.join(path, fname)
+
+                if args.in_place:
+                    outfile = filename
+                else:
+                    outfile = None
+
+                if fnmatch.fnmatch(fname, args.recursive):
+                    print("%s:" % filename)
+                    minised_on_file(filename, outfile, args.pattern, args.replace, args.ignore_case, dry_run)
+
+    else:
+        if args.output:
+            if args.recursive:
+                raise Exception("can't use --output and recursive together")
+            else:
+                outfile = args.output
         elif args.in_place:
             outfile = args.FILE
         else:
             outfile = None
 
-        if outfile:
-            with open(outfile, 'wt', newline='\r\n', encoding='latin-1', errors="replace") as fout:
-                for line in output:
-                    fout.write(line)
-                    fout.write("\n")
-        else:
-            for line in output:
-                print(line)
+        minised_on_file(args.FILE, outfile, args.pattern, args.replace, args.ignore_case, dry_run)
+
+
+if __name__ == "__main__":
+    main()
+
 
 # EOF #
