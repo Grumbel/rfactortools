@@ -48,7 +48,8 @@ def print_tree_rec(tree, indent=""):
 
         print("%s%s[%s]" % (indent, sym, k))
         for e in v.content:
-            print("%s%s%-30s %-30s %s" % (indent, symc, e.driver, e.team, e.filename))
+            #print("%s%s%-30s %-30s %s" % (indent, symc, e.driver, e.team, e.filename))
+            print("%s%s%-30s %-30s" % (indent, symc, e.driver, e.team))
         print_tree_rec(v, indent + "  ")
 
 
