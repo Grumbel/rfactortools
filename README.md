@@ -7,12 +7,15 @@ Conversion is at this point not 100% automatic for all mods, but it
 will get you most of the way. The file `FAQ.md` provides solutions for
 common problems.
 
-These tools are written and tested in Linux only at this point, they
-might not work in Windows. They require `python3` and `python3-pil`.
+These tools are written and tested in Linux only at this point.
 
 ## Requirements
 
-Python3, Pillow, Cairo
+* Python3 (`python3`)
+* Pillow (`python3-pil`)
+* Cairo (`python3-cairo`)
+
+Name of the Ubuntu package is in parenthesis.
 
 ## Tools
 
@@ -31,6 +34,16 @@ Allows you to pack files into a `.mas` file.
 ### `imgtool.py`
 
 Allows you to rescale overlarge menu graphics to fit properly into GameStockCar2013.
+
+### `gentool.py`
+
+Allows you to inspect `.gen` and `.scn` files and quickly see if
+something wrong with the `.mas` files or the `SearchPath`.
+
+### `vehtool.py`
+
+Allows you to inspect `.veh` files and verify that `Category`, `Team`
+and `Classes` are set properly.
 
 ### `rfactorcrypt.py`
 
@@ -65,15 +78,10 @@ extracted as usual.
 
 Second step is running:
 
-    ./rfactor-to-gsc2013.py .../GameData/
+    ./rfactor-to-gsc2013.py .../GameData/ -o gsc/GameData
 
-This will *destructivly* convert the `GameData/` directory into
-GSC2013 format, `.mas` files will be overwritten with encrypted
-versions.
-
-Third step is:
-
-    ./imgtool.py .../GameData/
+This will convert the `GameData/` from the mod and save the results in
+`gsc/GameData`.
 
 This will rescale all the overlarge menu graphics so that they fit
 properly into GameStockCar2013.
