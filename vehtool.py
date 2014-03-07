@@ -16,16 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import argparse
 import os
 
 from collections import defaultdict
 import rfactortools
-
-
-def process_vehfile(filename):
-    veh = rfactortools.parse_vehfile(filename)
-    return veh
 
 
 class Tree(defaultdict):
@@ -66,6 +62,7 @@ def print_tree(vehs):
 
     print_tree_rec(tree)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor .veh/.gen processor')
     parser.add_argument('FILE', action='store', type=str, nargs='+',
@@ -81,7 +78,7 @@ if __name__ == "__main__":
         else:
             files.append(path)
 
-    vehs = [process_vehfile(filename) for filename in files]
+    vehs = [rfactortools.parse_vehfile(filename) for filename in files]
 
     if args.tree:
         print_tree(vehs)
@@ -93,5 +90,6 @@ if __name__ == "__main__":
             print("category:", veh.category)
             print("    team:", veh.team)
             print()
+
 
 # EOF #
