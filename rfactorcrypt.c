@@ -349,7 +349,8 @@ static struct PyModuleDef moduledef = {
   NULL  // free
 };
 
-void PyInit_rfactorcrypt(void)
+PyMODINIT_FUNC
+PyInit_rfactorcrypt(void)
 {
   PyModule_Create(&moduledef);
 }
