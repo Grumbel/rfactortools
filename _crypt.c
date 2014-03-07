@@ -350,9 +350,9 @@ static struct PyModuleDef moduledef = {
 };
 
 PyMODINIT_FUNC
-PyInit_rfactorcrypt(void)
+PyInit__crypt(void)
 {
-  PyModule_Create(&moduledef);
+  return PyModule_Create(&moduledef);
 }
 
 /* EOF */

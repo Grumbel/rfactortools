@@ -17,7 +17,7 @@
 import struct
 import os
 
-import rfactorcrypt
+import rfactortools._crypt
 
 games = \
     {
@@ -34,13 +34,13 @@ games = \
 
 def encrypt_data(data, key, sign, skip):
     data = decrypt_data(data, skip)
-    return rfactorcrypt.encrypt(data, key, sign, skip)
+    return rfactortools._crypt.encrypt(data, key, sign, skip)
 
 
 def decrypt_data(data, skip):
     sign, key = crypt_info(data)
     while games.get(sign):
-        data = rfactorcrypt.decrypt(data, skip)
+        data = rfactortools._crypt.decrypt(data, skip)
         sign, key = crypt_info(data)
     return data
 

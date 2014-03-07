@@ -5,6 +5,6 @@ py_env = Environment(SHLIBPREFIX = '',
                      CCFLAGS=['-Wall', '-Werror', '-std=c99', '-O3', '-g'])
 
 py_env.ParseConfig("python3-config --cflags --ldflags | sed 's/-Werror=declaration-after-statement//'")
-py_env.SharedLibrary('rfactorcrypt', ['rfactorcrypt.c'])
+py_env.SharedLibrary('rfactortools/_crypt', ['_crypt.c'])
 
 # EOF #
