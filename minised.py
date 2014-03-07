@@ -116,7 +116,7 @@ def main():
                 else:
                     outfile = None
 
-                if fnmatch.fnmatch(fname, args.recursive):
+                if fnmatch.fnmatch(fname.lower(), args.recursive.lower()):
                     print("%s:" % filename)
                     minised_on_file(filename, outfile, args.pattern, args.replace, args.ignore_case, dry_run)
 
