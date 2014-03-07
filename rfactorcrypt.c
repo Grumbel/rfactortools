@@ -144,6 +144,22 @@ static u64 isi_key(int enctype, u64 key)
   return isi_keyz(enctype, key, 0, 0);
 }
 
+static inline u64 isi_crypt2(int enctype, int pos, u64 key)
+{
+  static const u8 table0[8] = { 0x00, 0x28, 0x18, 0x08, 0x20, 0x38, 0x10, 0x30 };
+  static const u8 table1[8] = { 0x38, 0x20, 0x30, 0x10, 0x28, 0x00, 0x08, 0x18 };
+  u64     t = 0;
+
+  switch(enctype) {
+    case 0: t = table0[pos & 7];    break;
+    case 1: t = table1[key & 7];    break;
+    default: {
+      assert(!"unsupported enctype");
+    }
+  }
+  return((((u64)0x000000ff000000ffLL << t) & key) >> t);
+}
+
 static void isi_crypt(int enctype, u8* output, const u8* input, int len, u64 key, int encrypt)
 {
   u64 t = 0;
@@ -186,22 +202,6 @@ static void isi_crypt(int enctype, u8* output, const u8* input, int len, u64 key
       x++;
     }
   }
-}
-
-static inline u64 isi_crypt2(int enctype, int pos, u64 key)
-{
-  static const u8 table0[8] = { 0x00, 0x28, 0x18, 0x08, 0x20, 0x38, 0x10, 0x30 };
-  static const u8 table1[8] = { 0x38, 0x20, 0x30, 0x10, 0x28, 0x00, 0x08, 0x18 };
-  u64     t = 0;
-
-  switch(enctype) {
-    case 0: t = table0[pos & 7];    break;
-    case 1: t = table1[key & 7];    break;
-    default: {
-      assert(!"unsupported enctype");
-    }
-  }
-  return((((u64)0x000000ff000000ffLL << t) & key) >> t);
 }
 
 static PyObject*
