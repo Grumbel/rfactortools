@@ -38,10 +38,8 @@ if __name__ == "__main__":
 
     aiw = rfactortools.parse_aiwfile(args.FILE)
     img = rfactortools.render_aiw(aiw, args.size[0], args.size[1])
-    img.write_to_png(args.output)
 
-    pil_img = PIL.Image.open(args.output)
-    pil_img.save(args.output)
+    img.save(args.output)
 
 
 # EOF #

@@ -22,7 +22,6 @@ import shutil
 import sys
 import PIL.Image
 import random
-import pathlib
 
 import imgtool
 import rfactortools
@@ -41,7 +40,7 @@ class rFactorToGSC2013:
         # string will be enough for the moment to avoid conflicts
         self.mod_name = "RandomModName%0d" % random.randint(0, 2**32-1)
 
-        # gather files and directories
+        # gather files and directories, dir_tree is relative to source_directory
         self.dir_tree = []
         self.files_by_type = defaultdict(list)
 
@@ -110,12 +109,7 @@ class rFactorToGSC2013:
         if not rfactortools.lookup_path_icase(source_mini_file):
             aiw = rfactortools.parse_aiwfile(source_file)
             img = rfactortools.render_aiw(aiw, 252, 249)
-
-            # TODO: img.get_data() is not implemented in pycairo, thus we save
-            # to .png, load it and save as .tga again
-            img.write_to_png(target_mini_file)
-            pil_img = PIL.Image.open(target_mini_file)
-            pil_img.save(target_mini_file)
+            img.save(target_mini_file)
 
     def convert_veh(self, source_file, target_file):
         with open(source_file, "rt", encoding="latin-1") as fin:
