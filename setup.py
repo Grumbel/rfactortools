@@ -33,11 +33,11 @@ setup(name='rfactortools',
                'minised.py',
                'rfactorcrypt.py',
                'rfactor-to-gsc2013.py',
-               'rfactortools-gui.py',
+               'rfactortools-gui.pyw',
                'vehtool.py'],
       packages=['rfactortools'],
-      ext_modules=[Extension('rfactortools._crypt', ['_crypt.c'],
-                             extra_compile_args=['-std=c99'] )],
+      ext_modules=[Extension('rfactortools._crypt', ['rfactortools_crypt.cpp'],
+                             extra_compile_args=[] )],
       requires=['PIL', 'pathlib'])
 
 

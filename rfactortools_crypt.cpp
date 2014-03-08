@@ -59,7 +59,7 @@ static GameSignature game_signatures[] =
 
 static const GameSignature* isi_game_from_sign(u64 sign)
 {
-  for(int i = 0; i < sizeof(game_signatures)/sizeof(GameSignature); ++i)
+  for(unsigned int i = 0; i < sizeof(game_signatures)/sizeof(GameSignature); ++i)
   {
     if (game_signatures[i].key == sign)
     {
@@ -180,7 +180,7 @@ static void isi_crypt(int enctype, u8* output, const u8* input, int len, u64 key
   }
 
   n = len % blocksz;
-  for(int i = 0; i < n; i++) {
+  for(unsigned int i = 0; i < n; i++) {
     c = input[x];
     output[x] = isi_crypt2(enctype, x, key) ^ c;
     if(encrypt) c = output[x];
@@ -349,6 +349,7 @@ static struct PyModuleDef moduledef = {
   NULL  // free
 };
 
+extern "C"
 PyMODINIT_FUNC
 PyInit__crypt(void)
 {
