@@ -3,10 +3,14 @@
 *.so
 *~
 /.sconsign.dblite
+/build.*/
 /build/
+/build/
+/external/
 /old/
 /other/quickbms/src/quickbms
 /other/wtcced/.sconsign.dblite
 /other/wtcced/wtcced
 /rfactordec
+/test/
 __pycache__/
