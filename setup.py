@@ -36,7 +36,7 @@ setup(name='rfactortools',
                'rfactortools-gui.py',
                'vehtool.py'],
       packages=['rfactortools'],
-      ext_modules=[Extension('rfactortools/_crypt', ['_crypt.c'],
+      ext_modules=[Extension('rfactortools._crypt', ['_crypt.c'],
                              extra_compile_args=['-std=c99'] )],
       requires=['PIL', 'pathlib'])
 
