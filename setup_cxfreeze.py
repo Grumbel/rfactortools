@@ -18,7 +18,7 @@
 
 
 from cx_Freeze import setup, Executable
-
+from distutils.core import Extension
 
 setup(name='rfactortools',
       version='0.1',
@@ -35,8 +35,8 @@ setup(name='rfactortools',
                    Executable('rfactor-to-gsc2013.py'),
                    Executable('rfactortools-gui.pyw'),
                    Executable('vehtool.py')],
-      #ext_modules=[Extension('rfactortools._crypt', ['_crypt.cpp'],
-      #                       extra_compile_args=[] )],
+      ext_modules=[Extension('rfactortools._crypt', ['rfactortools_crypt.cpp'])],
+      include_files=['logo.png'],
       requires=['PIL', 'pathlib'])
 
 
