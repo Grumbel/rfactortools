@@ -54,15 +54,15 @@ Car mods will show up in the same class as Mini Challenge.
 
 def createDirectoryEntry(frame, name, row):
     directory_label = Label(frame, text=name)
-    directory_label.grid(column=0, row=row, sticky=N+S+E)
+    directory_label.grid(column=0, row=row, sticky=N+S+E, pady=4)
 
     directory = StringVar()
     directory_entry = Entry(frame, textvariable=directory)
-    directory_entry.grid(column=1, row=row, sticky=N+S+W+E)
+    directory_entry.grid(column=1, row=row, sticky=N+S+W+E, pady=4)
 
     directory_button = Button(frame)
     directory_button["text"] = "Browse"
-    directory_button.grid(column=2, row=row, sticky=N+S)
+    directory_button.grid(column=2, row=row, sticky=N+S, pady=4)
     directory_button["command"] =  lambda: do_ask_directory(directory)
 
     return directory
@@ -111,31 +111,61 @@ class Application(Frame):
         self.source_directory = createDirectoryEntry(self.directory_frame, "Input:", 0)
         self.target_directory = createDirectoryEntry(self.directory_frame, "Output:", 1)
         self.target_directory.set("build/")
-        self.directory_frame.grid(column=0, row=1, columnspan=3, sticky=W+E)
+        self.directory_frame.grid(column=0, row=1, columnspan=3, sticky=W+E, padx=8, pady=4)
+
 
         self.button_frame = Frame(self)
-        self.button_frame.grid(column=0, row=2, columnspan=3, sticky=E+S)
+        self.button_frame.grid(column=0, row=2, columnspan=3, sticky=W+E+N+S)
 
-        self.cancel_btn = Button(self.button_frame)
+        self.confirm_button_frame = Frame(self.button_frame)
+        self.confirm_button_frame.pack(side=RIGHT)
+
+        self.tool_button_frame = Frame(self.button_frame)
+        self.tool_button_frame.pack(side=LEFT)
+
+        self.vehtree_btn = Button(self.tool_button_frame)
+        self.vehtree_btn["text"] = ".veh tree"
+        self.vehtree_btn["command"] =  self.do_veh_tree
+        self.vehtree_btn.grid(column=0, row=0, sticky=S, pady=8, padx=8)
+
+        self.veh_btn = Button(self.tool_button_frame)
+        self.veh_btn["text"] = ".veh check"
+        self.veh_btn["command"] =  self.do_veh_check
+        self.veh_btn.grid(column=1, row=0, sticky=S, pady=8, padx=8)
+
+        self.gen_btn = Button(self.tool_button_frame)
+        self.gen_btn["text"] = ".gen check"
+        self.gen_btn["command"] =  self.do_gen_check
+        self.gen_btn.grid(column=2, row=0, sticky=S, pady=8, padx=8)
+
+
+        self.cancel_btn = Button(self.confirm_button_frame)
         self.cancel_btn["text"] = "Cancel"
         self.cancel_btn["command"] =  self.quit
-        self.cancel_btn.grid(column=1, row=3, sticky=S, pady=8, padx=8)
+        self.cancel_btn.grid(column=3, row=0, sticky=S, pady=8, padx=8)
 
-        self.convert_btn = Button(self.button_frame)
+        self.convert_btn = Button(self.confirm_button_frame)
         self.convert_btn["text"] = "Convert"
         self.convert_btn["command"] =  self.do_conversion
-        self.convert_btn.grid(column=2, row=3, sticky=S, pady=8, padx=8)
+        self.convert_btn.grid(column=4, row=0, sticky=S, pady=8, padx=8)
 
     def do_conversion(self):
         print("Source: %s" % self.source_directory.get())
         print("Target: %s" % self.target_directory.get())
 
+    def do_veh_tree(self):
+        print("veh_tree")
+
+    def do_veh_check(self):
+        print("veh_check")
+
+    def do_gen_check(self):
+        print("gen_check")
 
 def main():
     root = Tk()
     root.wm_title("rFactor to Game Stock Car 2013 Mod Converter")
-    root.minsize(600, 340)
-    root.configure(bg="black")
+    root.minsize(640, 400)
     app = Application(master=root)
     app.mainloop()
     root.destroy()
