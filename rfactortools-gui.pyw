@@ -19,6 +19,8 @@
 
 from tkinter import *
 import tkinter.filedialog
+import PIL.Image
+import PIL.ImageTk
 
 
 welcome_text = \
@@ -88,7 +90,8 @@ class Application(Frame):
         self.grid_columnconfigure(0, weight=0)
         self.grid_rowconfigure(0, weight=1)
 
-        self.photo = PhotoImage(file="logo.png")
+
+        self.photo = PIL.ImageTk.PhotoImage(PIL.Image.open("logo.png"))
         self.photo_label = Label(self, image=self.photo, anchor=N, width=256, height=256)
         self.photo_label["bg"] = "black"
         self.photo_label.grid(column=0, row=0, sticky=N+S+W+E)
