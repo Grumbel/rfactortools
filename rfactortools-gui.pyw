@@ -19,8 +19,12 @@
 
 from tkinter import *
 import tkinter.filedialog
+import tkinter.messagebox 
 import PIL.Image
 import PIL.ImageTk
+import traceback
+
+import rfactortools
 
 
 welcome_text = \
@@ -39,17 +43,17 @@ To convert a mod:
 2) select the directory where you installed the mod as "Input"
 
 3) select the directory where you want the conversion to be copied to
-   as "Output"
+   as "Output". Installing directly into the GSC2013 is not
+   recommended, use an empty directory instead.
 
-4) Hit the "Convert" button
+4) Hit the "Convert" button and wait a minute or two.
 
-5) Once conversion is finished copy the mod over to the GSC2013
+5) Once the conversion is finished copy the mod over to the GSC2013
    directory
 
-Car mods will show up in the same class as Mini Challenge.
+Car mods will show up in the same class as the Mini Challenge.
 
 """
-
 
 
 def createDirectoryEntry(frame, name, row):
@@ -120,27 +124,27 @@ class Application(Frame):
         self.confirm_button_frame = Frame(self.button_frame)
         self.confirm_button_frame.pack(side=RIGHT)
 
-        self.tool_button_frame = Frame(self.button_frame)
-        self.tool_button_frame.pack(side=LEFT)
+        if False:
+            self.tool_button_frame = Frame(self.button_frame)
+            self.tool_button_frame.pack(side=LEFT)
 
-        self.vehtree_btn = Button(self.tool_button_frame)
-        self.vehtree_btn["text"] = ".veh tree"
-        self.vehtree_btn["command"] =  self.do_veh_tree
-        self.vehtree_btn.grid(column=0, row=0, sticky=S, pady=8, padx=8)
+            self.vehtree_btn = Button(self.tool_button_frame)
+            self.vehtree_btn["text"] = ".veh tree"
+            self.vehtree_btn["command"] =  self.do_veh_tree
+            self.vehtree_btn.grid(column=0, row=0, sticky=S, pady=8, padx=8)
 
-        self.veh_btn = Button(self.tool_button_frame)
-        self.veh_btn["text"] = ".veh check"
-        self.veh_btn["command"] =  self.do_veh_check
-        self.veh_btn.grid(column=1, row=0, sticky=S, pady=8, padx=8)
+            self.veh_btn = Button(self.tool_button_frame)
+            self.veh_btn["text"] = ".veh check"
+            self.veh_btn["command"] =  self.do_veh_check
+            self.veh_btn.grid(column=1, row=0, sticky=S, pady=8, padx=8)
 
-        self.gen_btn = Button(self.tool_button_frame)
-        self.gen_btn["text"] = ".gen check"
-        self.gen_btn["command"] =  self.do_gen_check
-        self.gen_btn.grid(column=2, row=0, sticky=S, pady=8, padx=8)
-
+            self.gen_btn = Button(self.tool_button_frame)
+            self.gen_btn["text"] = ".gen check"
+            self.gen_btn["command"] =  self.do_gen_check
+            self.gen_btn.grid(column=2, row=0, sticky=S, pady=8, padx=8)
 
         self.cancel_btn = Button(self.confirm_button_frame)
-        self.cancel_btn["text"] = "Cancel"
+        self.cancel_btn["text"] = "Quit"
         self.cancel_btn["command"] =  self.quit
         self.cancel_btn.grid(column=3, row=0, sticky=S, pady=8, padx=8)
 
@@ -150,8 +154,35 @@ class Application(Frame):
         self.convert_btn.grid(column=4, row=0, sticky=S, pady=8, padx=8)
 
     def do_conversion(self):
-        print("Source: %s" % self.source_directory.get())
-        print("Target: %s" % self.target_directory.get())
+        if not self.source_directory.get():
+            tkinter.messagebox.showerror("Input directory not selected", 
+                                   "Input directory not selected",
+                                   parent=self)
+
+        elif not self.target_directory.get():
+            tkinter.messagebox.showerror("Error: Output directory not selected", 
+                                   "Output directory not selected", 
+                                   parent=self)
+
+        else:
+            print("Source: %s" % self.source_directory.get())
+            print("Target: %s" % self.target_directory.get())
+
+            try:
+                converter = rfactortools.rFactorToGSC2013(self.source_directory.get())
+                converter.convert_all(self.target_directory.get())
+                print("-- rfactor-to-gsc2013 conversion complete --")
+
+                tkinter.messagebox.showinfo("Conversion finished",
+                                            "Conversion finished",
+                                            parent=self)
+            except Exception as e:
+                tb = traceback.format_exc()
+                print(tb)
+                tkinter.messagebox.showerror("Conversion failed", 
+                                             "Conversion failed with:\n\n%s" % tb,
+                                             parent=self)
+            
 
     def do_veh_tree(self):
         print("veh_tree")
