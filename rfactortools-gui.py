@@ -124,24 +124,23 @@ class Application(Frame):
         self.confirm_button_frame = Frame(self.button_frame)
         self.confirm_button_frame.pack(side=RIGHT)
 
-        if False:
-            self.tool_button_frame = Frame(self.button_frame)
-            self.tool_button_frame.pack(side=LEFT)
+        self.tool_button_frame = Frame(self.button_frame)
+        self.tool_button_frame.pack(side=LEFT)
 
-            self.vehtree_btn = Button(self.tool_button_frame)
-            self.vehtree_btn["text"] = ".veh tree"
-            self.vehtree_btn["command"] =  self.do_veh_tree
-            self.vehtree_btn.grid(column=0, row=0, sticky=S, pady=8, padx=8)
+        self.vehtree_btn = Button(self.tool_button_frame)
+        self.vehtree_btn["text"] = ".veh tree"
+        self.vehtree_btn["command"] =  self.do_veh_tree
+        self.vehtree_btn.grid(column=0, row=0, sticky=S, pady=8, padx=8)
 
-            self.veh_btn = Button(self.tool_button_frame)
-            self.veh_btn["text"] = ".veh check"
-            self.veh_btn["command"] =  self.do_veh_check
-            self.veh_btn.grid(column=1, row=0, sticky=S, pady=8, padx=8)
+        self.veh_btn = Button(self.tool_button_frame)
+        self.veh_btn["text"] = ".veh check"
+        self.veh_btn["command"] =  self.do_veh_check
+        self.veh_btn.grid(column=1, row=0, sticky=S, pady=8, padx=8)
 
-            self.gen_btn = Button(self.tool_button_frame)
-            self.gen_btn["text"] = ".gen check"
-            self.gen_btn["command"] =  self.do_gen_check
-            self.gen_btn.grid(column=2, row=0, sticky=S, pady=8, padx=8)
+        self.gen_btn = Button(self.tool_button_frame)
+        self.gen_btn["text"] = ".gen check"
+        self.gen_btn["command"] =  self.do_gen_check
+        self.gen_btn.grid(column=2, row=0, sticky=S, pady=8, padx=8)
 
         self.cancel_btn = Button(self.confirm_button_frame)
         self.cancel_btn["text"] = "Quit"
@@ -185,13 +184,26 @@ class Application(Frame):
             
 
     def do_veh_tree(self):
-        print("veh_tree")
+        print("--- veh tree: start ---")
+        path = self.target_directory.get()
+        files = rfactortools.find_files(path, ".veh")
+        vehs = [rfactortools.parse_vehfile(filename) for filename in files]
+        rfactortools.print_veh_tree(vehs)
+        print("--- veh tree: end ---")
 
     def do_veh_check(self):
-        print("veh_check")
+        print("--- veh check: start ---")
+        path = self.target_directory.get()
+        files = rfactortools.find_files(path, ".veh")
+        vehs = [rfactortools.parse_vehfile(filename) for filename in files]
+        rfactortools.print_veh_info(vehs)
+        print("--- veh check: end ---")
 
     def do_gen_check(self):
-        print("gen_check")
+        print("--- gen check: start ---")
+        path = self.target_directory.get()
+        rfactortools.process_gen_directory(path, False)
+        print("--- gen check: end ---")
 
 def main():
     root = Tk()

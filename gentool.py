@@ -26,59 +26,6 @@ import traceback
 import rfactortools
 
 
-def process_directory(directory, fix):
-    vfs = rfactortools.VFS(directory)
-
-    gen_files = []
-    veh_files = []
-    gdb_files = []
-    scn_files = []
-    mas_files = []
-
-    for fname in vfs.files():
-        ext = os.path.splitext(fname)[1].lower()
-        if ext == ".gen":
-            gen_files.append(fname)
-        elif ext == ".veh":
-            veh_files.append(fname)
-        elif ext == ".scn":
-            scn_files.append(fname)
-        elif ext == ".gdb":
-            gdb_files.append(fname)
-        elif ext == ".mas":
-            mas_files.append(fname)
-
-    errors = []
-    for gdb in sorted(gdb_files):
-        try:
-            rfactortools.process_gdb_file(vfs, gdb, fix, errors)
-        except Exception:
-            e = traceback.format_exc()
-            print("error:\n%s\n" % e)
-            errors.append(e)
-
-    for veh in sorted(veh_files):
-        try:
-            rfactortools.process_veh_file(vfs, veh, fix, errors)
-        except Exception as e:
-            e = traceback.format_exc()
-            print("raised error:\n%s\n" % e)
-            errors.append(e)
-
-    print("[MASFiles]")
-    for mas in sorted(mas_files):
-        print("  %s" % mas)
-    print()
-
-    if errors:
-        print("Error summary:")
-        print("==============")
-        for e in errors:
-            print("error:", e)
-    else:
-        print("No errors")
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor .veh/.gen processor')
     parser.add_argument('DIRECTORY', action='store', type=str,
@@ -93,7 +40,7 @@ if __name__ == "__main__":
                         help="try to fix all detected errors")
     args = parser.parse_args()
 
-    process_directory(args.DIRECTORY, args.fix)
+    rfactortools.process_gen_directory(args.DIRECTORY, args.fix)
 
 
 # EOF #

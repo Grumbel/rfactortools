@@ -180,4 +180,14 @@ def print_veh_tree(vehs):
     _print_tree_rec(tree)
 
 
+def print_veh_info(vehs):
+        for veh in vehs:
+            print("    file:", veh.filename)
+            print(" classes:", veh.classes)
+            print("graphics:", veh.graphics_file)
+            print("category:", veh.category)
+            print("    team:", veh.team)
+            print()
+
+
 # EOF #

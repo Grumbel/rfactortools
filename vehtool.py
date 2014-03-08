@@ -43,13 +43,6 @@ if __name__ == "__main__":
     if args.tree:
         rfactortools.print_veh_tree(vehs)
     else:
-        for veh in vehs:
-            print("    file:", veh.filename)
-            print(" classes:", veh.classes)
-            print("graphics:", veh.graphics_file)
-            print("category:", veh.category)
-            print("    team:", veh.team)
-            print()
-
+        rfactortools.print_veh_info(vehs)
 
 # EOF #
