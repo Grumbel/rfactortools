@@ -14,9 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import re
 import ntpath
 import os
+from collections import defaultdict
+
+import rfactortools
 
 keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
 comment_regex = re.compile(r'(.*?)(//.*)')
@@ -26,6 +30,27 @@ quoted_string_regex = re.compile(r'"(.*)"')
 
 def nt2os_path(path):
     return path.replace(ntpath.sep, os.path.sep)
+
+
+def find_vehdir(path):
+    m = re.match(r'^(.*GameData/Vehicles)', path, re.IGNORECASE)
+    if m:
+        return m.group(1)
+    else:
+        raise Exception("couldn't locate <VEHDIR> in %s" % path)
+
+
+def find_file_backwards(vfs, dir, gen):
+    while True:
+        filename = os.path.join(dir, gen)
+        if vfs.file_exists(filename):
+            return filename
+
+        newdir = os.path.dirname(dir)
+        if newdir == dir:  # reached the root of the path
+            return None
+        else:
+            dir = newdir
 
 
 class Veh:
@@ -73,9 +98,9 @@ def parse_vehfile(filename):
             if m:
                 key, value = m.group(1), m.group(2)
                 if key.lower() == "graphics":
-                    veh.graphics_file = value.strip()
+                    veh.graphics_file = nt2os_path(value.strip())
                 elif key.lower() == "classes":
-                    veh.classes = [c.strip() for c in value.split(",")]
+                    veh.classes = [c.strip() for c in unquote(value).split(",")]
                 elif key.lower() == "category":
                     veh.category = [c.strip() for c in unquote(value).split(",")]
                 elif key.lower() == "driver":
@@ -88,27 +113,71 @@ def parse_vehfile(filename):
     return veh
 
 
-def process_vehfile(vfs, filename):
-    # print("processing", filename)
-    graphics_file = None
+def process_veh_file(vfs, veh, fix, errors):
+    teamdir = os.path.dirname(veh)
+    vehdir = find_vehdir(os.path.dirname(veh))
 
-    with vfs.open_read(filename, encoding='latin-1') as fin:
-        for orig_line in fin.read().splitlines():
-            line = orig_line
+    veh_obj = parse_vehfile(vfs.lookup_file(veh))
+    gen_name = veh_obj.graphics_file
+    gen = find_file_backwards(vfs, os.path.dirname(veh), gen_name)
+    if not gen:
+        raise Exception("%s: error: couldn't find .gen file '%s'" % (veh, gen_name))
+    print("[Vehicle]")
+    print("  veh:", veh)
+    print("  gen:", gen)
+    info = rfactortools.InfoScnParser()
+    rfactortools.process_scnfile(vfs, gen, info)
+    print("    <VEHDIR>:", vehdir)
+    print("   <TEAMDIR>:", teamdir)
+    print("  SearchPath:", info.search_path)
+    print("    MasFiles:", info.mas_files)
 
-            m = comment_regex.match(line)
-            if m:
-                comment = m.group(2)
-                line = m.group(1)
-            else:
-                comment = None
+    for err in rfactortools.gen_check_errors(vfs, info.search_path, info.mas_files, vehdir, teamdir):
+        errors.append("%s: %s" % (gen, err))
+    print()
 
-            m = keyvalue_regex.match(line)
-            if m:
-                key, value = m.group(1), m.group(2)
-                if key.lower() == "graphics":
-                    graphics_file = value.strip()
+    if fix:
+        modify_vehicle_file(vfs, gen, info.search_path, info.mas_files, vehdir, teamdir)
 
-    return nt2os_path(graphics_file)
+
+class Tree(defaultdict):
+
+    """A recursize defaultdict()"""
+
+    def __init__(self, value=None):
+        super(Tree, self).__init__(Tree)
+        self.value = value
+        self.content = []
+
+
+def _print_tree_rec(tree, indent=""):
+    for i, (k, v) in enumerate(sorted(tree.items())):
+        if indent == "":
+            sym = ""
+            symc = " - "
+        elif i < len(tree) - 1:
+            sym = "+ "
+            symc = "| - "
+        else:
+            sym = "+ "
+            symc = "  - "
+
+        print("%s%s[%s]" % (indent, sym, k))
+        for e in v.content:
+            #print("%s%s%-30s %-30s %s" % (indent, symc, e.driver, e.team, e.filename))
+            print("%s%s%-30s %-30s" % (indent, symc, e.driver, e.team))
+        _print_tree_rec(v, indent + "  ")
+
+
+def print_veh_tree(vehs):
+    tree = Tree()
+    for veh in vehs:
+        subtree = tree
+        for cat in veh.category:
+            subtree = subtree[cat]
+        subtree.content.append(veh)
+
+    _print_tree_rec(tree)
+
 
 # EOF #

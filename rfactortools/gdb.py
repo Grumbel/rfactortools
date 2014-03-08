@@ -1,4 +1,4 @@
-# rFactor .gen file manipulation tool
+# rFactor .gdb file manipulation tool
 # Copyright (C) 2014 Ingo Ruhnke <grumbel@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -14,17 +14,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = ["gen", "mas"]
 
-from .aiw import parse_aiwfile, render_aiw
-from .crypt import games, crypt_info, crypt_info_from_file, get_skip, \
-    encrypt_file, encrypt_data, decrypt_file, decrypt_data
-from .gsc2013 import rFactorToGSC2013
-from .mas import mas_pack, mas_unpack, mas_list, mas_pack_from_data, mas_unpack_to_data
-from .scn import ScnParser, InfoScnParser, SearchReplaceScnParser, process_scnfile, gen_check_errors
-from .util import find_files, lookup_path_icase
-from .gdb import process_gdb_file
-from .veh import parse_vehfile, print_veh_tree, process_veh_file
-from .vfs import VFS
+import os
+import rfactortools
+
+
+def process_gdb_file(vfs, gdb, fix, errors):
+    trackdir = os.path.dirname(gdb)
+    scn = os.path.splitext(gdb)[0] + ".scn"
+
+    info = rfactortools.InfoScnParser()
+    rfactortools.process_scnfile(vfs, scn, info)
+    print("[Track]")
+    print("  gdb: %s" % gdb)
+    print("  scn: %s" % scn)
+    print("  SearchPath:", info.search_path)
+    print("    MasFiles:", info.mas_files)
+    print()
+
+    if fix:
+        modify_track_file(vfs, scn)
+
 
 # EOF #

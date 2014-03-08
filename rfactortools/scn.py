@@ -196,4 +196,52 @@ def process_scnfile(vfs, filename, parser):
             else:
                 parser.on_unknown(orig_line)
 
+
+def modify_track_file(vfs, scn):
+    outfile = scn + ".new"
+    with open(outfile, "wt", encoding="latin-1", errors="replace") as fout:
+        sr_parser = rfactortools.SearchReplaceScnParser(fout)
+        # sr_parser.mas_files   =
+        # sr_parser.search_path =
+        rfactortools.process_scnfile(vfs, scn, sr_parser)
+
+
+def modify_vehicle_file(vfs, gen, search_path, mas_files, vehdir, teamdir):
+    outfile = gen + ".new"
+    with open(outfile, "wt", encoding="latin-1", errors="replace") as fout:
+        sr_parser = rfactortools.SearchReplaceScnParser(fout)
+        sr_parser.mas_files = mas_files
+        sr_parser.search_path = search_path
+        rfactortools.process_scnfile(vfs, gen, sr_parser)
+
+
+def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
+    def expand_path(p):
+        p = re.sub(r'<VEHDIR>', vehdir + "/", p)
+        p = re.sub(r'<TEAMDIR>', teamdir + "/", p)
+        return p
+
+    expanded_search_path = [expand_path(d) for d in search_path]
+
+    errors = []
+
+    for p, d in zip(search_path, expanded_search_path):
+        if not vfs.directory_exists(d):
+            print("error: couldn't locate SearchPath %s" % p)
+            errors.append("error: couldn't locate SearchPath %s" % p)
+
+    for mas in mas_files:
+        mas_found = False
+        for d in expanded_search_path:
+            f = os.path.join(d, mas)
+            if vfs.file_exists(f):
+                mas_found = True
+                break
+        if not mas_found:
+            print("error: couldn't locate %s" % mas)
+            errors.append("error: couldn't locate %s" % mas)
+
+    return errors
+
+
 # EOF #
