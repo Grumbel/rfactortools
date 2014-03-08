@@ -36,7 +36,7 @@ setup(name='rfactortools',
                    Executable('rfactortools-gui.pyw'),
                    Executable('vehtool.py')],
       ext_modules=[Extension('rfactortools._crypt', ['rfactortools_crypt.cpp'])],
-      include_files=['logo.png'],
+      options={'build_exe': {'include_files': ['logo.png']}},
       requires=['PIL', 'pathlib'])
 
 
