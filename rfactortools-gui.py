@@ -232,6 +232,7 @@ class Application(Frame):
         rfactortools.process_gen_directory(path, False)
         print("--- gen check: end ---")
 
+
 def main():
     root = tkinter.tix.Tk()
     root.wm_title("rFactor to Game Stock Car 2013 Mod Converter")
