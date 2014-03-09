@@ -39,7 +39,7 @@ def minised_on_lines(lines, pattern, replacement, ignore_case, only_replaced_lin
             right = line[m.span()[1]:]
             middle = line[m.span()[0]:m.span()[1]]
 
-            if replacement:
+            if replacement is not None:
                 expanded = m.expand(replacement)
 
                 print("- %s%s%s%s%s" % (left, "{{{", middle, "}}}", right))
