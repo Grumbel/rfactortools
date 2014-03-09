@@ -60,6 +60,9 @@ class rFactorToGSC2013:
 
         self._find_gamedata_directory()
 
+        self.unique_team_names = True
+        self.force_track_thumbnails = False
+
     def _find_gamedata_directory(self):
         self.gamedata = []
         basedir = os.path.basename(self.source_directory)
@@ -106,7 +109,7 @@ class rFactorToGSC2013:
         target_mini_file = os.path.join(trest + "mini.tga")
 
         print("generating track thumbnail: %s" % target_mini_file)
-        if not rfactortools.lookup_path_icase(source_mini_file):
+        if not rfactortools.lookup_path_icase(source_mini_file) or self.force_track_thumbnails:
             aiw = rfactortools.parse_aiwfile(source_file)
             img = rfactortools.render_aiw(aiw, 252, 249)
             img.save(target_mini_file)
@@ -115,7 +118,11 @@ class rFactorToGSC2013:
         with open(source_file, "rt", encoding="latin-1") as fin:
             lines = fin.readlines()
 
-        team_suffix = " %s" % self.mod_name
+        if self.unique_team_names:
+            team_suffix = " %s" % self.mod_name
+        else:
+            team_suffix = ""
+
         with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
             for line in lines:
                 # reiza5 (Mini Challenge) is needed for the cars to
