@@ -24,7 +24,7 @@ import re
 import sys
 
 
-def minised_on_lines(lines, pattern, replacement, ignore_case):
+def minised_on_lines(lines, pattern, replacement, ignore_case, only_replaced_lines = False):
     result = []
 
     flags = 0
@@ -51,7 +51,8 @@ def minised_on_lines(lines, pattern, replacement, ignore_case):
                 print("%s%s%s%s%s" % (left, "{{{", middle, "}}}", right))
                 result.append(line)
         else:
-            result.append(line)
+            if not only_replaced_lines:
+                result.append(line)
 
     return result
 
