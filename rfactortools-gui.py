@@ -55,6 +55,12 @@ To convert a mod:
 
 Car mods will show up in the same class as the Mini Challenge.
 
+
+Disclaimer:
+
+rfactortools is a homebrew tool collection for rFactor, Race07 and
+GSC2013 and in no way affiliated with Image Space Incorporated, SimBin
+Studios or Reiza Studios.
 """
 
 

@@ -94,3 +94,9 @@ This won't modify anything, but instead will show you some information
 about the mod, namely filenames of `.mas` files and which files
 reference them. This lets you quickly see if further work is needed.
 See `FAQ.md` for frequently occuring problems.
+
+## Disclaimer
+
+rfactortools is a homebrew tool collection for rFactor, Race07 and
+GSC2013 and in no way affiliated with Image Space Incorporated, SimBin
+Studios or Reiza Studios.
