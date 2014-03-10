@@ -26,6 +26,7 @@ import PIL.Image
 import PIL.ImageTk
 import os
 import fnmatch
+import argparse
 
 
 def do_ask_directory(directory):
@@ -67,11 +68,24 @@ def minised_on_lines(lines, pattern, replacement, ignore_case, only_replaced_lin
 
     return result
 
+class MiniSedConfig:
+    def __init__(self):
+        self.directory = StringVar()
+        self.glob = StringVar()
 
-class Application(Frame):
+        self.search = StringVar()
+        self.replace = StringVar()
+
+        self.ignore_case = BooleanVar(value=True)
+        self.show_full_content = BooleanVar(value=False)
+        self.mark_replacements = BooleanVar(value=True)
+
+class MiniSedGUI(Frame):
 
     def __init__(self, master=None):
         Frame.__init__(self, master)
+
+        self.cfg = MiniSedConfig()
 
         self.source_directory = None
         self.target_directory = None
@@ -88,8 +102,7 @@ class Application(Frame):
         self.directory_label = Label(self.directory_frame, text="Directory:")
         self.directory_label.grid(column=0, row=0)
 
-        self.directory = StringVar(value="build/")
-        self.directory_entry = Entry(self.directory_frame, textvariable=self.directory)
+        self.directory_entry = Entry(self.directory_frame, textvariable=self.cfg.directory)
         self.directory_entry.grid(column=1, row=0, sticky=W + E)
         self.directory_entry.bind('<Return>', self.do_preview)
 
@@ -100,8 +113,7 @@ class Application(Frame):
         self.glob_label = Label(self.directory_frame, text="Glob:")
         self.glob_label.grid(column=0, row=1, stick=E)
 
-        self.glob = StringVar(value="*.veh")
-        self.glob_entry = Entry(self.directory_frame, textvariable=self.glob)
+        self.glob_entry = Entry(self.directory_frame, textvariable=self.cfg.glob)
         self.glob_entry.bind('<Return>', self.do_preview)
         self.glob_entry.grid(column=1, row=1, sticky=N + S + W)
 
@@ -109,32 +121,27 @@ class Application(Frame):
         self.search_replace_frame.grid_columnconfigure(1, weight=1)
         self.search_replace_frame.pack(anchor=N, side=TOP, fill=X, expand=0, padx=4, pady=4)
 
-        self.search = StringVar(value="Team=")
         self.search_label = Label(self.search_replace_frame, text="Search:")
         self.search_label.grid(column=0, row=0, sticky=E)
-        self.search_entry = Entry(self.search_replace_frame, textvariable=self.search)
+        self.search_entry = Entry(self.search_replace_frame, textvariable=self.cfg.search)
         self.search_entry.grid(column=1, row=0, sticky=N + S + W + E)
         self.search_entry.bind('<Return>', self.do_preview)
 
-        self.replace = StringVar(value="Nothing")
         self.replace_label = Label(self.search_replace_frame, text="Replace:")
         self.replace_label.grid(column=0, row=1, sticky=E)
-        self.replace_entry = Entry(self.search_replace_frame, textvariable=self.replace)
+        self.replace_entry = Entry(self.search_replace_frame, textvariable=self.cfg.replace)
         self.replace_entry.grid(column=1, row=1, sticky=N + S + W + E)
         self.replace_entry.bind('<Return>', self.do_preview)
 
-        self.ignore_case = BooleanVar(value=True)
-        self.ignore_case_checkbutton = Checkbutton(self, text="ignore case", variable=self.ignore_case)
+        self.ignore_case_checkbutton = Checkbutton(self, text="ignore case", variable=self.cfg.ignore_case)
         self.ignore_case_checkbutton.pack(side=TOP, anchor=W, expand=0)
 
-        self.show_full_content = BooleanVar(value=False)
         self.show_full_content_checkbutton = Checkbutton(
-            self, text="show full content", variable=self.show_full_content)
+            self, text="show full content", variable=self.cfg.show_full_content)
         self.show_full_content_checkbutton.pack(side=TOP, anchor=W, expand=0)
 
-        self.mark_replacements = BooleanVar(value=True)
         self.mark_replacements_checkbutton = Checkbutton(
-            self, text="mark replacements", variable=self.mark_replacements)
+            self, text="mark replacements", variable=self.cfg.mark_replacements)
         self.mark_replacements_checkbutton.pack(side=TOP, anchor=W, expand=0)
 
         self.text_frame = Frame(self)
@@ -176,12 +183,9 @@ class Application(Frame):
         self.run_btn.grid(column=3, row=0, sticky=S, pady=8, padx=8)
         self.run_btn["state"] = 'disabled'
 
-        # Directory
-        # File Glob
-        # ignore case
     def do_preview(self, *args):
         print(args)
-        directory = self.directory.get()
+        directory = self.cfg.directory.get()
 
         self.text.config(state=NORMAL)
         self.text.delete("1.0", END)
@@ -191,13 +195,13 @@ class Application(Frame):
             for fname in files:
                 filename = os.path.join(path, fname)
 
-                if not self.glob.get() or fnmatch.fnmatch(fname.lower(), self.glob.get().lower()):
+                if not self.cfg.glob.get() or fnmatch.fnmatch(fname.lower(), self.cfg.glob.get().lower()):
                     print("%s" % filename)
 
                     with open(filename, 'rt', encoding='latin-1') as fin:
                         lines = fin.read().splitlines()
-                    lines = minised_on_lines(lines, self.search.get(), self.replace.get(),
-                                             self.ignore_case.get(), True)
+                    lines = minised_on_lines(lines, self.cfg.search.get(), self.cfg.replace.get(),
+                                             self.cfg.ignore_case.get(), True)
 
                     self.text.config(state=NORMAL)
                     self.text.insert(END, "%s:\n" % filename, "file")
@@ -222,14 +226,52 @@ class Application(Frame):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="A minimal sed-like tool")
+    parser.add_argument('DIRECTORY', action='store', nargs='?',
+                        help="directory to process")
+    parser.add_argument("-i", "--in-place", action='store_true', default=False,
+                        help="modify files in place")
+    parser.add_argument("-o", "--output", metavar="FILE", type=str, default=None,
+                        help="write output to FILE")
+    parser.add_argument("-n", "--dry-run", action='store_true', default=False,
+                        help="only show modifications, without actually modifying anything")
+    parser.add_argument("-s", "--search", metavar="PAT", type=str,
+                        help="the search pattern expression")
+    parser.add_argument("-r", "--replace", metavar="REPL", type=str,
+                        help="the replacement  expression, if not given just print the match")
+    parser.add_argument("-R", "--recursive", metavar="GLOB", type=str,
+                        help="interprets the FILE argument as perform replacement in all files matching GLOB")
+    parser.add_argument("-I", "--ignore-case", action='store_true', default=False,
+                        help="ignore case")
+    parser.add_argument("-v", "--verbose", action='store_true', default=False,
+                        help="display the replacements are performed")
+    args = parser.parse_args()
+
+
     root = tkinter.tix.Tk()
     root.wm_title("minised")
     root.minsize(600, 400)
     # root.geometry("800x500+0+0")
 
-    app = Application(master=root)
+    app = MiniSedGUI(master=root)
+
+    # apply command line parameters
+    if args.DIRECTORY is not None:
+        app.cfg.directory.set(args.DIRECTORY)
+    if args.recursive is not None:
+        app.cfg.glob.set(args.recursive)
+
+    if args.search is not None:
+        app.cfg.search.set(args.search)
+    if args.replace is not None:
+        app.cfg.replace.set(args.replace)
+
+    if args.ignore_case:
+        self.ignore_case.set(args.ignore_case)
+
+    # run the thing
     app.mainloop()
-    root.destroy()
+    # root.destroy()
 
 
 if __name__ == "__main__":
