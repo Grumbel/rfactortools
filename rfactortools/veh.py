@@ -15,10 +15,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import re
+from collections import defaultdict
 import ntpath
 import os
-from collections import defaultdict
+import posixpath
+import re
 
 import rfactortools
 
@@ -30,6 +31,14 @@ quoted_string_regex = re.compile(r'"(.*)"')
 
 def nt2os_path(path):
     return path.replace(ntpath.sep, os.path.sep)
+
+
+def find_modname(path):
+    m = re.match(r'^.*GameData/Vehicles/([^.*/]*)', path, re.IGNORECASE)
+    if m:
+        return m.group(1)
+    else:
+        raise Exception("couldn't locate modname")
 
 
 def find_vehdir(path):
@@ -58,6 +67,7 @@ class Veh:
     def __init__(self):
         self.filename = None
         self.graphics_file = None
+        self.spinner_file = None
         self.gen_string = None
         self.sounds = None
         self.cameras = None
@@ -99,6 +109,8 @@ def parse_vehfile(filename):
                 key, value = m.group(1), m.group(2)
                 if key.lower() == "graphics":
                     veh.graphics_file = nt2os_path(value.strip())
+                elif key.lower() == "spinner":
+                    veh.spinner_file = nt2os_path(value.strip())
                 elif key.lower() == "classes":
                     veh.classes = [c.strip() for c in unquote(value).split(",")]
                 elif key.lower() == "category":
@@ -113,31 +125,62 @@ def parse_vehfile(filename):
     return veh
 
 
-def process_veh_file(vfs, veh, fix, errors):
-    teamdir = os.path.dirname(veh)
-    vehdir = find_vehdir(os.path.dirname(veh))
+def process_veh_file(vfs, veh_filename, fix, errors):
+    teamdir = os.path.dirname(veh_filename)
+    modname = find_modname(os.path.dirname(veh_filename))
+    vehdir = find_vehdir(os.path.dirname(veh_filename))
 
-    veh_obj = parse_vehfile(vfs.lookup_file(veh))
+    veh_obj = parse_vehfile(vfs.lookup_file(veh_filename))
     gen_name = veh_obj.graphics_file
-    gen = find_file_backwards(vfs, os.path.dirname(veh), gen_name)
-    if not gen:
-        raise Exception("%s: error: couldn't find .gen file '%s'" % (veh, gen_name))
+    gen_filename = find_file_backwards(vfs, os.path.dirname(veh_filename), gen_name)
+    if not gen_filename:
+        raise Exception("%s: error: couldn't find .gen file '%s'" % (veh_filename, gen_name))
     print("[Vehicle]")
-    print("  veh:", veh)
-    print("  gen:", gen)
+    print("  veh:", veh_filename)
+    print("  gen:", gen_filename)
     info = rfactortools.InfoScnParser()
-    rfactortools.process_scnfile(vfs, gen, info)
+    rfactortools.process_scnfile(vfs, gen_filename, info)
     print("    <VEHDIR>:", vehdir)
     print("   <TEAMDIR>:", teamdir)
     print("  SearchPath:", info.search_path)
     print("    MasFiles:", info.mas_files)
 
-    for err in rfactortools.gen_check_errors(vfs, info.search_path, info.mas_files, vehdir, teamdir):
-        errors.append("%s: %s" % (gen, err))
+    errs, warns = rfactortools.gen_check_errors(vfs, info.search_path, info.mas_files, vehdir, teamdir)
+    for err in errs:
+        errors.append("%s: %s" % (gen_filename, err))
+    for warn in warns:
+        errors.append("%s: %s" % (gen_filename, warn))
     print()
 
-    if fix:
-        modify_vehicle_file(vfs, gen, info.search_path, info.mas_files, vehdir, teamdir)
+    if errs and fix:
+        cmaps = vfs.find_file("cmaps.mas")
+        print("XXX", vehdir)
+        print("XXX", cmaps)
+        if cmaps:
+            cmaps = posixpath.relpath(cmaps, vehdir)
+
+        # add modname to the search path
+        search_path = [re.sub(r'<VEHDIR>', r'<VEHDIR>/%s' % modname, p) for p in info.search_path]
+        search_path.insert(0, "<VEHDIR>")
+        
+        # make cmaps unique
+        # TODO: do this even if there are no obvious errors
+        mas_files = []
+        for m in info.mas_files:
+            if m.lower() == "cmaps.mas":
+                mas_files.append(cmaps)
+            else:
+                mas_files.append(m)
+
+        errs, warns = rfactortools.gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir)
+        if not errs:
+            rfactortools.modify_vehicle_file(vfs, gen_filename, search_path, mas_files, vehdir, teamdir)
+        else:
+            errors.append("-- Automatic fixing failed:")
+            for err in errs:
+                errors.append("%s: %s" % (gen_filename, err))
+            for warn in warns:
+                errors.append("%s: %s" % (gen_filename, warn))
 
 
 class Tree(defaultdict):

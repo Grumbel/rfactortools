@@ -32,8 +32,5 @@ def process_gdb_file(vfs, gdb, fix, errors):
     print("    MasFiles:", info.mas_files)
     print()
 
-    if fix:
-        modify_track_file(vfs, scn)
-
 
 # EOF #

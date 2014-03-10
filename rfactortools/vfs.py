@@ -65,6 +65,13 @@ class VFS:
         except:
             raise Exception("%s: VFS couldn't locate directory" % path)
 
+    def find_file(self, filename):
+        filename = filename.lower()
+        for k, v in self._files.items():
+            if os.path.basename(k) == filename.lower():
+                return v
+        return None
+
     def lookup_file(self, path):
         try:
             return self._files[os.path.normpath(path).lower()]
