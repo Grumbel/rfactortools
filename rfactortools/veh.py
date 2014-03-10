@@ -144,18 +144,12 @@ def process_veh_file(vfs, veh_filename, fix, errors):
     print("   <TEAMDIR>:", teamdir)
     print("  SearchPath:", info.search_path)
     print("    MasFiles:", info.mas_files)
-
-    errs, warns = rfactortools.gen_check_errors(vfs, info.search_path, info.mas_files, vehdir, teamdir)
-    for err in errs:
-        errors.append("%s: %s" % (gen_filename, err))
-    for warn in warns:
-        errors.append("%s: %s" % (gen_filename, warn))
     print()
 
-    if errs and fix:
+    orig_errs, orig_warns = rfactortools.gen_check_errors(vfs, info.search_path, info.mas_files, vehdir, teamdir)
+
+    if orig_errs and fix:
         cmaps = vfs.find_file("cmaps.mas")
-        print("XXX", vehdir)
-        print("XXX", cmaps)
         if cmaps:
             cmaps = posixpath.relpath(cmaps, vehdir)
 
@@ -172,15 +166,31 @@ def process_veh_file(vfs, veh_filename, fix, errors):
             else:
                 mas_files.append(m)
 
-        errs, warns = rfactortools.gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir)
-        if not errs:
+        new_errs, new_warns = rfactortools.gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir)
+        if not new_errs or len(new_errs) < len(orig_errs):
             rfactortools.modify_vehicle_file(vfs, gen_filename, search_path, mas_files, vehdir, teamdir)
-        else:
-            errors.append("-- Automatic fixing failed:")
-            for err in errs:
+
+            for err in new_errs:
                 errors.append("%s: %s" % (gen_filename, err))
-            for warn in warns:
+            for warn in new_warns:
                 errors.append("%s: %s" % (gen_filename, warn))
+        else:
+            errors.append("-- Original Errors:")
+            for err in orig_errs:
+                errors.append("%s: %s" % (gen_filename, err))
+            for warn in orig_warns:
+                errors.append("%s: %s" % (gen_filename, warn))
+
+            errors.append("-- Automatic fixing failed:")
+            for err in new_errs:
+                errors.append("%s: %s" % (gen_filename, err))
+            for warn in new_warns:
+                errors.append("%s: %s" % (gen_filename, warn))
+    else:
+        for err in orig_errs:
+            errors.append("%s: %s" % (gen_filename, err))
+        for warn in orig_warns:
+            errors.append("%s: %s" % (gen_filename, warn))
 
 
 class Tree(defaultdict):
