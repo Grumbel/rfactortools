@@ -30,7 +30,7 @@ import argparse
 
 
 def do_ask_directory(directory):
-    d = tkinter.filedialog.askdirectory()
+    d = tkinter.filedialog.askdirectory(initialdir=directory.get())
     if d:
         directory.set(d)
 
@@ -79,6 +79,7 @@ class MiniSedConfig:
         self.ignore_case = BooleanVar(value=True)
         self.show_full_content = BooleanVar(value=False)
         self.mark_replacements = BooleanVar(value=True)
+        self.create_backups = BooleanVar(value=False)
 
 class MiniSedGUI(Frame):
 
@@ -104,17 +105,17 @@ class MiniSedGUI(Frame):
 
         self.directory_entry = Entry(self.directory_frame, textvariable=self.cfg.directory)
         self.directory_entry.grid(column=1, row=0, sticky=W + E)
-        self.directory_entry.bind('<Return>', self.do_preview)
+        self.directory_entry.bind('<Return>', lambda arg: self.do_preview())
 
         self.directory_button = Button(self.directory_frame, text="Browse")
-        self.directory_button["command"] = lambda: do_ask_directory(self.directory)
+        self.directory_button["command"] = lambda: do_ask_directory(self.cfg.directory)
         self.directory_button.grid(column=2, row=0)
 
         self.glob_label = Label(self.directory_frame, text="Glob:")
         self.glob_label.grid(column=0, row=1, stick=E)
 
         self.glob_entry = Entry(self.directory_frame, textvariable=self.cfg.glob)
-        self.glob_entry.bind('<Return>', self.do_preview)
+        self.glob_entry.bind('<Return>', lambda arg: self.do_preview())
         self.glob_entry.grid(column=1, row=1, sticky=N + S + W)
 
         self.search_replace_frame = Frame(self)
@@ -125,13 +126,13 @@ class MiniSedGUI(Frame):
         self.search_label.grid(column=0, row=0, sticky=E)
         self.search_entry = Entry(self.search_replace_frame, textvariable=self.cfg.search)
         self.search_entry.grid(column=1, row=0, sticky=N + S + W + E)
-        self.search_entry.bind('<Return>', self.do_preview)
+        self.search_entry.bind('<Return>', lambda arg: self.do_preview())
 
         self.replace_label = Label(self.search_replace_frame, text="Replace:")
         self.replace_label.grid(column=0, row=1, sticky=E)
         self.replace_entry = Entry(self.search_replace_frame, textvariable=self.cfg.replace)
         self.replace_entry.grid(column=1, row=1, sticky=N + S + W + E)
-        self.replace_entry.bind('<Return>', self.do_preview)
+        self.replace_entry.bind('<Return>', lambda arg: self.do_preview())
 
         self.ignore_case_checkbutton = Checkbutton(self, text="ignore case", variable=self.cfg.ignore_case)
         self.ignore_case_checkbutton.pack(side=TOP, anchor=W, expand=0)
@@ -143,6 +144,10 @@ class MiniSedGUI(Frame):
         self.mark_replacements_checkbutton = Checkbutton(
             self, text="mark replacements", variable=self.cfg.mark_replacements)
         self.mark_replacements_checkbutton.pack(side=TOP, anchor=W, expand=0)
+
+        self.create_backups_checkbutton = Checkbutton(
+            self, text="create backups", variable=self.cfg.create_backups)
+        self.create_backups_checkbutton.pack(side=TOP, anchor=W, expand=0)
 
         self.text_frame = Frame(self)
         self.text_frame.pack(side=TOP, fill=BOTH, expand=1, pady=4)
@@ -183,8 +188,7 @@ class MiniSedGUI(Frame):
         self.run_btn.grid(column=3, row=0, sticky=S, pady=8, padx=8)
         self.run_btn["state"] = 'disabled'
 
-    def do_preview(self, *args):
-        print(args)
+    def do_preview(self):
         directory = self.cfg.directory.get()
 
         self.text.config(state=NORMAL)
@@ -196,8 +200,6 @@ class MiniSedGUI(Frame):
                 filename = os.path.join(path, fname)
 
                 if not self.cfg.glob.get() or fnmatch.fnmatch(fname.lower(), self.cfg.glob.get().lower()):
-                    print("%s" % filename)
-
                     with open(filename, 'rt', encoding='latin-1') as fin:
                         lines = fin.read().splitlines()
                     lines = minised_on_lines(lines, self.cfg.search.get(), self.cfg.replace.get(),
