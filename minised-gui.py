@@ -78,7 +78,7 @@ class MiniSedConfig:
 
         self.ignore_case = BooleanVar(value=True)
         self.show_full_content = BooleanVar(value=False)
-        self.mark_replacements = BooleanVar(value=True)
+        self.show_original = BooleanVar(value=True)
         self.create_backups = BooleanVar(value=False)
 
 
@@ -146,20 +146,31 @@ class MiniSedGUI(Frame):
         self.replace_entry.grid(column=1, row=1, sticky=N + S + W + E)
         self.replace_entry.bind('<Return>', lambda arg: self.do_preview())
 
-        self.ignore_case_checkbutton = Checkbutton(self, text="ignore case", variable=self.cfg.ignore_case)
+
+        self.option_frame = Frame(self)
+        self.option_frame.pack(side=TOP, fill=X, expand=0, pady=4)
+
+        self.work_frame = LabelFrame(self.option_frame, text="Options")
+        self.work_frame.pack(side=LEFT, padx=4, pady=4)
+
+        self.ignore_case_checkbutton = Checkbutton(
+            self.work_frame, text="ignore case", variable=self.cfg.ignore_case)
         self.ignore_case_checkbutton.pack(side=TOP, anchor=W, expand=0)
 
+        self.create_backups_checkbutton = Checkbutton(
+            self.work_frame, text="create backups", variable=self.cfg.create_backups)
+        self.create_backups_checkbutton.pack(side=TOP, anchor=W, expand=0)
+
+        self.preview_frame = LabelFrame(self.option_frame, text="Preview")
+        self.preview_frame.pack(side=LEFT, padx=4, pady=4)
         self.show_full_content_checkbutton = Checkbutton(
-            self, text="show full content", variable=self.cfg.show_full_content)
+            self.preview_frame, text="show full content", variable=self.cfg.show_full_content)
         self.show_full_content_checkbutton.pack(side=TOP, anchor=W, expand=0)
 
-        self.mark_replacements_checkbutton = Checkbutton(
-            self, text="mark replacements", variable=self.cfg.mark_replacements)
-        self.mark_replacements_checkbutton.pack(side=TOP, anchor=W, expand=0)
+        self.show_original_checkbutton = Checkbutton(
+            self.preview_frame, text="show original", variable=self.cfg.show_original)
+        self.show_original_checkbutton.pack(side=TOP, anchor=W, expand=0)
 
-        self.create_backups_checkbutton = Checkbutton(
-            self, text="create backups", variable=self.cfg.create_backups)
-        self.create_backups_checkbutton.pack(side=TOP, anchor=W, expand=0)
 
         self.text_frame = Frame(self)
         self.text_frame.pack(side=TOP, fill=BOTH, expand=1, pady=4)
@@ -224,9 +235,10 @@ class MiniSedGUI(Frame):
                     self.text.insert(END, "%s:\n" % filename, "file")
                     for line in lines:
                         if isinstance(line, tuple):
-                            self.text.insert(END, "%s" % line[0], "hollow")
-                            self.text.insert(END, "%s" % line[1], "search")
-                            self.text.insert(END, "%s\n" % line[3], "hollow")
+                            if self.cfg.show_original.get():
+                                self.text.insert(END, "%s" % line[0], "hollow")
+                                self.text.insert(END, "%s" % line[1], "search")
+                                self.text.insert(END, "%s\n" % line[3], "hollow")
 
                             self.text.insert(END, "%s" % line[0], "highlight")
                             self.text.insert(END, "%s" % line[2], "replace")
