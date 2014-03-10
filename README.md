@@ -7,45 +7,54 @@ Conversion is at this point not 100% automatic for all mods, but it
 will get you most of the way. The file `FAQ.md` provides solutions for
 common problems.
 
-These tools are written and tested in Linux only at this point.
-
 ## Requirements
 
-* Python3 (`python3`)
-* Pillow (`python3-pil`)
-* Cairo (`python3-cairo`)
+* Python3.4 (`python3.4`)
+* Pillow (`python3-pil`, `python3-pil.imagetk`)
 
-Name of the Ubuntu package is in parenthesis.
+Name of the Ubuntu package are in parenthesis.
+
+On Windows Pillow can be installed with:
+
+    C:\Python34\Scripts\easy_install-3.4.exe pillow
+
+If Python3.3 is used `pathlib`, which is included in Python3.4, is required as well.
+
+Windows binaries are build with `cx_freeze`, which currently only works with Python3.3.
 
 ## Tools
 
-### `rfactor-to-gsc2013.py`
+### `rfactortools-gui`
+
+A GUI that includes the functionality of `rfactor-to-gsc2013`, `vehtool` and `gentool`.
+
+### `rfactor-to-gsc2013`
 
 This script will convert a rFactor mod's `GameData/` directory to GameStockCar2013.
 
-### `masunpack.py`
+### `masunpack`
 
 Allows you to unpack a `.mas` file or list its content.
 
-### `maspack.py`
+### `maspack`
 
 Allows you to pack files into a `.mas` file.
 
-### `imgtool.py`
+### `imgtool`
 
 Allows you to rescale overlarge menu graphics to fit properly into GameStockCar2013.
 
-### `gentool.py`
+### `gentool`
 
 Allows you to inspect `.gen` and `.scn` files and quickly see if
 something wrong with the `.mas` files or the `SearchPath`.
 
-### `vehtool.py`
+### `vehtool`
 
 Allows you to inspect `.veh` files and verify that `Category`, `Team`
 and `Classes` are set properly.
 
-### `rfactorcrypt.py`
+### `rfactorcrypt`
 
 Used for encryption, decryption or inspection of rFactor related files.
 
@@ -54,6 +63,16 @@ Used for encryption, decryption or inspection of rFactor related files.
 Used by rfactorcrypt.py for the actual encryption/decryption, downloaded from:
 
 * http://aluigi.altervista.org/search.php?src=decrypter
+
+### `minised`
+
+A command line tool that allows search&replace across multiple files,
+similar to the Unix tools `find` and `sed`.
+
+### `minised-gui`
+
+A GUI tool that allows to search&replace across multiple files,
+similar to the Unix tools `find` and `sed`.
 
 ### `other/MAS2Files.exe`, `other/Files2MAS.exe`
 
