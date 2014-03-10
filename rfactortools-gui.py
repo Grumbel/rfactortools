@@ -197,6 +197,7 @@ class Application(Frame):
                 converter.unique_team_names = self.unique_team_names.get()
                 converter.force_track_thumbnails = self.force_track_thumb.get()
                 converter.convert_all(self.target_directory.get())
+                rfactortools.process_gen_directory(self.target_directory.get(), True)
                 print("-- rfactor-to-gsc2013 conversion complete --")
 
                 tkinter.messagebox.showinfo("Conversion finished",
@@ -235,7 +236,7 @@ class Application(Frame):
 
 def main():
     root = tkinter.tix.Tk()
-    root.wm_title("rFactor to Game Stock Car 2013 Mod Converter")
+    root.wm_title("rFactor to Game Stock Car 2013 Mod Converter V0.1")
     root.minsize(640, 400)
     app = Application(master=root)
     app.mainloop()
