@@ -65,8 +65,8 @@ def modify_vehicle_file(vfs, gen, search_path, mas_files, vehdir, teamdir):
 
 def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
     def expand_path(p):
-        p = re.sub(r'<VEHDIR>', vehdir + "/", p)
-        p = re.sub(r'<TEAMDIR>', teamdir + "/", p)
+        p = re.sub(r'<VEHDIR>', (vehdir + "/").replace("\\", "\\\\"), p)
+        p = re.sub(r'<TEAMDIR>', (teamdir + "/").replace("\\", "\\\\"), p)
         return p
 
     expanded_search_path = [expand_path(d) for d in search_path]
