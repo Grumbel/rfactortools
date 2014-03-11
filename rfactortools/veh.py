@@ -34,6 +34,8 @@ def nt2posixpath(path):
 
 
 def find_modname(path):
+    path = path.replace(os.path.sep, posixpath.sep)
+
     m = re.match(r'^.*/Vehicles/([^/]+)', path, re.IGNORECASE)
     if m:
         return m.group(1)
@@ -42,6 +44,8 @@ def find_modname(path):
 
 
 def find_vehdir(path):
+    path = path.replace(os.path.sep, posixpath.sep)
+
     m = re.match(r'^(.*/Vehicles)', path, re.IGNORECASE)
     if m:
         return m.group(1)
