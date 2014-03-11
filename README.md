@@ -7,6 +7,10 @@ Conversion is at this point not 100% automatic for all mods, but it
 will get you most of the way. The file `FAQ.md` provides solutions for
 common problems.
 
+Source code for rfactortools can be found at:
+
+* https://github.com/Grumbel/rfactortools
+
 ## Requirements
 
 * Python3.4 (`python3.4`)
