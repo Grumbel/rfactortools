@@ -22,6 +22,7 @@ import shutil
 import sys
 import PIL.Image
 import random
+import posixpath
 
 import imgtool
 import rfactortools
