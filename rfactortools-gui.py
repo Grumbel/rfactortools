@@ -25,6 +25,7 @@ import tkinter.tix
 import PIL.Image
 import PIL.ImageTk
 import traceback
+import argparse
 
 import rfactortools
 
@@ -235,10 +236,24 @@ class Application(Frame):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='rFactor to GSC2013 converter')
+    parser.add_argument('INPUTDIR', action='store', type=str, nargs='?',
+                        help='directory containing the mod')
+    parser.add_argument('OUTPUTDIR', action='store', type=str, nargs='?',
+                        help='directory where the conversion will be written')
+    args = parser.parse_args()
+
     root = tkinter.tix.Tk()
     root.wm_title("rFactor to Game Stock Car 2013 Mod Converter V0.1")
     root.minsize(640, 400)
     app = Application(master=root)
+
+    if args.INPUTDIR is not None:
+        app.source_directory.set(args.INPUTDIR)
+
+    if args.OUTPUTDIR is not None:
+        app.target_directory.set(args.OUTPUTDIR)
+
     app.mainloop()
     root.destroy()
 
