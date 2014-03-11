@@ -34,11 +34,11 @@ def nt2os_path(path):
 
 
 def find_modname(path):
-    m = re.match(r'^.*/Vehicles/([^.*/]*)', path, re.IGNORECASE)
+    m = re.match(r'^.*/Vehicles/([^/]+)', path, re.IGNORECASE)
     if m:
         return m.group(1)
     else:
-        raise Exception("couldn't locate modname")
+        raise Exception("couldn't locate modname: %s" % path)
 
 
 def find_vehdir(path):
