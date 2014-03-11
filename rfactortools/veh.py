@@ -155,7 +155,7 @@ def process_veh_file(vfs, veh_filename, fix, errors):
     if orig_errs and fix:
         cmaps = vfs.find_file("cmaps.mas")
         if cmaps:
-            cmaps = posixpath.relpath(cmaps, vehdir)
+            cmaps = os.path.relpath(cmaps, vehdir)
 
         # add modname to the search path
         search_path = [re.sub(r'<VEHDIR>', r'<VEHDIR>/%s' % modname, p) for p in info.search_path]
