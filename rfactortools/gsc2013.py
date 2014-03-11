@@ -27,6 +27,20 @@ import imgtool
 import rfactortools
 
 
+def find_modname(path):
+    # TODO: do a better scan for a usable modname, not all
+    # tracks and vehicles have one which makes this tricky, random
+    # string will be enough for the moment to avoid conflicts
+
+    path = path.replace(os.path.sep, posixpath.sep)
+
+    m = re.match(r'^.*/Vehicles/([^/]+)', path, re.IGNORECASE)
+    if m:
+        return m.group(1)
+    else:
+        return "RND%d" % random.randint(0, 999)
+
+
 class rFactorToGSC2013:
     """
     Converter for rFactor vehicles and tracks to Game Stock Car 2013
@@ -35,10 +49,7 @@ class rFactorToGSC2013:
     def __init__(self, source_directory):
         self.source_directory = os.path.normpath(source_directory)
 
-        # TODO: scan the directory for a usable modname, not all
-        # tracks and vehicles have one which makes this tricky, random
-        # string will be enough for the moment to avoid conflicts
-        self.mod_name = "RandomModName%0d" % random.randint(0, 2**32-1)
+        self.mod_name = find_modname(source_directory)
 
         # gather files and directories, dir_tree is relative to source_directory
         self.dir_tree = []
