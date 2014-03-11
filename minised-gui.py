@@ -303,8 +303,13 @@ def main():
     # apply command line parameters
     if args.DIRECTORY is not None:
         app.cfg.directory.set(args.DIRECTORY)
+    else:
+        app.cfg.directory.set(os.getcwd())
+
     if args.recursive is not None:
         app.cfg.glob.set(args.recursive)
+    else:
+        app.cfg.glob.set("*.txt")
 
     if args.search is not None:
         app.cfg.search.set(args.search)
