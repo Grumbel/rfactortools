@@ -29,8 +29,8 @@ comment_regex = re.compile(r'(.*?)(//.*)')
 quoted_string_regex = re.compile(r'"(.*)"')
 
 
-def nt2os_path(path):
-    return path.replace(ntpath.sep, os.path.sep)
+def nt2posixpath(path):
+    return path.replace(ntpath.sep, posixpath.sep)
 
 
 def find_modname(path):
@@ -108,9 +108,9 @@ def parse_vehfile(filename):
             if m:
                 key, value = m.group(1), m.group(2)
                 if key.lower() == "graphics":
-                    veh.graphics_file = nt2os_path(value.strip())
+                    veh.graphics_file = nt2posixpath(value.strip())
                 elif key.lower() == "spinner":
-                    veh.spinner_file = nt2os_path(value.strip())
+                    veh.spinner_file = nt2posixpath(value.strip())
                 elif key.lower() == "classes":
                     veh.classes = [c.strip() for c in unquote(value).split(",")]
                 elif key.lower() == "category":
