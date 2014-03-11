@@ -162,8 +162,8 @@ class rFactorToGSC2013:
         shutil.copy(source_file, target_file)
 
         # TODO: insert check if additional textures are needed
-        shutil.copy("gsc2013/RACEGROOVE.dds", os.path.dirname(target_file))
-        shutil.copy("gsc2013/SKIDHARD.dds", os.path.dirname(target_file))
+        # shutil.copy("gsc2013/RACEGROOVE.dds", os.path.dirname(target_file))
+        # shutil.copy("gsc2013/SKIDHARD.dds", os.path.dirname(target_file))
 
     def convert_all(self, target_directory):
         target_directory = os.path.normpath(target_directory)
