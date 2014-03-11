@@ -286,3 +286,8 @@ No idea, happens in multiple mods, so it might be more then a random mod bug.
 Find the `.scn` file for the track and edit the `Light` section, the
 intensity value should be 1.0 or smaller.
 
+## Track complains that it can't open the `.mas`
+
+Check the `.scn` of the track, some tracks must be installed into a
+subdirectory and not into the toplevel `GameData/Locations/`, either
+add the directory or adopt the SearchPath in the `.scn`.
