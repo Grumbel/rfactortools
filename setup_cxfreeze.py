@@ -39,6 +39,7 @@ setup(name='rfactortools',
                    Executable('vehtool.py')],
       ext_modules=[Extension('rfactortools._crypt', ['rfactortools_crypt.cpp'])],
       options={'build_exe': {'include_files': ['logo.png'],
+                             'includes': ['PIL.TgaImagePlugin'],
                              'icon': 'icon.ico'}},
       requires=['PIL', 'pathlib'])
 
