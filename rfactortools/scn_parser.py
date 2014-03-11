@@ -92,7 +92,7 @@ class InfoScnParser(ScnParser):
         if self.section == 0:
             if key.lower() == "masfile":
                 value = scn2posix_path(value)
-                if os.path.isabs(value):
+                if posixpath.isabs(value):
                     value = value[1:]
                 self.mas_files.append(value)
             elif key.lower() == "searchpath":
