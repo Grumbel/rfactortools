@@ -95,7 +95,7 @@ class rFactorToGSC2013:
         with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
             for line in lines:
                 line = re.sub(r'Filter Properties *=.*',
-                              r'Filter Properties = StockV8 \\*/',
+                              r'Filter Properties = StockV8 *',
                               line, flags=re.IGNORECASE)
                 fout.write(line)
 
