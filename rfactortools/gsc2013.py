@@ -194,27 +194,29 @@ class rFactorToGSC2013:
         # convert and copy files
         for ext, files in self.files_by_type.items():
             for i, filename in enumerate(files):
-                source_file = os.path.join(self.source_directory, filename)
-                target_file = os.path.join(target_directory, filename)
-
-                print("Processing '%s' file %d/%d: %s" % (ext, i + 1, len(files), filename))
-                if ext == ".gdb":
-                    self.convert_gdb(source_file, target_file)
-                elif ext == ".veh":
-                    self.convert_veh(source_file, target_file)
-                elif ext == ".aiw":
-                    self.convert_aiw(source_file, target_file)
-                elif ext == ".gmt":
-                    self.convert_gmt(source_file, target_file)
-                elif ext == ".tdf":
-                    self.convert_tdf(source_file, target_file)
-                elif ext == ".mas":
-                    if filename.lower().endswith("shared" + os.path.sep + "coreshaders.mas"):
-                        pass
-                    else:
-                        self.convert_mas(source_file, target_file)
+                if filename.lower().endswith(os.path.join("shared", "coreshaders.mas")) or \
+                   filename.lower().endswith(os.path.join("locations", "commonmaps.mas")) or \
+                   filename.lower().endswith(os.path.join("locations", "terrain.tdf")):
+                    pass
                 else:
-                    shutil.copy(source_file, target_file)
+                    source_file = os.path.join(self.source_directory, filename)
+                    target_file = os.path.join(target_directory, filename)
+
+                    print("Processing '%s' file %d/%d: %s" % (ext, i + 1, len(files), filename))
+                    if ext == ".gdb":
+                        self.convert_gdb(source_file, target_file)
+                    elif ext == ".veh":
+                        self.convert_veh(source_file, target_file)
+                    elif ext == ".aiw":
+                        self.convert_aiw(source_file, target_file)
+                    elif ext == ".gmt":
+                        self.convert_gmt(source_file, target_file)
+                    elif ext == ".tdf":
+                        self.convert_tdf(source_file, target_file)
+                    elif ext == ".mas":
+                        self.convert_mas(source_file, target_file)
+                    else:
+                        shutil.copy(source_file, target_file)
 
         imgtool.process_directory(target_directory)
 
