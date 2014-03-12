@@ -208,7 +208,7 @@ class rFactorToGSC2013:
                 elif ext == ".tdf":
                     self.convert_tdf(source_file, target_file)
                 elif ext == ".mas":
-                    if filename.lower().endswith("shared/coreshader.mas"):
+                    if filename.lower().endswith("shared/coreshaders.mas"):
                         pass
                     else:
                         self.convert_mas(source_file, target_file)
