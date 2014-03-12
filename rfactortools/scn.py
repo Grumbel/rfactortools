@@ -75,10 +75,11 @@ def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
     warnings = []
 
     for p, d in zip(search_path, expanded_search_path):
-        if not vfs.directory_exists(d):
-            print("error: couldn't locate SearchPath %s" % p)
+        if not vfs.directory_exists(d) and d != ".":
+            print("warning: couldn't locate SearchPath %s" % p)
             warnings.append("warning: couldn't locate SearchPath %s" % p)
 
+    default_mas_files = ["cmaps.mas"]
     for mas in mas_files:
         mas_found = False
         for d in expanded_search_path:
@@ -86,7 +87,7 @@ def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
             if vfs.file_exists(f):
                 mas_found = True
                 break
-        if not mas_found:
+        if not mas_found and mas.lower() not in default_mas_files:
             print("error: couldn't locate %s" % mas)
             errors.append("error: couldn't locate %s" % mas)
 
