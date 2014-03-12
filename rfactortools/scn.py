@@ -19,6 +19,7 @@ import re
 import ntpath
 import os
 import traceback
+import io
 
 import rfactortools
 
@@ -55,13 +56,14 @@ skybox_gsc2013 = """Instance=skyboxi
 
 
 def modify_vehicle_file(vfs, gen, search_path, mas_files, vehdir, teamdir):
-    outfile = gen
-    with open(outfile, "wt", encoding="latin-1", newline='\r\n', errors="replace") as fout:
-        sr_parser = rfactortools.SearchReplaceScnParser(fout)
-        sr_parser.mas_files = mas_files
-        sr_parser.search_path = search_path
-        rfactortools.process_scnfile(vfs, gen, sr_parser)
+    strio = io.StringIO()
+    sr_parser = rfactortools.SearchReplaceScnParser(strio)
+    sr_parser.mas_files = mas_files
+    sr_parser.search_path = search_path
+    rfactortools.process_scnfile(vfs, gen, sr_parser)
 
+    with open(gen, "wt", encoding="latin-1", newline='\r\n', errors="replace") as fout:
+        fout.write(strio.getvalue())
 
 def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
     def expand_path(p):
