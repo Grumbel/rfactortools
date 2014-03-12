@@ -165,7 +165,7 @@ def process_veh_file(vfs, veh_filename, fix, errors):
         # TODO: do this even if there are no obvious errors
         mas_files = []
         for m in info.mas_files:
-            if m.lower() == "cmaps.mas":
+            if cmaps and m.lower() == "cmaps.mas":
                 mas_files.append(cmaps)
             else:
                 mas_files.append(m)
