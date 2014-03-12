@@ -18,10 +18,8 @@
 
 
 from tkinter import *
-import tkinter.tix
 import tkinter.filedialog
 import tkinter.messagebox
-import tkinter.tix
 import PIL.Image
 import PIL.ImageTk
 import os
@@ -293,7 +291,7 @@ def main():
     args = parser.parse_args()
 
 
-    root = tkinter.tix.Tk()
+    root = tkinter.Tk()
     root.wm_title("minised")
     root.minsize(600, 400)
     # root.geometry("800x500+0+0")

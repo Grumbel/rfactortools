@@ -18,10 +18,8 @@
 
 
 from tkinter import *
-import tkinter.tix
 import tkinter.filedialog
 import tkinter.messagebox 
-import tkinter.tix
 import PIL.Image
 import PIL.ImageTk
 import traceback
@@ -55,6 +53,19 @@ To convert a mod:
    directory
 
 Car mods will show up in the same class as the Mini Challenge.
+
+
+Options:
+--------
+
+Unique Team Names:
+Adds a suffix to the 'Team' name in .veh files to make them unique and
+avoid conflicts with other mods
+
+
+Force Track Thumbnail:
+Always generate a new track thumbnail, ignoring the one from the
+original mod
 
 
 Disclaimer:
@@ -133,16 +144,10 @@ class Application(Frame):
         self.unique_team_names = BooleanVar(value=True)
         self.unique_team_names_checkbox = Checkbutton(self.option_frame, text="Unique Team Names", variable=self.unique_team_names)
         self.unique_team_names_checkbox.grid(column=0, row=0)
-        tkinter.tix.Balloon().bind_widget(self.unique_team_names_checkbox,
-                                          balloonmsg="Adds a suffix to the 'Team' name in .veh files to make them unique\n" +
-                                          "and avoid conflicts with other mods")
 
         self.force_track_thumb = BooleanVar(value=False)
         self.force_track_thumb_checkbox = Checkbutton(self.option_frame, text="Force Track Thumbnail", variable=self.force_track_thumb)
         self.force_track_thumb_checkbox.grid(column=1, row=0)
-        tkinter.tix.Balloon().bind_widget(self.force_track_thumb_checkbox,
-                                          balloonmsg="Always generate a new track thumbnail,\n" +
-                                          "ignoring the one from the original mod")
 
         self.button_frame = Frame(self)
         self.button_frame.grid(column=0, row=3, columnspan=3, sticky=W+E+N+S)
@@ -243,7 +248,7 @@ def main():
                         help='directory where the conversion will be written')
     args = parser.parse_args()
 
-    root = tkinter.tix.Tk()
+    root = tkinter.Tk()
     root.wm_title("rFactor to Game Stock Car 2013 Mod Converter V0.1.1")
     root.minsize(640, 400)
     app = Application(master=root)
