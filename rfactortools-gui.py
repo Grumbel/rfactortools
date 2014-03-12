@@ -260,7 +260,6 @@ def main():
         app.target_directory.set(args.OUTPUTDIR)
 
     app.mainloop()
-    root.destroy()
 
 
 if __name__ == "__main__":
