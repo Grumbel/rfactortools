@@ -21,7 +21,7 @@ from cx_Freeze import setup, Executable
 from distutils.core import Extension
 
 setup(name='rfactortools',
-      version='0.1.1',
+      version='0.1.2',
       executables=[Executable('aiwtool.py'),
                    Executable('aiwtool.py'),
                    Executable('dirtool.py'),
