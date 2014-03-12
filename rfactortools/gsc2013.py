@@ -50,6 +50,7 @@ class rFactorToGSC2013:
     def __init__(self, source_directory):
         self.source_directory = os.path.normpath(source_directory)
 
+        # TODO: this doesn't work
         self.mod_name = find_modname(source_directory)
 
         # gather files and directories, dir_tree is relative to source_directory

@@ -133,7 +133,7 @@ def append_errors(context, errs, warns, errors):
     for err in errs:
         errors.append("%s: %s" % (context, err))
     for warn in warns:
-        errors.append("%s: %s" % (context_filename, warn))
+        errors.append("%s: %s" % (context, warn))
 
 
 def process_scn_veh_file(vfs, modname, veh_filename, scn_short_filename, vehdir, teamdir, fix, errors):
