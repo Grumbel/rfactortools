@@ -197,8 +197,14 @@ def process_veh_file(vfs, veh_filename, fix, errors):
     print("veh:", veh_filename)
     print("    <VEHDIR>:", vehdir)
     print("   <TEAMDIR>:", teamdir)
-    process_scn_veh_file(vfs, modname, veh_filename, veh_obj.graphics_file, vehdir, teamdir, fix, errors)
-    process_scn_veh_file(vfs, modname, veh_filename, veh_obj.spinner_file, vehdir, teamdir, fix, errors)
+    print("    graphics:", veh_obj.graphics_file)
+    print("     spinner:", veh_obj.spinner_file)
+
+    if veh_obj.graphics_file is not None:
+        process_scn_veh_file(vfs, modname, veh_filename, veh_obj.graphics_file, vehdir, teamdir, fix, errors)
+
+    if veh_obj.spinner_file is not None:
+        process_scn_veh_file(vfs, modname, veh_filename, veh_obj.spinner_file, vehdir, teamdir, fix, errors)
 
 
 class Tree(defaultdict):
