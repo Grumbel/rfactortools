@@ -41,7 +41,7 @@ setup(name='rfactortools',
       options={'build_exe': {'include_files': ['logo.png', 'FAQ.md', 'README.md', 'COPYING'],
                              'includes': ['PIL.TgaImagePlugin'],
                              'icon': 'icon.ico'}},
-      requires=['PIL', 'pathlib'])
+      requires=['PIL', 'pathlib', 'tkinter.tix'])
 
 
 # EOF #
