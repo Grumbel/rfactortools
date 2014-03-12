@@ -11,6 +11,14 @@ Source code for rfactortools can be found at:
 
 * https://github.com/Grumbel/rfactortools
 
+## Features
+
+* conversion of track and vehicle mods from rFactor to GSC2013
+* automatic thumbnail generation for tracks
+* automatic resizing of track thumbnails and vehicle images
+* automatic repacking and encryption of .mas files
+* automatic fixing of the SearchPath
+
 ## Requirements
 
 * Python3.4 (`python3.4`)
