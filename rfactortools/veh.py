@@ -129,40 +129,38 @@ def parse_vehfile(filename):
     return veh
 
 
-def process_veh_file(vfs, veh_filename, fix, errors):
-    teamdir = os.path.dirname(veh_filename)
-    modname = find_modname(os.path.dirname(veh_filename))
-    vehdir = find_vehdir(os.path.dirname(veh_filename))
+def append_errors(context, errs, warns, errors):
+    for err in errs:
+        errors.append("%s: %s" % (context, err))
+    for warn in warns:
+        errors.append("%s: %s" % (context_filename, warn))
 
-    veh_obj = parse_vehfile(vfs.lookup_file(veh_filename))
-    gen_name = veh_obj.graphics_file
-    gen_filename = find_file_backwards(vfs, os.path.dirname(veh_filename), gen_name)
-    if not gen_filename:
-        raise Exception("%s: error: couldn't find .gen file '%s'" % (veh_filename, gen_name))
-    print("[Vehicle]")
-    print("  veh:", veh_filename)
-    print("  gen:", gen_filename)
+
+def process_scn_veh_file(vfs, modname, veh_filename, scn_short_filename, vehdir, teamdir, fix, errors):
+    # resolve scn_filename to a proper path
+    scn_filename = find_file_backwards(vfs, os.path.dirname(veh_filename), scn_short_filename)
+    if not scn_filename:
+        raise Exception("error: couldn't find .gen file '%s'" % (veh_filename, scn_short_filename))
+
+    print("gen:", scn_filename)
+
     info = rfactortools.InfoScnParser()
-    rfactortools.process_scnfile(vfs, gen_filename, info)
-    print("    <VEHDIR>:", vehdir)
-    print("   <TEAMDIR>:", teamdir)
+    rfactortools.process_scnfile(vfs, scn_filename, info)
+
     print("  SearchPath:", info.search_path)
     print("    MasFiles:", info.mas_files)
     print()
 
     orig_errs, orig_warns = rfactortools.gen_check_errors(vfs, info.search_path, info.mas_files, vehdir, teamdir)
 
-    if orig_errs and fix:
+    if not fix:
+        append_errors(scn_filename, orig_errs, orig_warns, errors)
+    else:
+        # if there is a cmaps in the mod, use that instead of the one in <VEHDIR>
         cmaps = vfs.find_file("cmaps.mas")
         if cmaps:
             cmaps = os.path.relpath(cmaps, vehdir)
 
-        # add modname to the search path
-        search_path = [re.sub(r'<VEHDIR>', r'<VEHDIR>/%s' % modname, p) for p in info.search_path]
-        search_path.insert(0, "<VEHDIR>")
-        
-        # make cmaps unique
-        # TODO: do this even if there are no obvious errors
         mas_files = []
         for m in info.mas_files:
             if cmaps and m.lower() == "cmaps.mas":
@@ -170,31 +168,37 @@ def process_veh_file(vfs, veh_filename, fix, errors):
             else:
                 mas_files.append(m)
 
-        new_errs, new_warns = rfactortools.gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir)
-        if not new_errs or len(new_errs) < len(orig_errs):
-            rfactortools.modify_vehicle_file(vfs, gen_filename, search_path, mas_files, vehdir, teamdir)
-
-            for err in new_errs:
-                errors.append("%s: %s" % (gen_filename, err))
-            for warn in new_warns:
-                errors.append("%s: %s" % (gen_filename, warn))
+        if orig_errs:
+            # add modname to the SearchPath to avoid errors
+            search_path = [re.sub(r'<VEHDIR>', r'<VEHDIR>/%s' % modname, p) for p in info.search_path]
+            search_path.insert(0, "<VEHDIR>")
         else:
-            errors.append("-- Original Errors:")
-            for err in orig_errs:
-                errors.append("%s: %s" % (gen_filename, err))
-            for warn in orig_warns:
-                errors.append("%s: %s" % (gen_filename, warn))
+            search_path = info.search_path
+        search_path.sort()
 
-            errors.append("-- Automatic fixing failed:")
-            for err in new_errs:
-                errors.append("%s: %s" % (gen_filename, err))
-            for warn in new_warns:
-                errors.append("%s: %s" % (gen_filename, warn))
-    else:
-        for err in orig_errs:
-            errors.append("%s: %s" % (gen_filename, err))
-        for warn in orig_warns:
-            errors.append("%s: %s" % (gen_filename, warn))
+        new_errs, new_warns = rfactortools.gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir)
+
+        append_errors(scn_filename, new_errs, new_warns, errors)
+
+        # write a new file if there are no or less errors or if there
+        # is a cmaps.mas
+        if not new_errs or len(new_errs) < len(orig_errs) or cmaps:
+            rfactortools.modify_vehicle_file(vfs, scn_filename, search_path, mas_files, vehdir, teamdir)
+
+
+def process_veh_file(vfs, veh_filename, fix, errors):
+    teamdir = os.path.dirname(veh_filename)
+    modname = find_modname(os.path.dirname(veh_filename))
+
+    vehdir = find_vehdir(os.path.dirname(veh_filename))
+    veh_obj = parse_vehfile(vfs.lookup_file(veh_filename))
+
+    print("[Vehicle]")
+    print("veh:", veh_filename)
+    print("    <VEHDIR>:", vehdir)
+    print("   <TEAMDIR>:", teamdir)
+    process_scn_veh_file(vfs, modname, veh_filename, veh_obj.graphics_file, vehdir, teamdir, fix, errors)
+    process_scn_veh_file(vfs, modname, veh_filename, veh_obj.spinner_file, vehdir, teamdir, fix, errors)
 
 
 class Tree(defaultdict):
