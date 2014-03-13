@@ -24,6 +24,7 @@ from .mas import mas_pack, mas_unpack, mas_list, mas_pack_from_data, mas_unpack_
 from .scn import gen_check_errors, process_gen_directory, modify_vehicle_file
 from .scn_parser import ScnParser, InfoScnParser, SearchReplaceScnParser, process_scnfile
 from .util import find_files, lookup_path_icase
+from .sfx import parse_sfxfile, modify_sfxfile
 from .gdb import process_gdb_file
 from .veh import parse_vehfile, print_veh_tree, print_veh_info, process_veh_file
 from .vfs import VFS
