@@ -17,6 +17,12 @@
 
 import os
 import pathlib
+import ntpath
+import posixpath
+
+
+def nt2posixpath(path):
+    return path.replace(ntpath.sep, posixpath.sep)
 
 
 def find_files(directory, ext=None):
@@ -61,5 +67,6 @@ def lookup_path_icase(filename):
         return _lookup_path_icase(os.curdir, parts)
     else:
         return _lookup_path_icase(parts[0], parts[1:])
+
 
 # EOF #

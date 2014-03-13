@@ -23,14 +23,11 @@ import re
 
 import rfactortools
 
+
 keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
 comment_regex = re.compile(r'(.*?)(//.*)')
 
 quoted_string_regex = re.compile(r'"(.*)"')
-
-
-def nt2posixpath(path):
-    return path.replace(ntpath.sep, posixpath.sep)
 
 
 def find_modname(path):

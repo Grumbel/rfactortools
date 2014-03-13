@@ -16,6 +16,7 @@
 
 
 import re
+import rfactortools
 
 
 comment_regex = re.compile(r'(.*?)(//.*)')
@@ -62,11 +63,11 @@ def parse_sfxfile(filename):
 
             m = wav1_regex.match(line)
             if m:
-                wavs.append(m.group(3))
+                wavs.append(rfactortools.nt2posixpath(m.group(3)))
             else:
                 m = wav2_regex.match(line)
                 if m:
-                    wavs.append(m.group(2))
+                    wavs.append(rfactortools.nt2posixpath(m.group(2)))
     return wavs
 
 

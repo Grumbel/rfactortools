@@ -35,6 +35,8 @@ if __name__ == "__main__":
                         help="overwrite origin files after changes")
     parser.add_argument('-b', '--backup', metavar='SUFFIX', type=str,
                         help="make backups by copying file to FILENAME+SUFFIX before changing")
+    parser.add_argument('-g', '--gamedata', metavar='DIR', type=str,
+                        help="Set GameData directory used for verification")
     args = parser.parse_args()
 
     files = []
@@ -44,11 +46,24 @@ if __name__ == "__main__":
         else:
             files.append(path)
 
+
     if args.modify is None:
+        if args.gamedata:
+            gamedata = args.gamedata
+        else:
+            gamadata = None
+
         for filename in files:
             wavs = rfactortools.parse_sfxfile(filename)
             for wav in wavs:
-                print(wav)
+                if gamadata:
+                    p = os.path.join(gamedata, "Sounds", wav)
+                    if rfactortools.lookup_path_icase(p):
+                        print("%s: ok" % wav)
+                    else:
+                        print("%s: failure" % wav)
+                else:
+                    print(wav)
     else:
         for filename in files:
             sout = io.StringIO()
