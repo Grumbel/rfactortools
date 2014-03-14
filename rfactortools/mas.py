@@ -15,8 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from concurrent.futures import ThreadPoolExecutor
-import struct
+import logging
 import os
+import struct
 import zlib
 
 mas_type0 = b"GMOTORMAS10\0\0\0\0\0"
@@ -74,7 +75,7 @@ def get_file_type(filename):
     elif ext == ".dds":
         return MASFileType.DDS  # FIXME: need to handle the other DDS
     else:
-        print("%s: warning: unknown file type" % filename)
+        logging.warning("%s: unknown file type" % filename)
         return MASFileType.UNKNOWN
 
 # MAS file packing
@@ -106,12 +107,12 @@ def mas_pack_from_data(files, masfile, mas_type=1):
         compressed_files = []
         with ThreadPoolExecutor(max_workers=8) as executor:
             for name, data in files:
-                print("compressing %s" % name)
+                logging.debug("compressing %s" % name)
                 compressed_files.append((name, data, executor.submit(zlib.compress, data)))
         compressed_files = [(name, data, deflated_data.result()) for name, data, deflated_data in compressed_files]
 
         for name, data, deflated_data in compressed_files:
-            print("packing %s" % name)
+            logging.debug("packing %s" % name)
             file_type = get_file_type(name)
             flags = 0
 
@@ -135,7 +136,7 @@ def mas_pack_from_data(files, masfile, mas_type=1):
             fout.seek(24)
 
         for file_type, flags, name, offset, size, zsize in file_table:
-            print("%8d %8d %8d %s" % (offset, size, zsize, name))
+            logging.debug("%8d %8d %8d %s" % (offset, size, zsize, name))
 
             name_bytes = name.encode("latin-1", "replace")
 
@@ -155,7 +156,7 @@ def mas_pack(files, masfile, mas_type):
     files_with_data = []
 
     for filename in files:
-        print("reading %s" % filename)
+        logging.info("reading %s" % filename)
         name = os.path.basename(filename)
 
         with open(filename, "rb") as fin:
@@ -203,7 +204,7 @@ def mas_unpack(masfile, outdir, verbose=False):
             data = fin.read(entry.zsize)
 
             outfile = os.path.join(outdir, entry.name)
-            print("%8d %8d %8d %s" % (entry.offset, entry.size, entry.zsize, outfile))
+            logging.info("%8d %8d %8d %s" % (entry.offset, entry.size, entry.zsize, outfile))
             with open(outfile, "wb") as fout:
                 if entry.size != entry.zsize:
                     inflated_data = zlib.decompress(data)
@@ -226,7 +227,7 @@ def mas_unpack_to_data(masfile):
             fin.seek(entry.offset)
             data = fin.read(entry.zsize)
 
-            print("%8d %8d %8d %s" % (entry.offset, entry.size, entry.zsize, entry.name))
+            logging.debug("%8d %8d %8d %s" % (entry.offset, entry.size, entry.zsize, entry.name))
 
             if entry.size != entry.zsize:
                 inflated_data = zlib.decompress(data)

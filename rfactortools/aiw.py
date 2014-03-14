@@ -16,6 +16,7 @@
 
 import PIL.Image
 import PIL.ImageDraw
+import logging
 import math
 import os
 import re
@@ -165,7 +166,7 @@ def parse_aiwfile(filename):
                     elif key == "wp_branchID":
                         waypoint.branch_id = int1(value)
                     else:
-                        pass  # print("unhandled: \"%s\"" % key)
+                        pass  # logging.info("unhandled: \"%s\"" % key)
 
     return aiw
 
@@ -259,7 +260,7 @@ def render_aiw(aiw, width=512, height=512):
         return pil_img
 
     except ImportError as err:
-        print("Cairo not found, rendering with PIL: %s" % err)
+        logging.info("Cairo not found, rendering with lower quality PIL: %s" % err)
 
         # render at 2x scale to get a bit of anti-aliasing, rendering
         # quality is still much worse then cairo
