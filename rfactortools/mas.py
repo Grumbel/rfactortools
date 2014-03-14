@@ -58,7 +58,7 @@ def get_mas_type(signature):
 def get_file_type(filename):
     ext = os.path.splitext(filename)[1].lower()
 
-    if ext == ".bik" or ext == ".gfx" or ext == ".psd" or ext == ".rtf" or ext == ".txt" or ext == ".vsh":
+    if ext in [".bik", ".gfx", ".psd", ".rtf", ".txt", ".psh", ".vsh"]:
         return MASFileType.MISC
     elif ext == ".gmt":
         return MASFileType.GMT
