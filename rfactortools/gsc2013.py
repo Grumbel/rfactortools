@@ -52,6 +52,8 @@ class rFactorToGSC2013Config:
     def __init__(self):
         self.unique_team_names = True
         self.force_track_thumbnails = False
+        self.reiza_class = "reiza5"
+        self.vehicle_toplevel_category = None
 
 
 class rFactorToGSC2013:
@@ -121,12 +123,12 @@ class rFactorToGSC2013:
             img = rfactortools.render_aiw(aiw, 252, 249)
             img.save(target_mini_file)
 
-    def convert_veh(self, source_file, target_file):
+    def convert_veh(self, source_file, target_file, mod_name):
         with open(source_file, "rt", encoding="latin-1") as fin:
             lines = fin.readlines()
 
         if self.cfg.unique_team_names:
-            team_suffix = " %s" % self.mod_name
+            team_suffix = " %s" % mod_name
         else:
             team_suffix = ""
 
@@ -135,7 +137,7 @@ class rFactorToGSC2013:
                 # reiza5 (Mini Challenge) is needed for the cars to
                 # show up in the car list
                 line = re.sub(r'^Classes="',
-                              r'Classes="reiza5, ',
+                              r'Classes="%s, ' % self.cfg.reiza_class,
                               line, flags=re.IGNORECASE)
 
                 # Adding a suffix to Team is needed as conflicts in
@@ -146,6 +148,11 @@ class rFactorToGSC2013:
                 line = re.sub(r'^Team="([^"]*)"',
                               r'Team="\1%s"' % team_suffix,
                               line, flags=re.IGNORECASE)
+
+                if self.vehicle_toplevel_category:
+                    line = re.sub(r'^Category="([^"]*)"',
+                                  r'Category="%s, \1"' % self.vehicle_toplevel_category,
+                                  line, flags=re.IGNORECASE)
 
                 fout.write(line)
 
@@ -159,7 +166,7 @@ class rFactorToGSC2013:
         logging.info("encrypting files")
         encrypted_mas_content = []
         for i, (name, data) in enumerate(mas_content):
-            logging.info("processing %d/%d: %s" % (i, len(mas_content), name))
+            logging.debug("processing %d/%d: %s" % (i, len(mas_content), name))
             encrypted_data = rfactortools.encrypt_data(data, 1, 0x4b1dca9f960524e8, rfactortools.get_skip(name))
             encrypted_mas_content.append((name, encrypted_data))
 
@@ -210,7 +217,7 @@ class rFactorToGSC2013:
 
         # convert and copy files
         for ext, files in self.files_by_type.items():
-            # files are in os.normpath() syntax and relative to GamaData/
+            # ``files`` are in os.path.normpath() syntax and relative to GamaData/
             for i, filename in enumerate(files):
                 if filename.lower() in exclude_files:
                     pass
@@ -223,7 +230,7 @@ class rFactorToGSC2013:
                         if ext == ".gdb":
                             self.convert_gdb(source_file, target_file)
                         elif ext == ".veh":
-                            self.convert_veh(source_file, target_file)
+                            self.convert_veh(source_file, target_file, "placeholder")
                         elif ext == ".aiw":
                             self.convert_aiw(source_file, target_file)
                         elif ext == ".gmt":

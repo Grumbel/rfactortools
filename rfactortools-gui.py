@@ -21,12 +21,14 @@ from tkinter import \
     Button, Checkbutton, Entry, Frame, Label, Scrollbar, Text, \
     N, S, W, E, CENTER, BOTH, LEFT, RIGHT, END, DISABLED, \
     StringVar, BooleanVar
-import tkinter.filedialog
-import tkinter.messagebox
 import PIL.Image
 import PIL.ImageTk
-import traceback
 import argparse
+import logging
+import sys
+import tkinter.filedialog
+import tkinter.messagebox
+import traceback
 
 import rfactortools
 
@@ -197,8 +199,8 @@ class Application(Frame):
                                          parent=self)
 
         else:
-            print("Source: %s" % self.source_directory.get())
-            print("Target: %s" % self.target_directory.get())
+            logging.info("source-directory: %s" % self.source_directory.get())
+            logging.info("target-directory: %s" % self.target_directory.get())
 
             try:
                 cfg = rfactortools.rFactorToGSC2013Config()
@@ -243,6 +245,21 @@ class Application(Frame):
 
 
 def main():
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter("%(levelname)s: %(message)s")
+
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setLevel(logging.INFO)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    handler = logging.FileHandler("rfactortools-gui.log", mode='w')
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
     parser = argparse.ArgumentParser(description='rFactor to GSC2013 converter')
     parser.add_argument('INPUTDIR', action='store', type=str, nargs='?',
                         help='directory containing the mod')
