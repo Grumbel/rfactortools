@@ -19,7 +19,7 @@ __all__ = ["gen", "mas"]
 from .aiw import parse_aiwfile, render_aiw
 from .crypt import games, crypt_info, crypt_info_from_file, get_skip, \
     encrypt_file, encrypt_data, decrypt_file, decrypt_data
-from .gsc2013 import rFactorToGSC2013
+from .gsc2013 import rFactorToGSC2013, rFactorToGSC2013Config
 from .mas import mas_pack, mas_unpack, mas_list, mas_pack_from_data, mas_unpack_to_data
 from .scn import gen_check_errors, process_gen_directory, modify_vehicle_file
 from .scn_parser import ScnParser, InfoScnParser, SearchReplaceScnParser, process_scnfile

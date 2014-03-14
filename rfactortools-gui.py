@@ -199,11 +199,12 @@ class Application(Frame):
             print("Target: %s" % self.target_directory.get())
 
             try:
-                converter = rfactortools.rFactorToGSC2013(self.source_directory.get())
-                converter.unique_team_names = self.unique_team_names.get()
-                converter.force_track_thumbnails = self.force_track_thumb.get()
+                cfg = rfactortools.rFactorToGSC2013Config()
+                cfg.unique_team_names = self.unique_team_names.get()
+                cfg.force_track_thumbnails = self.force_track_thumb.get()
+
+                converter = rfactortools.rFactorToGSC2013(self.source_directory.get(), cfg)
                 converter.convert_all(self.target_directory.get())
-                rfactortools.process_gen_directory(self.target_directory.get(), True)
                 print("-- rfactor-to-gsc2013 conversion complete --")
 
                 tkinter.messagebox.showinfo("Conversion finished",

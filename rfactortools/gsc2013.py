@@ -16,81 +16,81 @@
 
 
 from collections import defaultdict
+import PIL.Image
+import logging
 import os
+import posixpath
+import random
 import re
 import shutil
 import sys
-import PIL.Image
-import random
-import posixpath
 
 import imgtool
 import rfactortools
 
 
-def find_modname(path):
-    # TODO: do a better scan for a usable modname, not all
-    # tracks and vehicles have one which makes this tricky, random
-    # string will be enough for the moment to avoid conflicts
+def find_gamedata_directory(directory):
+    """Returns the ``GameData/`` directory inside of ``directory``, throws
+    exception when more then one ``GamaData/`` is found, return
+    ``None``, if none is found (not an error, as tracks don't contain
+    a ``GameData/``)
+    """
 
-    path = path.replace(os.path.sep, posixpath.sep)
-
-    m = re.match(r'^.*/Vehicles/([^/]+)', path, re.IGNORECASE)
-    if m:
-        return m.group(1)
+    basedir = os.path.basename(directory)
+    if basedir.lower() == "gamedata":
+        return directory
     else:
-        return "RND%d" % random.randint(0, 999)
+        gamedata = None
+        for path, dirs, files in os.walk(self.directory):
+            for d in dirs:
+                if d.lower() == "gamedata":
+                    if gamedata is not None:
+                        raise Exception("multiple GamaData/ directories found in %s" % directory)
+                    else:
+                        gamedata = d
+        return gamedata
+
+
+class rFactorToGSC2013Config:
+
+    def __init__(self):
+        self.unique_team_names = True
+        self.force_track_thumbnails = False
 
 
 class rFactorToGSC2013:
+
     """
     Converter for rFactor vehicles and tracks to Game Stock Car 2013
     """
 
-    def __init__(self, source_directory):
+    def __init__(self, source_directory, cfg):
         self.source_directory = os.path.normpath(source_directory)
+        self.cfg = cfg or rFactorToGSC2013Config()
+        self.gamedata_directory = find_gamedata_directory(self.source_directory)
 
-        # TODO: this doesn't work
-        self.mod_name = find_modname(source_directory)
-
-        # gather files and directories, dir_tree is relative to source_directory
-        self.dir_tree = []
-        self.files_by_type = defaultdict(list)
-
-        for path, dirs, files in os.walk(self.source_directory):
-            relpath = os.path.relpath(path, self.source_directory)
-
-            for d in dirs:
-                self.dir_tree.append(os.path.normpath(os.path.join(relpath, d)))
-
-            for fname in files:
-                filename = os.path.normpath(os.path.join(relpath, fname))
-
-                ext = os.path.splitext(filename)[1].lower()
-                self.files_by_type[ext].append(filename)
-
-        self.dir_tree.sort()
-
-        self._find_gamedata_directory()
-
-        self.unique_team_names = True
-        self.force_track_thumbnails = False
-
-    def _find_gamedata_directory(self):
-        self.gamedata = []
-        basedir = os.path.basename(self.source_directory)
-        if basedir.lower() == "gamedata":
-            self.gamedata.append(self.source_directory)
+        if self.gamedata_directory is None:
+            raise Exception("couldn't locate 'GameData/' directory")
         else:
-            for d in self.dir_tree:
-                tail, head = os.path.split(d)
-                if head.lower() == "gamedata":
-                    self.gamedata.append(d)
-                elif head.lower() == "vehicles" or head.lower() == "locations":
-                    self.gamedata.append(tail)
+            # gather files and directories, dir_tree is relative to ``gamedata_directory``
+            self.dir_tree = []
+            self.files_by_type = defaultdict(list)
 
-        # remove duplicate directories
-        self.gamedata = list(set(self.gamedata))        
+            for path, dirs, files in os.walk(self.gamedata_directory):
+                relpath = os.path.relpath(path, self.gamedata_directory)
+
+                for d in dirs:
+                    self.dir_tree.append(os.path.normpath(os.path.join(relpath, d)))
+
+                for fname in files:
+                    filename = os.path.normpath(os.path.join(relpath, fname))
+
+                    ext = os.path.splitext(filename)[1].lower()
+                    self.files_by_type[ext].append(filename)
+
+            self.dir_tree.sort()
+            for k, v in self.files_by_type.items():
+                v.sort()
 
     def print_info(self):
         vehicle_count = len(self.files_by_type['.veh'])
@@ -121,8 +121,8 @@ class rFactorToGSC2013:
         source_mini_file = os.path.join(rest + "mini.tga")
         target_mini_file = os.path.join(trest + "mini.tga")
 
-        print("generating track thumbnail: %s" % target_mini_file)
-        if not rfactortools.lookup_path_icase(source_mini_file) or self.force_track_thumbnails:
+        logging.info("generating track thumbnail: %s" % target_mini_file)
+        if not rfactortools.lookup_path_icase(source_mini_file) or self.cfg.force_track_thumbnails:
             aiw = rfactortools.parse_aiwfile(source_file)
             img = rfactortools.render_aiw(aiw, 252, 249)
             img.save(target_mini_file)
@@ -131,7 +131,7 @@ class rFactorToGSC2013:
         with open(source_file, "rt", encoding="latin-1") as fin:
             lines = fin.readlines()
 
-        if self.unique_team_names:
+        if self.team.unique_team_names:
             team_suffix = " %s" % self.mod_name
         else:
             team_suffix = ""
@@ -179,8 +179,8 @@ class rFactorToGSC2013:
         # shutil.copy("gsc2013/SKIDHARD.dds", os.path.dirname(target_file))
 
     def convert_all(self, target_directory):
-        target_directory = os.path.normpath(target_directory)
-        print("Converting %s to %s" % (self.source_directory, target_directory))
+        target_directory = os.path.join(os.path.normpath(target_directory), "GameData")
+        print("Converting %s to %s" % (self.gamedata_directory, target_directory))
 
         # create target directory hierachy
         if not os.path.isdir(target_directory):
@@ -191,34 +191,67 @@ class rFactorToGSC2013:
             if not os.path.isdir(t):
                 os.mkdir(t)
 
+        exclude_files = [
+            "locations/commonmaps.mas",
+            "locations/terrain.tdf",
+            "scripts/pits.mas",
+            "shared/coreshaders.mas",
+            "vehicles/rfhud.mas",
+            "vehicles/cmaps.mas",
+            "vehicles/damage.ini",
+            "vehicles/default.cam",
+            "vehicles/default.sfx",
+            "vehicles/doublewishbone.pm",
+            "vehicles/multicar.mas",
+            "vehicles/multiplayervehicle.scn",
+            "vehicles/night_lightfield.tga",
+            "vehicles/f3_ambientshadow.dds",
+            "vehicles/headphysics.ini",
+            "vehicles/showroom.mas",
+            "vehicles/spark.tga",
+            "vehicles/vehicle_commonmaps.mas",
+            "vehicles/vview.scn",
+        ]
+        exclude_files = [os.normpath(f) for f in exclude_files]
+
         # convert and copy files
         for ext, files in self.files_by_type.items():
+            # files are in os.normpath() syntax and relative to GamaData/
             for i, filename in enumerate(files):
-                if filename.lower().endswith(os.path.join("shared", "coreshaders.mas")) or \
-                   filename.lower().endswith(os.path.join("locations", "commonmaps.mas")) or \
-                   filename.lower().endswith(os.path.join("locations", "terrain.tdf")):
+                if filename.lower() in exclude_files:
                     pass
                 else:
-                    source_file = os.path.join(self.source_directory, filename)
+                    source_file = os.path.join(self.gamedata_directory, filename)
                     target_file = os.path.join(target_directory, filename)
 
                     print("Processing '%s' file %d/%d: %s" % (ext, i + 1, len(files), filename))
-                    if ext == ".gdb":
-                        self.convert_gdb(source_file, target_file)
-                    elif ext == ".veh":
-                        self.convert_veh(source_file, target_file)
-                    elif ext == ".aiw":
-                        self.convert_aiw(source_file, target_file)
-                    elif ext == ".gmt":
-                        self.convert_gmt(source_file, target_file)
-                    elif ext == ".tdf":
-                        self.convert_tdf(source_file, target_file)
-                    elif ext == ".mas":
-                        self.convert_mas(source_file, target_file)
-                    else:
-                        shutil.copy(source_file, target_file)
+                    try:
+                        if ext == ".gdb":
+                            self.convert_gdb(source_file, target_file)
+                        elif ext == ".veh":
+                            self.convert_veh(source_file, target_file)
+                        elif ext == ".aiw":
+                            self.convert_aiw(source_file, target_file)
+                        elif ext == ".gmt":
+                            self.convert_gmt(source_file, target_file)
+                        elif ext == ".tdf":
+                            self.convert_tdf(source_file, target_file)
+                        elif ext == ".mas":
+                            self.convert_mas(source_file, target_file)
+                        else:
+                            shutil.copy(source_file, target_file)
+                    except Exception:
+                        logging.exception("rfactortools.process_gen_directory")
 
-        imgtool.process_directory(target_directory)
+        try:
+            rfactortools.process_gen_directory(self.target_directory.get(), True)
+        except Exception:
+            logging.exception("rfactortools.process_gen_directory")
 
+        try:
+            imgtool.process_directory(target_directory)
+        except Exception:
+            logging.exception("imgtool error")
+            
 
 # EOF #

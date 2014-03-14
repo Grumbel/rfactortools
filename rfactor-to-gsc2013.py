@@ -23,6 +23,8 @@ import rfactortools
 
 
 if __name__ == "__main__":
+    cfg = rfactortools.rFactorToGSC2013Config()
+
     parser = argparse.ArgumentParser(description='rFactor to GSC2013 converter')
     parser.add_argument('DIRECTORY', action='store', type=str, nargs='+',
                         help='directory containing the mod')
@@ -38,14 +40,14 @@ if __name__ == "__main__":
 
     if args.info:
         for source_directory in args.DIRECTORY:
-            converter = rfactortools.rFactorToGSC2013(source_directory)
+            converter = rfactortools.rFactorToGSC2013(source_directory, cfg)
             converter.print_info()
     else:
         if not target_directory:
             raise Exception("--output DIR must be set")
         else:
             for source_directory in args.DIRECTORY:
-                converter = rfactortools.rFactorToGSC2013(source_directory)
+                converter = rfactortools.rFactorToGSC2013(source_directory, cfg)
                 converter.convert_all(target_directory)
                 print("-- rfactor-to-gsc2013 conversion complete --")
 
