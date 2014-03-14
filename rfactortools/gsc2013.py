@@ -47,7 +47,7 @@ def find_gamedata_directory(directory):
                     if gamedata is not None:
                         raise Exception("multiple GamaData/ directories found in %s" % directory)
                     else:
-                        gamedata = d
+                        gamedata = os.path.join(path, d)
         return gamedata
 
 
@@ -67,17 +67,17 @@ class rFactorToGSC2013:
     def __init__(self, source_directory, cfg):
         self.source_directory = os.path.normpath(source_directory)
         self.cfg = cfg or rFactorToGSC2013Config()
-        self.gamedata_directory = find_gamedata_directory(self.source_directory)
+        self.source_gamedata_directory = find_gamedata_directory(self.source_directory)
 
-        if self.gamedata_directory is None:
+        if self.source_gamedata_directory is None:
             raise Exception("couldn't locate 'GameData/' directory")
         else:
             # gather files and directories, dir_tree is relative to ``gamedata_directory``
             self.dir_tree = []
             self.files_by_type = defaultdict(list)
 
-            for path, dirs, files in os.walk(self.gamedata_directory):
-                relpath = os.path.relpath(path, self.gamedata_directory)
+            for path, dirs, files in os.walk(self.source_gamedata_directory):
+                relpath = os.path.relpath(path, self.source_gamedata_directory)
 
                 for d in dirs:
                     self.dir_tree.append(os.path.normpath(os.path.join(relpath, d)))
@@ -97,9 +97,7 @@ class rFactorToGSC2013:
         track_count = len(self.files_by_type['.gdb'])
         print("Vehicles: %d" % vehicle_count)
         print("  Tracks: %d" % track_count)
-
-        for d in self.gamedata:
-            print("GameData: \"%s\"" % d)
+        print("GameData: \"%s\"" % self.source_gamedata_directory)
 
     def convert_gdb(self, filename, target_file):
         with open(filename, "rt", encoding="latin-1") as fin:
@@ -131,7 +129,7 @@ class rFactorToGSC2013:
         with open(source_file, "rt", encoding="latin-1") as fin:
             lines = fin.readlines()
 
-        if self.team.unique_team_names:
+        if self.cfg.unique_team_names:
             team_suffix = " %s" % self.mod_name
         else:
             team_suffix = ""
@@ -159,13 +157,13 @@ class rFactorToGSC2013:
         rfactortools.encrypt_file(source_file, target_file)
 
     def convert_mas(self, source_file, target_file):
-        print("mas unpacking %s" % source_file)
+        logging.info("mas unpacking %s" % source_file)
         mas_content = rfactortools.mas_unpack_to_data(source_file)
 
-        print("encrypting files")
+        logging.info("encrypting files")
         encrypted_mas_content = []
         for i, (name, data) in enumerate(mas_content):
-            print("processing %d/%d: %s" % (i, len(mas_content), name))
+            logging.info("processing %d/%d: %s" % (i, len(mas_content), name))
             encrypted_data = rfactortools.encrypt_data(data, 1, 0x4b1dca9f960524e8, rfactortools.get_skip(name))
             encrypted_mas_content.append((name, encrypted_data))
 
@@ -180,14 +178,14 @@ class rFactorToGSC2013:
 
     def convert_all(self, target_directory):
         target_gamedata_directory = os.path.join(os.path.normpath(target_directory), "GameData")
-        print("Converting %s to %s" % (self.gamedata_directory, target_gamedata_directory))
+        logging.info("converting %s to %s" % (self.source_gamedata_directory, target_gamedata_directory))
 
         # create target directory hierachy
         if not os.path.isdir(target_gamedata_directory):
             os.makedirs(os.path.normpath(target_gamedata_directory))
         for d in self.dir_tree:
             t = os.path.join(target_gamedata_directory, d)
-            print("creating %s" % t)
+            logging.info("creating %s" % t)
             if not os.path.isdir(t):
                 os.mkdir(t)
 
@@ -221,10 +219,10 @@ class rFactorToGSC2013:
                 if filename.lower() in exclude_files:
                     pass
                 else:
-                    source_file = os.path.join(self.gamedata_directory, filename)
+                    source_file = os.path.join(self.source_gamedata_directory, filename)
                     target_file = os.path.join(target_gamedata_directory, filename)
 
-                    print("Processing '%s' file %d/%d: %s" % (ext, i + 1, len(files), filename))
+                    logging.info("processing '%s' file %d/%d: %s" % (ext, i + 1, len(files), filename))
                     try:
                         if ext == ".gdb":
                             self.convert_gdb(source_file, target_file)

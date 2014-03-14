@@ -18,6 +18,7 @@
 
 
 import argparse
+import logging
 
 import rfactortools
 
@@ -37,6 +38,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     target_directory = args.output
+
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
     if args.info:
         for source_directory in args.DIRECTORY:
