@@ -41,7 +41,8 @@ def find_gamedata_directory(directory):
             for d in dirs:
                 if d.lower() == "gamedata":
                     if gamedata is not None:
-                        raise Exception("multiple GamaData/ directories found in %s" % directory)
+                        raise Exception("multiple \"GamaData/\" directories found in \"%s\", only one allowed"
+                                        % directory)
                     else:
                         gamedata = os.path.join(path, d)
         return gamedata
@@ -53,7 +54,8 @@ class rFactorToGSC2013Config:
         self.unique_team_names = True
         self.force_track_thumbnails = False
         self.reiza_class = "reiza5"
-        self.vehicle_toplevel_category = None
+        self.vehicle_category = None
+        self.track_category = None
 
 
 class rFactorToGSC2013:
@@ -149,9 +151,9 @@ class rFactorToGSC2013:
                               r'Team="\1%s"' % team_suffix,
                               line, flags=re.IGNORECASE)
 
-                if self.vehicle_toplevel_category:
+                if self.cfg.vehicle_category:
                     line = re.sub(r'^Category="([^"]*)"',
-                                  r'Category="%s, \1"' % self.vehicle_toplevel_category,
+                                  r'Category="%s, \1"' % self.cfg.vehicle_category,
                                   line, flags=re.IGNORECASE)
 
                 fout.write(line)

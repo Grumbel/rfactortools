@@ -18,7 +18,7 @@
 
 
 from tkinter import \
-    Button, Checkbutton, Entry, Frame, Label, Scrollbar, Text, \
+    Button, Checkbutton, Entry, Frame, Label, LabelFrame, Scrollbar, Text, \
     N, S, W, E, CENTER, BOTH, LEFT, RIGHT, END, DISABLED, \
     StringVar, BooleanVar
 import PIL.Image
@@ -140,19 +140,35 @@ class Application(Frame):
         self.target_directory.set("build/")
         self.directory_frame.grid(column=0, row=1, columnspan=3, sticky=W+E, padx=8, pady=4)
 
-        self.option_frame = Frame(self)
-        self.option_frame.grid(column=0, row=2, columnspan=3, sticky=W+E+N+S)
+        # Options
+        self.option_frame = LabelFrame(self, text="Options", padx=8, pady=4)
+        self.option_frame.grid(column=0, row=2, columnspan=3, sticky=N+S+W+E, padx=8, pady=4)
+        self.option_frame.grid_columnconfigure(1, minsize=200)
 
         self.unique_team_names = BooleanVar(value=True)
         self.unique_team_names_checkbox = Checkbutton(self.option_frame, text="Unique Team Names",
                                                       variable=self.unique_team_names)
-        self.unique_team_names_checkbox.grid(column=0, row=0)
+        self.unique_team_names_checkbox.grid(column=0, row=0, columnspan=2, sticky=W)
 
         self.force_track_thumb = BooleanVar(value=False)
         self.force_track_thumb_checkbox = Checkbutton(self.option_frame, text="Force Track Thumbnail",
                                                       variable=self.force_track_thumb)
-        self.force_track_thumb_checkbox.grid(column=1, row=0)
+        self.force_track_thumb_checkbox.grid(column=0, row=1, columnspan=2, sticky=W)
 
+        self.vehicle_category = StringVar(value="")
+        self.vehicle_category_label = Label(self.option_frame, text="Vehicle Category:")
+        self.vehicle_category_label.grid(column=2, row=0)
+        self.vehicle_category_entry = Entry(self.option_frame, textvariable=self.vehicle_category)
+        self.vehicle_category_entry.grid(column=3, row=0, sticky=W)
+
+        self.track_category = StringVar(value="")
+        self.track_category_label = Label(self.option_frame, text="Track Category:")
+        self.track_category_label.grid(column=2, row=1)
+        self.track_category_entry = Entry(self.option_frame, textvariable=self.track_category)
+        self.track_category_entry.grid(column=3, row=1, sticky=W)
+        self.track_category_entry.config(state=DISABLED)
+
+        # Buttons
         self.button_frame = Frame(self)
         self.button_frame.grid(column=0, row=3, columnspan=3, sticky=W+E+N+S)
 
@@ -207,6 +223,12 @@ class Application(Frame):
                 cfg.unique_team_names = self.unique_team_names.get()
                 cfg.force_track_thumbnails = self.force_track_thumb.get()
 
+                if self.vehicle_category.get().strip():
+                    cfg.vehicle_category = self.vehicle_category.get().strip()
+
+                if self.track_category.get().strip():
+                    cfg.track_category = self.track_category.get().strip()
+
                 converter = rfactortools.rFactorToGSC2013(self.source_directory.get(), cfg)
                 converter.convert_all(self.target_directory.get())
                 print("-- rfactor-to-gsc2013 conversion complete --")
@@ -214,11 +236,11 @@ class Application(Frame):
                 tkinter.messagebox.showinfo("Conversion finished",
                                             "Conversion finished",
                                             parent=self)
-            except Exception:
+            except Exception as e:
                 tb = traceback.format_exc()
                 print(tb)
                 tkinter.messagebox.showerror("Conversion failed",
-                                             "Conversion failed with:\n\n%s" % tb,
+                                             "Conversion failed with:\n\nError: %s" % e,
                                              parent=self)
 
     def do_veh_tree(self):
