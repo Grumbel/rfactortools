@@ -41,7 +41,7 @@ def find_gamedata_directory(directory):
         return directory
     else:
         gamedata = None
-        for path, dirs, files in os.walk(self.directory):
+        for path, dirs, files in os.walk(directory):
             for d in dirs:
                 if d.lower() == "gamedata":
                     if gamedata is not None:
@@ -179,14 +179,14 @@ class rFactorToGSC2013:
         # shutil.copy("gsc2013/SKIDHARD.dds", os.path.dirname(target_file))
 
     def convert_all(self, target_directory):
-        target_directory = os.path.join(os.path.normpath(target_directory), "GameData")
-        print("Converting %s to %s" % (self.gamedata_directory, target_directory))
+        target_gamedata_directory = os.path.join(os.path.normpath(target_directory), "GameData")
+        print("Converting %s to %s" % (self.gamedata_directory, target_gamedata_directory))
 
         # create target directory hierachy
-        if not os.path.isdir(target_directory):
-            os.makedirs(os.path.normpath(target_directory))
+        if not os.path.isdir(target_gamedata_directory):
+            os.makedirs(os.path.normpath(target_gamedata_directory))
         for d in self.dir_tree:
-            t = os.path.join(target_directory, d)
+            t = os.path.join(target_gamedata_directory, d)
             print("creating %s" % t)
             if not os.path.isdir(t):
                 os.mkdir(t)
@@ -212,7 +212,7 @@ class rFactorToGSC2013:
             "vehicles/vehicle_commonmaps.mas",
             "vehicles/vview.scn",
         ]
-        exclude_files = [os.normpath(f) for f in exclude_files]
+        exclude_files = [os.path.normpath(f) for f in exclude_files]
 
         # convert and copy files
         for ext, files in self.files_by_type.items():
@@ -222,7 +222,7 @@ class rFactorToGSC2013:
                     pass
                 else:
                     source_file = os.path.join(self.gamedata_directory, filename)
-                    target_file = os.path.join(target_directory, filename)
+                    target_file = os.path.join(target_gamedata_directory, filename)
 
                     print("Processing '%s' file %d/%d: %s" % (ext, i + 1, len(files), filename))
                     try:
@@ -244,12 +244,12 @@ class rFactorToGSC2013:
                         logging.exception("rfactortools.process_gen_directory")
 
         try:
-            rfactortools.process_gen_directory(self.target_directory.get(), True)
+            rfactortools.process_gen_directory(target_gamedata_directory, True)
         except Exception:
             logging.exception("rfactortools.process_gen_directory")
 
         try:
-            imgtool.process_directory(target_directory)
+            imgtool.process_directory(target_gamedata_directory)
         except Exception:
             logging.exception("imgtool error")
             

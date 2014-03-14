@@ -45,7 +45,7 @@ def modify_sfxfile(fout, filename, prefix):
                 if m:
                     fout.write("%s=%s%s%s\n" % (m.group(1), prefix, m.group(2), suffix))
                 else:
-                    fout.write(orig_line))
+                    fout.write(orig_line)
                     fout.write("\n")
 
 
