@@ -63,10 +63,8 @@ def read_ids(filename):
     for line in lines:
         m = comment_regex.match(line)
         if m:
-            comment = m.group(2)
+            # comment = m.group(2)
             line = m.group(1)
-        else:
-            comment = None
 
         m = keyvalue_regex.match(line)
         if m:

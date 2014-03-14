@@ -24,7 +24,7 @@ import re
 import sys
 
 
-def minised_on_lines(lines, pattern, replacement, ignore_case, only_replaced_lines = False):
+def minised_on_lines(lines, pattern, replacement, ignore_case, only_replaced_lines=False):
     result = []
 
     flags = 0

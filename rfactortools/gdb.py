@@ -20,7 +20,6 @@ import rfactortools
 
 
 def process_gdb_file(vfs, gdb, fix, errors):
-    trackdir = os.path.dirname(gdb)
     scn = os.path.splitext(gdb)[0] + ".scn"
 
     info = rfactortools.InfoScnParser()

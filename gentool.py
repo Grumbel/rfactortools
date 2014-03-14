@@ -16,12 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from io import StringIO
 import argparse
-import ntpath
-import os
-import re
-import traceback
 
 import rfactortools
 

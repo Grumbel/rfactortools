@@ -16,7 +16,6 @@
 
 
 from collections import defaultdict
-import ntpath
 import os
 import posixpath
 import re
@@ -100,18 +99,16 @@ def parse_vehfile(filename):
 
             m = comment_regex.match(line)
             if m:
-                comment = m.group(2)
+                # comment = m.group(2)
                 line = m.group(1)
-            else:
-                comment = None
 
             m = keyvalue_regex.match(line)
             if m:
                 key, value = m.group(1), m.group(2)
                 if key.lower() == "graphics":
-                    veh.graphics_file = nt2posixpath(value.strip())
+                    veh.graphics_file = rfactortools.nt2posixpath(value.strip())
                 elif key.lower() == "spinner":
-                    veh.spinner_file = nt2posixpath(value.strip())
+                    veh.spinner_file = rfactortools.nt2posixpath(value.strip())
                 elif key.lower() == "classes":
                     veh.classes = [c.strip() for c in unquote(value).split(",")]
                 elif key.lower() == "category":

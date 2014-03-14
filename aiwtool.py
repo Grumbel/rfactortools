@@ -18,7 +18,6 @@
 
 
 import argparse
-import PIL.Image
 
 import rfactortools
 

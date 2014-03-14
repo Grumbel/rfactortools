@@ -46,7 +46,6 @@ if __name__ == "__main__":
         else:
             files.append(path)
 
-
     if args.modify is None:
         if args.gamedata:
             gamedata = args.gamedata

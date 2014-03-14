@@ -17,7 +17,6 @@
 
 import re
 import ntpath
-import os
 import posixpath
 
 

@@ -19,7 +19,6 @@
 
 import os
 import argparse
-import hashlib
 import functools
 import shutil
 import filecmp
@@ -188,8 +187,8 @@ def extract_diff_command(path1, path2, target, dry_run, ignore_case):
 
     if dry_run:
         for f in files:
-            source_file = os.path.join(sourcedir, f)
-            target_file = os.path.join(targetdir, f)
+            source_file = os.path.join(path2, f)
+            target_file = os.path.join(target, f)
             print("moving %s to %s" % (source_file, target_file))
     else:
         move_files(path2, target, files, ignore_case)
@@ -274,6 +273,6 @@ if __name__ == "__main__":
     elif args.COMMAND == "merge":
         merge_command(args.FILE1, args.FILE2, args.dry_run, args.force)
     else:
-        raise Exception("unknown command: %s" % command)
+        raise Exception("unknown command: %s" % args.COMMAND)
 
 # EOF #

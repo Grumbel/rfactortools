@@ -16,14 +16,10 @@
 
 
 from collections import defaultdict
-import PIL.Image
 import logging
 import os
-import posixpath
-import random
 import re
 import shutil
-import sys
 
 import imgtool
 import rfactortools
@@ -250,6 +246,6 @@ class rFactorToGSC2013:
             imgtool.process_directory(target_gamedata_directory)
         except Exception:
             logging.exception("imgtool error")
-            
+
 
 # EOF #

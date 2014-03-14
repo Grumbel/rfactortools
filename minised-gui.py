@@ -17,14 +17,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from tkinter import *
+from tkinter import \
+    Button, Checkbutton, Entry, Frame, Label, LabelFrame, Scrollbar, Text, \
+    N, S, W, E, X, CENTER, BOTH, TOP, BOTTOM, LEFT, END, NORMAL, DISABLED, \
+    StringVar, BooleanVar
+import argparse
+import fnmatch
+import os
+import re
 import tkinter.filedialog
 import tkinter.messagebox
-import PIL.Image
-import PIL.ImageTk
-import os
-import fnmatch
-import argparse
 
 
 def do_ask_directory(directory):
@@ -102,7 +104,7 @@ class MiniSedGUI(Frame):
         self.cfg.ignore_case.trace('w', self.disable_apply)
 
     def disable_apply(self, *args):
-        self.run_btn["state"] = 'disabled'        
+        self.run_btn["state"] = 'disabled'
 
     def createWidgets(self):
 
@@ -144,7 +146,6 @@ class MiniSedGUI(Frame):
         self.replace_entry.grid(column=1, row=1, sticky=N + S + W + E)
         self.replace_entry.bind('<Return>', lambda arg: self.do_preview())
 
-
         self.option_frame = Frame(self)
         self.option_frame.pack(side=TOP, fill=X, expand=0, pady=4)
 
@@ -168,7 +169,6 @@ class MiniSedGUI(Frame):
         self.show_original_checkbutton = Checkbutton(
             self.preview_frame, text="show original", variable=self.cfg.show_original)
         self.show_original_checkbutton.pack(side=TOP, anchor=W, expand=0)
-
 
         self.text_frame = Frame(self)
         self.text_frame.pack(side=TOP, fill=BOTH, expand=1, pady=4)
@@ -266,7 +266,9 @@ class MiniSedGUI(Frame):
                     fout.write("\n")
 
         self.run_btn["state"] = 'disabled'
-        tkinter.messagebox.showinfo("Replacement successful", "Replacements have been performed successfully on the files")
+        tkinter.messagebox.showinfo("Replacement successful",
+                                    "Replacements have been performed successfully on the files")
+
 
 def main():
     parser = argparse.ArgumentParser(description="A minimal sed-like tool")
@@ -289,7 +291,6 @@ def main():
     parser.add_argument("-v", "--verbose", action='store_true', default=False,
                         help="display the replacements are performed")
     args = parser.parse_args()
-
 
     root = tkinter.Tk()
     root.wm_title("minised")
@@ -315,7 +316,7 @@ def main():
         app.cfg.replace.set(args.replace)
 
     if args.ignore_case:
-        self.ignore_case.set(args.ignore_case)
+        app.cfg.ignore_case.set(args.ignore_case)
 
     # run the thing
     app.mainloop()

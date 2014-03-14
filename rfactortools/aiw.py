@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import PIL.Image
 import PIL.ImageDraw
 import logging
@@ -22,45 +23,6 @@ import os
 import re
 import tempfile
 
-# [Waypoint]
-# trackstate=4543
-# drivinglines=1
-# autogengrid=(-1,9)
-# autogenaltgrid=(1,0)
-# teleportwp=(438)
-# pitlanepaths=(11,11)
-# times=(67.7990,340282346638528860000000000000000000000.0000)
-# multilinetimes=(139.2194,340282346638528860000000000000000000000.0000)
-# number_waypoints=3672
-# lap_length=18169.6
-# sector_1_length=17893.38
-# sector_2_length=17937.1
-# LeftHandedPits=1
-# FuelUse=37171.0
-# AIBrakingStiffness=(1.0000,1.0000,0.9000)
-# SpeedOffset=0.000000
-# DelayPitCrewLoad=0
-# OutsideAdjustment=-0.500000
-# InsideAdjustment=-1.000000
-# GrooveWidth=0
-# GrooveHeightOffset=0.01
-# PaceCarReleaseDist=(0.8000, 0.8700)
-# GrooveWidthWet=4.000000
-# IntermediateFogLevel=(0.1250)        // Combined wetness factor where intermediate values are used (sunny fog values are in SCN file!)
-# IntermediateFogPlanes=(175.0,675.0)  // Fog planes at intermediate wetness
-# RainyFogPlanes=(0.0,150.0)           // Fog planes at full monsoon
-# IntermediateFogColor=(191.3,191.3,191.3)  // Fog color at intermediate wetness (RGB, 0-255 each)
-# RainyFogColor=(127.5,127.5,127.5)    // Fog color at full monsoon (RGB, 0-255 each)
-# FogDensity=(0.00125,0.01000)         // Fog density only works on some video cards (intermediate, monsoon)
-# RainyDarkness=(0.50000,0.00000)      // Overcast light value, monsoon light value
-# WorstTime=(0.0000)
-# MidTime=(0.0000)
-# BestTime=(0.0000)
-# WorstAdjust=(0.8000)
-# MidAdjust=(1.0000)
-# BestAdjust=(1.2000)
-# CheatDelta=(0.0000,0.0000,0.0000)
-# AIRange=(0.1000)
 
 keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
 vec3_regex = re.compile(r'\((-?\d*(\.\d*)?),\s*(-?\d*(\.\d*)?),\s*(-?\d*(\.\d*)?)\)')
@@ -145,7 +107,6 @@ def parse_aiwfile(filename):
     aiw = AIW()
 
     with open(filename, "rt", encoding="latin-1", errors="replace") as fout:
-        waypoints = []
         parse_waypoints = False
 
         waypoint = Waypoint()
@@ -207,9 +168,6 @@ def draw_path(draw, scale, waypoints, ofx, ofy):
 def render_aiw(aiw, width=512, height=512):
     x1, y1, x2, y2 = aiw.get_bounding_box()
 
-    cx = (x2 + x1) / 2
-    cy = (y2 + y1) / 2
-
     w = (x2 - x1)
     h = (y2 - y1)
 
@@ -266,7 +224,7 @@ def render_aiw(aiw, width=512, height=512):
         # quality is still much worse then cairo
         img = PIL.Image.new("RGBA", (width*2, height*2))
 
-        ofx = width  / 2 + (-x1 - w / 2) * scale
+        ofx = width / 2 + (-x1 - w / 2) * scale
         ofy = height / 2 + (-y1 - h / 2) * scale
 
         draw = PIL.ImageDraw.Draw(img)

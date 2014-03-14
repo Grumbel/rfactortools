@@ -15,11 +15,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import re
-import ntpath
-import os
-import traceback
 import io
+import os
+import re
+import traceback
 
 import rfactortools
 
@@ -64,6 +63,7 @@ def modify_vehicle_file(vfs, gen, search_path, mas_files, vehdir, teamdir):
 
     with open(gen, "wt", encoding="latin-1", newline='\r\n', errors="replace") as fout:
         fout.write(strio.getvalue())
+
 
 def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
     def expand_path(p):

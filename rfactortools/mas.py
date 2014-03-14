@@ -88,8 +88,6 @@ def mas_pack_from_data(files, masfile, mas_type=1):
             fout.write(mas_type0)
         elif mas_type == 1:
             fout.write(mas_type1)
-        elif mas_type == 2:
-            fout.write(mas_type2)
         elif mas_type == 3:
             fout.write(mas_type3)
         else:

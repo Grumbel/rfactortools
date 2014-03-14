@@ -40,7 +40,7 @@ def modify_sfxfile(fout, filename, prefix):
             m = wav1_regex.match(line)
             if m:
                 fout.write("%s=%s,%s%s%s\n" % (m.group(1), prefix, m.group(2), m.group(3), suffix))
-            else: 
+            else:
                 m = wav2_regex.match(line)
                 if m:
                     fout.write("%s=%s%s%s\n" % (m.group(1), prefix, m.group(2), suffix))
@@ -55,12 +55,11 @@ def parse_sfxfile(filename):
         for orig_line in fin.read().splitlines():
             m = comment_regex.match(orig_line)
             if m:
-                comment = m.group(2)
+                # comment = m.group(2)
                 line = m.group(1)
             else:
-                comment = None
+                # comment = None
                 line = orig_line
-
 
             m = wav1_regex.match(line)
             if m:

@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
+
 import sys
 import struct
 import argparse
@@ -108,7 +108,7 @@ def process_gmt(filename, verbose=False):
                 d_mat_name = asciz2py(fin.read(264))
                 print("  mat:", repr(d_mat_name))
 
-            d_obj_junk = fin.read(24)
+            fin.read(24)  # junk?
 
             d_tex_count = struct.unpack("<I", fin.read(4))[0]
             print("  tex_count:", d_tex_count)

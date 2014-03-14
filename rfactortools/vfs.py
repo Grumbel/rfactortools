@@ -41,14 +41,14 @@ class VFS:
 
     def directory_exists(self, path):
         try:
-            _ = self.lookup_directory(path)
+            self.lookup_directory(path)
             return True
         except:
             return False
 
     def file_exists(self, path):
         try:
-            _ = self.lookup_file(path)
+            self.lookup_file(path)
             return True
         except:
             return False
