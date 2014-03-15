@@ -255,12 +255,21 @@ def mas_unpack_file_table(fin):
     for i in range(0, file_count):
         if mas_type == 0:
             offset, size, zsize, name = struct.unpack("<4xlll240s", fin.read(256))
+            entry = MASFileEntry(0,  # type
+                                 0,  # flags
+                                 name, offset, size, zsize)
         elif mas_type == 1:
             entry = MASFileEntry(*struct.unpack("<BBxx236slll4x", fin.read(256)))
         elif mas_type == 2:
             name, offset, size, zsize = struct.unpack("<4x16slll4x", fin.read(256))
+            entry = MASFileEntry(0,  # type
+                                 0,  # flags
+                                 name, offset, size, zsize)
         elif mas_type == 3:
             name, offset, size, zsize = struct.unpack("<4xlll4x236s", fin.read(256))
+            entry = MASFileEntry(0,  # type
+                                 0,  # flags
+                                 name, offset, size, zsize)
         else:
             raise RuntimeError("invalid map_type")
 
