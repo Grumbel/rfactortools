@@ -35,12 +35,16 @@ if __name__ == "__main__":
                         help="show info on the mod")
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help="be more verbose")
+    parser.add_argument('-q', '--quiet', action='store_true', default=False,
+                        help="be less verbose")
     args = parser.parse_args()
 
     target_directory = args.output
 
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
+    elif args.quiet:
+        logging.basicConfig(level=logging.ERROR)
     else:
         logging.basicConfig(level=logging.INFO)
 
