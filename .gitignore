@@ -6,7 +6,7 @@
 /.sconsign.dblite
 /build.*/
 /build/
-/build/
+/dist/
 /external/
 /old/
 /other/quickbms/src/quickbms
