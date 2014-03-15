@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from collections import defaultdict
 import logging
 import os
 import re
@@ -23,6 +22,30 @@ import shutil
 
 import imgtool
 import rfactortools
+
+
+exclude_files = [
+    "locations/commonmaps.mas",
+    "locations/terrain.tdf",
+    "scripts/pits.mas",
+    "shared/coreshaders.mas",
+    "vehicles/rfhud.mas",
+    "vehicles/cmaps.mas",
+    "vehicles/damage.ini",
+    "vehicles/default.cam",
+    "vehicles/default.sfx",
+    "vehicles/doublewishbone.pm",
+    "vehicles/multicar.mas",
+    "vehicles/multiplayervehicle.scn",
+    "vehicles/night_lightfield.tga",
+    "vehicles/f3_ambientshadow.dds",
+    "vehicles/headphysics.ini",
+    "vehicles/showroom.mas",
+    "vehicles/spark.tga",
+    "vehicles/vehicle_commonmaps.mas",
+    "vehicles/vview.scn",
+]
+exclude_files = [os.path.normpath(f) for f in exclude_files]
 
 
 def find_gamedata_directory(directory):
@@ -71,26 +94,6 @@ class rFactorToGSC2013:
 
         if self.source_gamedata_directory is None:
             raise Exception("couldn't locate 'GameData/' directory")
-        else:
-            # gather files and directories, dir_tree is relative to ``gamedata_directory``
-            self.dir_tree = []
-            self.files_by_type = defaultdict(list)
-
-            for path, dirs, files in os.walk(self.source_gamedata_directory):
-                relpath = os.path.relpath(path, self.source_gamedata_directory)
-
-                for d in dirs:
-                    self.dir_tree.append(os.path.normpath(os.path.join(relpath, d)))
-
-                for fname in files:
-                    filename = os.path.normpath(os.path.join(relpath, fname))
-
-                    ext = os.path.splitext(filename)[1].lower()
-                    self.files_by_type[ext].append(filename)
-
-            self.dir_tree.sort()
-            for k, v in self.files_by_type.items():
-                v.sort()
 
     def print_info(self):
         vehicle_count = len(self.files_by_type['.veh'])
@@ -181,53 +184,35 @@ class rFactorToGSC2013:
         # shutil.copy("gsc2013/RACEGROOVE.dds", os.path.dirname(target_file))
         # shutil.copy("gsc2013/SKIDHARD.dds", os.path.dirname(target_file))
 
-    def convert_all(self, target_directory):
-        target_gamedata_directory = os.path.join(os.path.normpath(target_directory), "GameData")
-        logging.info("converting %s to %s" % (self.source_gamedata_directory, target_gamedata_directory))
+    def convert_dirtree(self, source_directory, target_directory):
+        if not os.path.isdir(target_directory):
+            os.makedirs(os.path.normpath(target_directory))
 
-        # create target directory hierachy
-        if not os.path.isdir(target_gamedata_directory):
-            os.makedirs(os.path.normpath(target_gamedata_directory))
-        for d in self.dir_tree:
-            t = os.path.join(target_gamedata_directory, d)
-            logging.info("creating %s" % t)
-            if not os.path.isdir(t):
-                os.mkdir(t)
+        for path, dirs, files in os.walk(source_directory):
+            relpath = os.path.relpath(path, source_directory)
 
-        exclude_files = [
-            "locations/commonmaps.mas",
-            "locations/terrain.tdf",
-            "scripts/pits.mas",
-            "shared/coreshaders.mas",
-            "vehicles/rfhud.mas",
-            "vehicles/cmaps.mas",
-            "vehicles/damage.ini",
-            "vehicles/default.cam",
-            "vehicles/default.sfx",
-            "vehicles/doublewishbone.pm",
-            "vehicles/multicar.mas",
-            "vehicles/multiplayervehicle.scn",
-            "vehicles/night_lightfield.tga",
-            "vehicles/f3_ambientshadow.dds",
-            "vehicles/headphysics.ini",
-            "vehicles/showroom.mas",
-            "vehicles/spark.tga",
-            "vehicles/vehicle_commonmaps.mas",
-            "vehicles/vview.scn",
-        ]
-        exclude_files = [os.path.normpath(f) for f in exclude_files]
+            for d in dirs:
+                t = os.path.join(target_directory, relpath, d)
+                logging.info("creating %s" % t)
+                if not os.path.isdir(t):
+                    os.mkdir(t)
 
-        # convert and copy files
-        for ext, files in self.files_by_type.items():
-            # ``files`` are in os.path.normpath() syntax and relative to GamaData/
-            for i, filename in enumerate(files):
+    def convert_files(self, source_directory, target_directory):
+        for path, dirs, files in os.walk(source_directory):
+            relpath = os.path.relpath(path, source_directory)
+
+            for fname in files:
+                filename = os.path.normpath(os.path.join(relpath, fname))
+                ext = os.path.splitext(filename)[1].lower()
+
+                logging.info("processing '%s' file %s" % (ext, filename))
+
                 if filename.lower() in exclude_files:
                     pass
                 else:
-                    source_file = os.path.join(self.source_gamedata_directory, filename)
-                    target_file = os.path.join(target_gamedata_directory, filename)
+                    source_file = os.path.join(source_directory, filename)
+                    target_file = os.path.join(target_directory, filename)
 
-                    logging.info("processing '%s' file %d/%d: %s" % (ext, i + 1, len(files), filename))
                     try:
                         if ext == ".gdb":
                             self.convert_gdb(source_file, target_file)
@@ -245,6 +230,13 @@ class rFactorToGSC2013:
                             shutil.copy(source_file, target_file)
                     except Exception:
                         logging.exception("rfactortools.process_gen_directory")
+
+    def convert_all(self, target_directory):
+        target_gamedata_directory = os.path.join(os.path.normpath(target_directory), "GameData")
+        logging.info("converting %s to %s" % (self.source_gamedata_directory, target_gamedata_directory))
+
+        self.convert_dirtree(self.source_gamedata_directory, target_gamedata_directory)
+        self.convert_files(self.source_gamedata_directory, target_gamedata_directory)
 
         try:
             rfactortools.process_gen_directory(target_gamedata_directory, True)
