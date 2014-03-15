@@ -68,7 +68,7 @@ def find_gamedata_directory(directory):
                                         % directory)
                     else:
                         gamedata = os.path.join(path, d)
-        return gamedata
+                        return gamedata
 
 
 class rFactorToGSC2013Config:
@@ -197,46 +197,74 @@ class rFactorToGSC2013:
                 if not os.path.isdir(t):
                     os.mkdir(t)
 
-    def convert_files(self, source_directory, target_directory):
-        for path, dirs, files in os.walk(source_directory):
-            relpath = os.path.relpath(path, source_directory)
+    def convert_gamedata(self, source_directory, target_directory):
+        for fname in os.listdir(source_directory):
+            path = os.path.join(source_directory, fname)
+
+            if os.path.isdir(path):
+                self.convert_toplevel_subdir(source_directory, target_directory, fname)
+            elif os.path.isfile(path):
+                self.convert_file(source_directory, target_directory, fname)
+            else:
+                logging.error("%s: ignoring unknown file" % path)
+
+    def convert_toplevel_subdir(self, source_directory, target_directory, dname):
+        source = os.path.join(source_directory, dname)
+
+        for fname in os.listdir(source):
+            path = os.path.join(source, fname)
+
+            if os.path.isdir(path):
+                self.convert_mod_subdir(source_directory, target_directory, os.path.join(dname, fname), fname)
+            elif os.path.isfile(path):
+                self.convert_file(source_directory, target_directory, os.path.join(dname, fname), None)
+            else:
+                logging.error("%s: ignoring unknown file" % path)
+
+    def convert_mod_subdir(self, source_directory, target_directory, dname, modname):
+        source = os.path.join(source_directory, dname)
+
+        for path, dirs, files in os.walk(source):
+            relpath = os.path.relpath(path, source)
 
             for fname in files:
-                filename = os.path.normpath(os.path.join(relpath, fname))
+                self.convert_file(source_directory, target_directory, os.path.join(dname, relpath, fname), modname)
+
+    def convert_file(self, source_directory, target_directory, filename, modname):
+        logging.info("processing '%s' of mod '%s'" % (filename, modname))
+
+        if filename.lower() in exclude_files:
+            pass
+        else:
+            source_file = os.path.join(source_directory, filename)
+            target_file = os.path.join(target_directory, filename)
+
+            try:
                 ext = os.path.splitext(filename)[1].lower()
-
-                logging.info("processing '%s' file %s" % (ext, filename))
-
-                if filename.lower() in exclude_files:
-                    pass
+                if ext == ".gdb":
+                    self.convert_gdb(source_file, target_file)
+                elif ext == ".veh":
+                    self.convert_veh(source_file, target_file, modname)
+                elif ext == ".aiw":
+                    self.convert_aiw(source_file, target_file)
+                elif ext == ".gmt":
+                    self.convert_gmt(source_file, target_file)
+                elif ext == ".tdf":
+                    self.convert_tdf(source_file, target_file)
+                elif ext == ".mas":
+                    self.convert_mas(source_file, target_file)
                 else:
-                    source_file = os.path.join(source_directory, filename)
-                    target_file = os.path.join(target_directory, filename)
+                    shutil.copy(source_file, target_file)
 
-                    try:
-                        if ext == ".gdb":
-                            self.convert_gdb(source_file, target_file)
-                        elif ext == ".veh":
-                            self.convert_veh(source_file, target_file, "placeholder")
-                        elif ext == ".aiw":
-                            self.convert_aiw(source_file, target_file)
-                        elif ext == ".gmt":
-                            self.convert_gmt(source_file, target_file)
-                        elif ext == ".tdf":
-                            self.convert_tdf(source_file, target_file)
-                        elif ext == ".mas":
-                            self.convert_mas(source_file, target_file)
-                        else:
-                            shutil.copy(source_file, target_file)
-                    except Exception:
-                        logging.exception("rfactortools.process_gen_directory")
+            except Exception:
+                logging.exception("rfactortools.process_gen_directory")
 
     def convert_all(self, target_directory):
         target_gamedata_directory = os.path.join(os.path.normpath(target_directory), "GameData")
         logging.info("converting %s to %s" % (self.source_gamedata_directory, target_gamedata_directory))
 
         self.convert_dirtree(self.source_gamedata_directory, target_gamedata_directory)
-        self.convert_files(self.source_gamedata_directory, target_gamedata_directory)
+        self.convert_gamedata(self.source_gamedata_directory, target_gamedata_directory)
 
         try:
             rfactortools.process_gen_directory(target_gamedata_directory, True)
