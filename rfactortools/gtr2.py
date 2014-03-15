@@ -34,7 +34,7 @@ class GTR2ToGSC2013:
 
         # TOOD: This doesn't work .gmt files have different formats in
         # GSC2013 and rFactor and need to be converted first.
-        
+
         logging.info("encrypting files")
         encrypted_mas_content = []
         for i, (name, data) in enumerate(mas_content):
@@ -45,7 +45,7 @@ class GTR2ToGSC2013:
         rfactortools.mas_pack_from_data(encrypted_mas_content, target_file)
 
     def convert_trk(self, source_file, target_file):
-        with open(filename, "rt", encoding="latin-1") as fin:
+        with open(source_file, "rt", encoding="latin-1") as fin:
             lines = fin.readlines()
 
         with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
@@ -68,7 +68,7 @@ class GTR2ToGSC2013:
                     logging.info("creating %s" % target_d)
                     os.mkdir(target_d)
 
-            for fname in files:            
+            for fname in files:
                 source_file = os.path.normpath(os.path.join(path, fname))
                 target_file = os.path.normpath(os.path.join(target_directory, relpath, fname))
 
