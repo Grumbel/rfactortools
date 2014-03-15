@@ -21,15 +21,34 @@ import argparse
 import os
 import io
 import sys
+import logging
 
 import rfactortools
 
 
+def try_fix_wav_path(gamedata, wav_file):
+    p = os.path.join(gamedata, "Sounds", wav_file)
+    if rfactortools.lookup_path_icase(p):
+        logging.debug("%s: file ok" % wav_file)
+        return wav_file
+    else:
+        p = os.path.join(gamedata, "Sounds", "F1SR", wav_file)
+        if rfactortools.lookup_path_icase(p):
+            r = os.path.join("F1SR", wav_file)
+            logging.debug("%s: file ok" % r)
+            return r
+        else:
+            logging.error("%s: couldn't locate file" % wav_file)
+            return wav_file
+
+
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+
     parser = argparse.ArgumentParser(description='rFactor .sfx processor')
     parser.add_argument('FILE', action='store', type=str, nargs='+',
                         help='.sfx file or directory containing .sfx files')
-    parser.add_argument('-m', '--modify', metavar='PREFIX', type=str,
+    parser.add_argument('-m', '--modify', action='store_true', default=False,
                         help="add PREFIX to the .wav path")
     parser.add_argument('-i', '--in-place', action='store_true', default=False,
                         help="overwrite origin files after changes")
@@ -46,27 +65,27 @@ if __name__ == "__main__":
         else:
             files.append(path)
 
-    if args.modify is None:
-        if args.gamedata:
-            gamedata = args.gamedata
-        else:
-            gamadata = None
+    if args.gamedata:
+        gamedata = args.gamedata
+    else:
+        gamedata = None
 
+    if not args.modify:
         for filename in files:
-            wavs = rfactortools.parse_sfxfile(filename)
-            for wav in wavs:
-                if gamadata:
-                    p = os.path.join(gamedata, "Sounds", wav)
-                    if rfactortools.lookup_path_icase(p):
-                        print("%s: ok" % wav)
-                    else:
-                        print("%s: failure" % wav)
-                else:
+            sfx = rfactortools.parse_sfxfile(filename)
+            if gamedata:
+                sfx.check(gamedata, "F1SR")
+            else:
+                for wav in sfx.wavs:
                     print(wav)
     else:
+        if gamedata is None:
+            raise Exception("--gamedata required")
+
         for filename in files:
             sout = io.StringIO()
-            rfactortools.modify_sfxfile(sout, filename, args.modify)
+            rfactortools.modify_sfxfile(sout, filename,
+                                        lambda wav: try_fix_wav_path(gamedata, wav))
 
             if args.in_place:
                 if args.backup:

@@ -15,7 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import os
 import re
+
 import rfactortools
 
 
@@ -24,33 +26,56 @@ wav1_regex = re.compile(r'^\s*([^=]+)\s*=\s*([0-9]+\.[0-9]+|[0-9]+),(.*\.wav)\s*
 wav2_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*\.wav)\s*(.*)', re.IGNORECASE)
 
 
-def modify_sfxfile(fout, filename, prefix):
-    with open(filename, 'rt', encoding='latin-1') as fin:
-        for orig_line in fin.read().splitlines():
-            m = comment_regex.match(orig_line)
-            if m:
-                comment = m.group(2)
-                line = m.group(1)
-            else:
-                comment = None
-                line = orig_line
+class SFX:
 
-            suffix = (" " + comment) if comment else ""
+    def __init__(self):
+        self.wavs = []
 
-            m = wav1_regex.match(line)
-            if m:
-                fout.write("%s=%s,%s%s%s\n" % (m.group(1), prefix, m.group(2), m.group(3), suffix))
+    def check(self, gamedata_directory, modname):
+        for wav in self.wavs:
+            p = os.path.join(gamedata_directory, "Sounds", wav)
+            if rfactortools.lookup_path_icase(p):
+                print("%s: ok" % wav)
             else:
-                m = wav2_regex.match(line)
-                if m:
-                    fout.write("%s=%s%s%s\n" % (m.group(1), prefix, m.group(2), suffix))
+                p = os.path.join(gamedata_directory, "Sounds", modname, wav)
+                if rfactortools.lookup_path_icase(p):
+                    print("%s: ok with fix" % wav)
                 else:
-                    fout.write(orig_line)
-                    fout.write("\n")
+                    print("%s: failure" % wav)
+
+
+def modify_sfxfile(fout, filename, on_wav_file):
+    with open(filename, 'rt', encoding='latin-1') as fin:
+        lines = fin.read().splitlines()
+
+    for orig_line in lines:
+        m = comment_regex.match(orig_line)
+        if m:
+            comment = m.group(2)
+            line = m.group(1)
+        else:
+            comment = None
+            line = orig_line
+
+        suffix = (" " + comment) if comment else ""
+
+        m = wav1_regex.match(line)
+        if m:
+            wav = on_wav_file(rfactortools.nt2posixpath(m.group(3)))
+            fout.write("%s=%s,%s%s\n" % (m.group(1), m.group(2), wav, suffix))
+        else:
+            m = wav2_regex.match(line)
+            if m:
+                wav = on_wav_file(rfactortools.nt2posixpath(m.group(2)))
+                fout.write("%s=%s%s\n" % (m.group(1), wav, suffix))
+            else:
+                fout.write(orig_line)
+                fout.write("\n")
 
 
 def parse_sfxfile(filename):
-    wavs = []
+    sfx = SFX()
+
     with open(filename, 'rt', encoding='latin-1') as fin:
         for orig_line in fin.read().splitlines():
             m = comment_regex.match(orig_line)
@@ -63,12 +88,12 @@ def parse_sfxfile(filename):
 
             m = wav1_regex.match(line)
             if m:
-                wavs.append(rfactortools.nt2posixpath(m.group(3)))
+                sfx.wavs.append(rfactortools.nt2posixpath(m.group(3)))
             else:
                 m = wav2_regex.match(line)
                 if m:
-                    wavs.append(rfactortools.nt2posixpath(m.group(2)))
-    return wavs
+                    sfx.wavs.append(rfactortools.nt2posixpath(m.group(2)))
+    return sfx
 
 
 # EOF #
