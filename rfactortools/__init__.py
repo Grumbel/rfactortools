@@ -17,6 +17,7 @@
 from .aiw import parse_aiwfile, render_aiw
 from .crypt import games, crypt_info, crypt_info_from_file, get_skip, \
     encrypt_file, encrypt_data, decrypt_file, decrypt_data
+from .gtr2 import GTR2ToGSC2013
 from .gsc2013 import rFactorToGSC2013, rFactorToGSC2013Config
 from .mas import mas_pack, mas_unpack, mas_list, mas_pack_from_data, mas_unpack_to_data
 from .scn import gen_check_errors, process_gen_directory, modify_vehicle_file
@@ -31,6 +32,7 @@ __all__ = [
     'parse_aiwfile', 'render_aiw',
     "games", "crypt_info", "crypt_info_from_file", "get_skip",
     "encrypt_file", "encrypt_data", "decrypt_file", "decrypt_data",
+    'GTR2ToGSC2013',
     "rFactorToGSC2013", "rFactorToGSC2013Config",
     "mas_pack", "mas_unpack", "mas_list", "mas_pack_from_data", "mas_unpack_to_data",
     "gen_check_errors", "process_gen_directory", "modify_vehicle_file",
