@@ -61,7 +61,16 @@ To convert a mod:
    it's a base mod that contains sky textures necessary to run converted mods.
    It's available at:
 
-https://mega.co.nz/#!zlRFTAjD!byvxHGBi-19Cj9maG4bSTUqMX19lJuULKCAQbQ7Lr0g
+   https://mega.co.nz/#!zlRFTAjD!byvxHGBi-19Cj9maG4bSTUqMX19lJuULKCAQbQ7Lr0g
+
+7) If something goes wrong, full conversion logs are saved to
+   rfactortools-gui-*.log. For further tweaking, minised-gui.exe, a
+   tool that allows you to search&replace across multiple files is
+   included with rfactortools.
+
+8) If you want to report a bug or request a feature, you can do so at:
+
+   https://github.com/Grumbel/rfactortools/issues
 
 Car mods will show up in the same class as the Mini Challenge.
 
