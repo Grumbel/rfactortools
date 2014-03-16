@@ -15,13 +15,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import logging
+import ntpath
 import os
 import re
 
 import rfactortools
 
 
-comment_regex = re.compile(r'(.*?)(//.*)')
+comment_regex = re.compile(r'(.*?)(\s+//.*)')
 wav1_regex = re.compile(r'^\s*([^=]+)\s*=\s*([0-9]+\.[0-9]+|[0-9]+),(.*\.wav)\s*(.*)', re.IGNORECASE)
 wav2_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*\.wav)\s*(.*)', re.IGNORECASE)
 
@@ -44,6 +46,23 @@ class SFX:
                     print("%s: failure" % wav)
 
 
+def try_fix_wav_path(gamedata, modname, wav_file):
+    """Return either ``None`` to change nothing or a new wav path""" 
+    p = os.path.join(gamedata, "Sounds", wav_file)
+    if rfactortools.lookup_path_icase(p):
+        logging.debug("%s: file ok" % wav_file)
+        return None
+    else:
+        p = os.path.join(gamedata, "Sounds", modname, wav_file)
+        if rfactortools.lookup_path_icase(p):
+            r = os.path.join(modname, wav_file)
+            logging.debug("%s: file ok" % r)
+            return r
+        else:
+            logging.error("%s: couldn't locate file" % wav_file)
+            return None
+
+
 def modify_sfxfile(fout, filename, on_wav_file):
     with open(filename, 'rt', encoding='latin-1') as fin:
         lines = fin.read().splitlines()
@@ -54,19 +73,27 @@ def modify_sfxfile(fout, filename, on_wav_file):
             comment = m.group(2)
             line = m.group(1)
         else:
-            comment = None
+            comment = ""
             line = orig_line
 
-        suffix = (" " + comment) if comment else ""
+        suffix = comment
 
         m = wav1_regex.match(line)
         if m:
             wav = on_wav_file(rfactortools.nt2posixpath(m.group(3)))
+            if wav is not None:
+                wav = ntpath.normpath(wav)
+            else:
+                wav = m.group(3)
             fout.write("%s=%s,%s%s\n" % (m.group(1), m.group(2), wav, suffix))
         else:
             m = wav2_regex.match(line)
             if m:
                 wav = on_wav_file(rfactortools.nt2posixpath(m.group(2)))
+                if wav is not None:
+                    wav = ntpath.normpath(wav)
+                else:
+                    wav = m.group(2)
                 fout.write("%s=%s%s\n" % (m.group(1), wav, suffix))
             else:
                 fout.write(orig_line)

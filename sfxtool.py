@@ -26,22 +26,6 @@ import logging
 import rfactortools
 
 
-def try_fix_wav_path(gamedata, wav_file):
-    p = os.path.join(gamedata, "Sounds", wav_file)
-    if rfactortools.lookup_path_icase(p):
-        logging.debug("%s: file ok" % wav_file)
-        return wav_file
-    else:
-        p = os.path.join(gamedata, "Sounds", "F1SR", wav_file)
-        if rfactortools.lookup_path_icase(p):
-            r = os.path.join("F1SR", wav_file)
-            logging.debug("%s: file ok" % r)
-            return r
-        else:
-            logging.error("%s: couldn't locate file" % wav_file)
-            return wav_file
-
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
@@ -85,7 +69,7 @@ if __name__ == "__main__":
         for filename in files:
             sout = io.StringIO()
             rfactortools.modify_sfxfile(sout, filename,
-                                        lambda wav: try_fix_wav_path(gamedata, wav))
+                                        lambda wav: rfactortools.try_fix_wav_path(gamedata, wav))
 
             if args.in_place:
                 if args.backup:

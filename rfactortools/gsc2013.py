@@ -113,6 +113,13 @@ class rFactorToGSC2013:
                               line, flags=re.IGNORECASE)
                 fout.write(line)
 
+    def convert_sfx(self, source_file, target_file, modname):
+        with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
+            rfactortools.modify_sfxfile(fout, source_file,
+                                        lambda wav: 
+                                        rfactortools.try_fix_wav_path(self.source_gamedata_directory, 
+                                                                      modname, wav))
+
     def convert_aiw(self, source_file, target_file):
         shutil.copy(source_file, target_file)
 
@@ -253,6 +260,8 @@ class rFactorToGSC2013:
                     self.convert_tdf(source_file, target_file)
                 elif ext == ".mas":
                     self.convert_mas(source_file, target_file)
+                elif ext == ".sfx":
+                    self.convert_sfx(source_file, target_file, modname)
                 else:
                     shutil.copy(source_file, target_file)
 
