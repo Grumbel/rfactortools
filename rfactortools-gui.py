@@ -24,6 +24,7 @@ from tkinter import \
 import PIL.Image
 import PIL.ImageTk
 import argparse
+import datetime
 import logging
 import sys
 import tkinter.filedialog
@@ -335,7 +336,8 @@ def main():
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    handler = logging.FileHandler("rfactortools-gui.log", mode='w')
+    time_str = datetime.datetime.now().strftime("%Y-%m-%dT%H%M%S")
+    handler = logging.FileHandler("rfactortools-gui-%s.log" % time_str, mode='w')
     handler.setLevel(logging.DEBUG)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
