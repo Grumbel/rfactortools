@@ -154,7 +154,7 @@ class rFactorToGSC2013:
             for line in lines:
                 # reiza5 (Mini Challenge) is needed for the cars to
                 # show up in the car list
-                if self.clear_classes:
+                if self.cfg.clear_classes:
                     line = re.sub(r'^Classes=".*',
                                   r'Classes="%s"' % self.cfg.reiza_class,
                                   line, flags=re.IGNORECASE)
