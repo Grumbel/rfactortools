@@ -81,7 +81,6 @@ class rFactorToGSC2013Config:
         self.vehicle_category = None
         self.track_category = None
 
-
 class rFactorToGSC2013:
 
     """
