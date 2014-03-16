@@ -111,6 +111,12 @@ class rFactorToGSC2013:
                 line = re.sub(r'Filter Properties *=.*',
                               r'Filter Properties = StockV8 *',
                               line, flags=re.IGNORECASE)
+
+                if self.cfg.track_category:
+                    line = re.sub(r'^VenueName\s*=\s*(.*)"',
+                                  r'VenueName = %s, \1"' % self.cfg.track_category,
+                                  line, flags=re.IGNORECASE)
+
                 fout.write(line)
 
     def convert_sfx(self, source_file, target_file, modname):

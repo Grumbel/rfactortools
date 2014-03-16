@@ -157,16 +157,15 @@ class Application(Frame):
 
         self.vehicle_category = StringVar(value="")
         self.vehicle_category_label = Label(self.option_frame, text="Vehicle Category:")
-        self.vehicle_category_label.grid(column=2, row=0)
+        self.vehicle_category_label.grid(column=2, row=0, sticky=E)
         self.vehicle_category_entry = Entry(self.option_frame, textvariable=self.vehicle_category)
         self.vehicle_category_entry.grid(column=3, row=0, sticky=W)
 
         self.track_category = StringVar(value="")
         self.track_category_label = Label(self.option_frame, text="Track Category:")
-        self.track_category_label.grid(column=2, row=1)
+        self.track_category_label.grid(column=2, row=1, sticky=E)
         self.track_category_entry = Entry(self.option_frame, textvariable=self.track_category)
         self.track_category_entry.grid(column=3, row=1, sticky=W)
-        self.track_category_entry.config(state=DISABLED)
 
         # Buttons
         self.button_frame = Frame(self)
