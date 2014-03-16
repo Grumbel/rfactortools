@@ -134,7 +134,7 @@ def process_scn_veh_file(vfs, modname, veh_filename, scn_short_filename, vehdir,
     # resolve scn_filename to a proper path
     scn_filename = find_file_backwards(vfs, os.path.dirname(veh_filename), scn_short_filename)
     if not scn_filename:
-        raise Exception("error: couldn't find .gen file '%s'" % (veh_filename, scn_short_filename))
+        raise Exception("error: couldn't find .gen file '%s' '%s'" % (veh_filename, scn_short_filename))
 
     print("gen:", scn_filename)
 
