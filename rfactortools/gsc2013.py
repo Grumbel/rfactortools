@@ -76,6 +76,7 @@ class rFactorToGSC2013Config:
     def __init__(self):
         self.unique_team_names = True
         self.force_track_thumbnails = False
+        self.clear_classes = False
         self.reiza_class = "reiza5"
         self.vehicle_category = None
         self.track_category = None
@@ -154,9 +155,14 @@ class rFactorToGSC2013:
             for line in lines:
                 # reiza5 (Mini Challenge) is needed for the cars to
                 # show up in the car list
-                line = re.sub(r'^Classes="',
-                              r'Classes="%s, ' % self.cfg.reiza_class,
-                              line, flags=re.IGNORECASE)
+                if self.clear_classes:
+                    line = re.sub(r'^Classes=".*',
+                                  r'Classes="%s"' % self.cfg.reiza_class,
+                                  line, flags=re.IGNORECASE)
+                else:
+                    line = re.sub(r'^Classes="',
+                                  r'Classes="%s, ' % self.cfg.reiza_class,
+                                  line, flags=re.IGNORECASE)
 
                 # Adding a suffix to Team is needed as conflicts in
                 # Team names lead to cars getting sorted into the

@@ -39,7 +39,7 @@ welcome_text = """            ..:: rFactor to Game Stock Car 2013 ::..
 This application allows you to convert rFactor mods so that they can
 be used with Game Stock Car 2013. Conversation is for most part
 automatic, but some issues may remain, the file FAQ.md explains how to
-fix or work around some of them
+fix or work around some of them.
 
 To convert a mod:
 
@@ -56,6 +56,12 @@ To convert a mod:
 5) Once the conversion is finished copy the mod over to the GSC2013
    directory
 
+6) If you have converted a track, install gsc2013-missing-track-textures.7z,
+   it's a base mod that contains sky textures necessary to run converted mods.
+   It's available at:
+
+https://mega.co.nz/#!zlRFTAjD!byvxHGBi-19Cj9maG4bSTUqMX19lJuULKCAQbQ7Lr0g
+
 Car mods will show up in the same class as the Mini Challenge.
 
 
@@ -66,17 +72,54 @@ Unique Team Names:
 Adds a suffix to the 'Team' name in .veh files to make them unique and
 avoid conflicts with other mods
 
-
 Force Track Thumbnail:
 Always generate a new track thumbnail, ignoring the one from the
 original mod
 
+Clear Vehicle Classes:
+Empties the "Classes" tag in the .veh file and only uses the content of
+"Reiza Class", useful when in cases where
+
+Vehicle Category ("Category" tag in .veh files):
+Allows you to add a new folder for the car mod in the vehicle list,
+useful in cases the mod doesn't provide one by itself. Multiple
+folders can be created by separating the names with a comma, e.g.
+"Formula 1, 1994".
+
+Track Category (aka "VenueName" tag in .gdb files):
+Allows you to add a new folder for the car mod in the track list,
+useful in cases the mod doesn't provide one by itself. Multiple
+folders can be created by separating the names with a comma, e.g.
+"Anderstorp GP, 2003".
+
+Reiza Class (aka "Classes" tag in .veh files):
+Allows you to prepend a class to the "Classes" tag in the .veh file.
+Only vehicles containing a reiza class will show up in GSC2013. Valid
+classes are:
+
+reiza1: Camaro
+reiza2: ???
+reiza3: ???
+reiza4: ???
+reiza5: Mini
+reiza6: Opala
+reiza7: Kart Direct
+reiza8: Kart Bodywork
+reiza9: Formula Retro
+reiza10: Kart Shifter
+
+You can specify multiple classes by separating them by comma, e.g.
+"reiza5, Formula1 1994", useful in combination with "Clear Vehicle
+Classes".
+
 
 Disclaimer:
+-----------
 
 rfactortools is a homebrew tool collection for rFactor, Race07 and
 GSC2013 and in no way affiliated with Image Space Incorporated, SimBin
 Studios or Reiza Studios.
+
 """
 
 
@@ -155,6 +198,11 @@ class Application(Frame):
                                                       variable=self.force_track_thumb)
         self.force_track_thumb_checkbox.grid(column=0, row=1, columnspan=2, sticky=W)
 
+        self.clear_classes = BooleanVar(value=False)
+        self.clear_classes_checkbox = Checkbutton(self.option_frame, text="Clear Vehicle Classes",
+                                                  variable=self.clear_classes)
+        self.clear_classes_checkbox.grid(column=0, row=2, columnspan=2, sticky=W)
+
         self.vehicle_category = StringVar(value="")
         self.vehicle_category_label = Label(self.option_frame, text="Vehicle Category:")
         self.vehicle_category_label.grid(column=2, row=0, sticky=E)
@@ -166,6 +214,12 @@ class Application(Frame):
         self.track_category_label.grid(column=2, row=1, sticky=E)
         self.track_category_entry = Entry(self.option_frame, textvariable=self.track_category)
         self.track_category_entry.grid(column=3, row=1, sticky=W)
+
+        self.reiza_class = StringVar(value="reiza5")
+        self.reiza_class_label = Label(self.option_frame, text="Reiza Class:")
+        self.reiza_class_label.grid(column=2, row=2, sticky=E)
+        self.reiza_class_entry = Entry(self.option_frame, textvariable=self.reiza_class)
+        self.reiza_class_entry.grid(column=3, row=2, sticky=W)
 
         # Buttons
         self.button_frame = Frame(self)
@@ -219,14 +273,19 @@ class Application(Frame):
 
             try:
                 cfg = rfactortools.rFactorToGSC2013Config()
+
                 cfg.unique_team_names = self.unique_team_names.get()
                 cfg.force_track_thumbnails = self.force_track_thumb.get()
+                cfg.clear_classes = self.clear_classes.get()
 
                 if self.vehicle_category.get().strip():
                     cfg.vehicle_category = self.vehicle_category.get().strip()
 
                 if self.track_category.get().strip():
                     cfg.track_category = self.track_category.get().strip()
+
+                if self.reiza_class.get().strip():
+                    cfg.reiza_class = self.reiza_class.get().strip()
 
                 converter = rfactortools.rFactorToGSC2013(self.source_directory.get(), cfg)
                 converter.convert_all(self.target_directory.get())
