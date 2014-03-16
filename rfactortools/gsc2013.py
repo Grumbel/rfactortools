@@ -116,8 +116,8 @@ class rFactorToGSC2013:
     def convert_sfx(self, source_file, target_file, modname):
         with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
             rfactortools.modify_sfxfile(fout, source_file,
-                                        lambda wav: 
-                                        rfactortools.try_fix_wav_path(self.source_gamedata_directory, 
+                                        lambda wav:
+                                        rfactortools.try_fix_wav_path(self.source_gamedata_directory,
                                                                       modname, wav))
 
     def convert_aiw(self, source_file, target_file):

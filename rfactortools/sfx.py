@@ -47,7 +47,7 @@ class SFX:
 
 
 def try_fix_wav_path(gamedata, modname, wav_file):
-    """Return either ``None`` to change nothing or a new wav path""" 
+    """Return either ``None`` to change nothing or a new wav path"""
     p = os.path.join(gamedata, "Sounds", wav_file)
     if rfactortools.lookup_path_icase(p):
         logging.debug("%s: file ok" % wav_file)
