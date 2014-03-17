@@ -216,11 +216,11 @@ class rFactorToGSC2013:
                     os.mkdir(t)
 
     def convert_tga(self, source_file, target_file):
-        is_track_thumbnail = bool(source_file.lower().endswith("number.tga") and
-                                  rfactortools.lookup_path_icase(source_file[-10] + ".veh"))
+        is_vehicle_thumbnail = bool(source_file.lower().endswith("number.tga") and
+                                    rfactortools.lookup_path_icase(source_file[-10] + ".veh"))
 
-        is_vehicle_thumbnail = bool(source_file.lower().endswith("mini.tga") and
-                                    rfactortools.lookup_path_icase(source_file[-8] + ".gdb"))
+        is_track_thumbnail = bool(source_file.lower().endswith("mini.tga") and
+                                  rfactortools.lookup_path_icase(source_file[-8] + ".gdb"))
 
         if is_vehicle_thumbnail:
             rfactortools.resize_to_fit_img_file_with_target(source_file, target_file, 252, 64)
