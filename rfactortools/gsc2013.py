@@ -113,8 +113,8 @@ class rFactorToGSC2013:
                               line, flags=re.IGNORECASE)
 
                 if self.cfg.track_category:
-                    line = re.sub(r'^VenueName\s*=\s*(.*)',
-                                  r'VenueName = %s, \1' % self.cfg.track_category,
+                    line = re.sub(r'^(\s*)VenueName\s*=\s*(.*)',
+                                  r'\1VenueName = %s, \2' % self.cfg.track_category,
                                   line, flags=re.IGNORECASE)
 
                 fout.write(line)
