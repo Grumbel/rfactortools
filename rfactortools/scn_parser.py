@@ -126,8 +126,9 @@ class SearchReplaceScnParser(ScnParser):
         if self.section == 0:
             if key.lower() == "instance" and value.lower() == "skyboxi":
                 self.delete_next_section = True
+
             elif key.lower() == "masfile":
-                if self.search_path is not None:
+                if self.mas_files is not None:
                     for p in self.mas_files:
                         self.fout.write("MASFile=%s\n" % ntpath.normpath(p))
 

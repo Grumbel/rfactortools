@@ -145,22 +145,19 @@ def process_scn_veh_file(vfs, modname, veh_filename, scn_short_filename, vehdir,
     print("    MasFiles:", info.mas_files)
     print()
 
-    orig_errs, orig_warns = rfactortools.gen_check_errors(vfs, info.search_path, info.mas_files, vehdir, teamdir)
-
     if not fix:
+        orig_errs, orig_warns = rfactortools.gen_check_errors(vfs, info.search_path, info.mas_files, vehdir, teamdir)
         append_errors(scn_filename, orig_errs, orig_warns, errors)
     else:
         # if there is a cmaps in the mod, use that instead of the one in <VEHDIR>
         cmaps = vfs.find_file("cmaps.mas")
         if cmaps:
             cmaps = os.path.relpath(cmaps, vehdir)
+            for i, m in enumerate(info.mas_files):
+                if m.lower() == "cmaps.mas":
+                    info.mas_files[i] = cmaps
 
-        mas_files = []
-        for m in info.mas_files:
-            if cmaps and m.lower() == "cmaps.mas":
-                mas_files.append(cmaps)
-            else:
-                mas_files.append(m)
+        orig_errs, orig_warns = rfactortools.gen_check_errors(vfs, info.search_path, info.mas_files, vehdir, teamdir)
 
         if orig_errs:
             # add modname to the SearchPath to avoid errors
@@ -170,14 +167,15 @@ def process_scn_veh_file(vfs, modname, veh_filename, scn_short_filename, vehdir,
             search_path = info.search_path
         search_path.sort()
 
-        new_errs, new_warns = rfactortools.gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir)
+        new_errs, new_warns = rfactortools.gen_check_errors(vfs, search_path, info.mas_files, vehdir, teamdir)
 
         append_errors(scn_filename, new_errs, new_warns, errors)
 
-        # write a new file if there are no or less errors or if there
-        # is a cmaps.mas
-        if not new_errs or len(new_errs) < len(orig_errs) or cmaps:
-            rfactortools.modify_vehicle_file(vfs, scn_filename, search_path, mas_files, vehdir, teamdir)
+        # write a new file if there are no or less errors
+        if not new_errs or len(new_errs) < len(orig_errs):
+            rfactortools.modify_vehicle_file(vfs, scn_filename, search_path, info.mas_files, vehdir, teamdir)
+        elif cmaps:
+            rfactortools.modify_vehicle_file(vfs, scn_filename, info.search_path, info.mas_files, vehdir, teamdir)
 
 
 def process_veh_file(vfs, veh_filename, fix, errors):
