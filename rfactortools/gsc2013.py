@@ -20,7 +20,6 @@ import os
 import re
 import shutil
 
-import imgtool
 import rfactortools
 
 
@@ -80,6 +79,7 @@ class rFactorToGSC2013Config:
         self.reiza_class = "reiza5"
         self.vehicle_category = None
         self.track_category = None
+
 
 class rFactorToGSC2013:
 
@@ -215,6 +215,20 @@ class rFactorToGSC2013:
                 if not os.path.isdir(t):
                     os.mkdir(t)
 
+    def convert_tga(self, source_file, target_file):
+        is_track_thumbnail = bool(source_file.lower().endswith("number.tga") and
+                                  rfactortools.lookup_path_icase(source_file[-10] + ".veh"))
+
+        is_vehicle_thumbnail = bool(source_file.lower().endswith("mini.tga") and
+                                    rfactortools.lookup_path_icase(source_file[-8] + ".gdb"))
+
+        if is_vehicle_thumbnail:
+            rfactortools.resize_to_fit_img_file_with_target(source_file, target_file, 252, 64)
+        elif is_track_thumbnail and not self.cfg.force_track_thumbnails:
+            rfactortools.resize_to_fit_img_file_with_target(source_file, target_file, 252, 249)
+        else:
+            shutil.copy(source_file, target_file)
+
     def convert_gamedata(self, source_directory, target_directory):
         for fname in os.listdir(source_directory):
             path = os.path.join(source_directory, fname)
@@ -227,6 +241,8 @@ class rFactorToGSC2013:
                 logging.error("%s: ignoring unknown file" % path)
 
     def convert_toplevel_subdir(self, source_directory, target_directory, dname):
+        """Convert ``Vehicles``, ``Locations``, etc."""
+
         source = os.path.join(source_directory, dname)
 
         for fname in os.listdir(source):
@@ -240,6 +256,8 @@ class rFactorToGSC2013:
                 logging.error("%s: ignoring unknown file" % path)
 
     def convert_mod_subdir(self, source_directory, target_directory, dname, modname):
+        """Convert ``Vehicles/some_mod/``, ``Locations/some_mod``, etc."""
+
         source = os.path.join(source_directory, dname)
 
         for path, dirs, files in os.walk(source):
@@ -273,11 +291,13 @@ class rFactorToGSC2013:
                     self.convert_mas(source_file, target_file)
                 elif ext == ".sfx":
                     self.convert_sfx(source_file, target_file, modname)
+                elif ext == ".tga":
+                    self.convert_tga(source_file, target_file)
                 else:
                     shutil.copy(source_file, target_file)
 
             except Exception:
-                logging.exception("rfactortools.process_gen_directory")
+                logging.exception("%s: %s: rfactortools.convert_file failed" % (source_file, target_file))
 
     def convert_all(self, target_directory):
         target_gamedata_directory = os.path.join(os.path.normpath(target_directory), "GameData")
@@ -290,11 +310,6 @@ class rFactorToGSC2013:
             rfactortools.process_gen_directory(target_gamedata_directory, True)
         except Exception:
             logging.exception("rfactortools.process_gen_directory")
-
-        try:
-            imgtool.process_directory(target_gamedata_directory)
-        except Exception:
-            logging.exception("imgtool error")
 
 
 # EOF #

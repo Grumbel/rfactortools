@@ -19,7 +19,7 @@ from .crypt import games, crypt_info, crypt_info_from_file, get_skip, \
     encrypt_file, encrypt_data, decrypt_file, decrypt_data
 from .gtr2 import GTR2ToGSC2013
 from .gsc2013 import rFactorToGSC2013, rFactorToGSC2013Config
-from .img import resize_to_fit_img_file
+from .img import resize_to_fit_img_file, resize_to_fit_img_file_with_target
 from .mas import mas_pack, mas_unpack, mas_list, mas_pack_from_data, mas_unpack_to_data
 from .scn import gen_check_errors, process_gen_directory, modify_vehicle_file
 from .scn_parser import ScnParser, InfoScnParser, SearchReplaceScnParser, process_scnfile
@@ -35,7 +35,7 @@ __all__ = [
     "encrypt_file", "encrypt_data", "decrypt_file", "decrypt_data",
     'GTR2ToGSC2013',
     "rFactorToGSC2013", "rFactorToGSC2013Config",
-    "resize_to_fit_img_file",
+    "resize_to_fit_img_file", "resize_to_fit_img_file_with_target",
     "mas_pack", "mas_unpack", "mas_list", "mas_pack_from_data", "mas_unpack_to_data",
     "gen_check_errors", "process_gen_directory", "modify_vehicle_file",
     "ScnParser", "InfoScnParser", "SearchReplaceScnParser", "process_scnfile",
