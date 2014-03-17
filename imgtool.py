@@ -16,36 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PIL import Image
+
 import os
 import argparse
 
 import rfactortools
-
-
-def resize_to_fit(img, w, h):
-    iw, ih = img.size
-
-    if iw <= w and ih <= h:
-        return img
-    else:
-        w_ratio = w / iw
-        h_ratio = h / ih
-
-        if w_ratio > h_ratio:
-            return img.resize((int(iw * h_ratio), h), Image.ANTIALIAS)
-        else:
-            return img.resize((w, int(ih * w_ratio)), Image.ANTIALIAS)
-
-
-def resize_to_fit_img_file(filename, w, h):
-    img = Image.open(filename)
-    newimg = resize_to_fit(img, w, h)
-    if newimg != img:
-        print("resizing %s %s to %s" % (filename, img.size, newimg.size))
-        newimg.save(filename)
-    else:
-        print("ignoring %s %s" % (filename, img.size))
 
 
 def process_directory(directory):
@@ -56,12 +31,13 @@ def process_directory(directory):
         if ext.lower() == ".veh":
             img = os.path.join(name + "number.tga")
             if vfs.file_exists(img):
-                resize_to_fit_img_file(vfs.lookup_file(img), 252, 64)
+                rfactortools.resize_to_fit_img_file(vfs.lookup_file(img), 252, 64)
 
         elif ext.lower() == ".gdb":
             img = os.path.join(name + "mini.tga")
             if vfs.file_exists(img):
-                resize_to_fit_img_file(vfs.lookup_file(img), 252, 249)
+                rfactortools.resize_to_fit_img_file(vfs.lookup_file(img), 252, 249)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='rFactor thumbnail image resizer')
@@ -70,5 +46,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     process_directory(args.DIRECTORY)
+
 
 # EOF #
