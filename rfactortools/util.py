@@ -57,16 +57,22 @@ def _lookup_path_icase(root, rest):
 def lookup_path_icase(filename):
     """Returns list of files matching filename in a case insensitive manner"""
 
-    assert filename, "filename must not be empty: %s" % filename
-
-    filename = os.path.normpath(filename)
-    path = pathlib.Path(filename)
-    parts = path.parts
-
-    if not path.is_absolute():
-        return _lookup_path_icase(os.curdir, parts)
+    if os.name == 'nt':
+        if os.path.exists(filename):
+            return [filename]
+        else:
+            return []
     else:
-        return _lookup_path_icase(parts[0], parts[1:])
+        assert filename, "filename must not be empty: %s" % filename
+
+        filename = os.path.normpath(filename)
+        path = pathlib.Path(filename)
+        parts = path.parts
+
+        if not path.is_absolute():
+            return _lookup_path_icase(os.curdir, parts)
+        else:
+            return _lookup_path_icase(parts[0], parts[1:])
 
 
 # EOF #
