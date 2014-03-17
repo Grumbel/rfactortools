@@ -8,6 +8,7 @@
 /build/
 /dist/
 /external/
+/logs/
 /old/
 /other/quickbms/src/quickbms
 /other/wtcced/.sconsign.dblite

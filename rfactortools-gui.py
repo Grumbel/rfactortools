@@ -26,6 +26,7 @@ import PIL.ImageTk
 import argparse
 import datetime
 import logging
+import os
 import sys
 import tkinter.filedialog
 import tkinter.messagebox
@@ -346,7 +347,9 @@ def main():
     logger.addHandler(handler)
 
     time_str = datetime.datetime.now().strftime("%Y-%m-%dT%H%M%S")
-    handler = logging.FileHandler("rfactortools-gui-%s.log" % time_str, mode='w')
+    if not os.path.isdir("logs"):
+        os.mkdir("logs")
+    handler = logging.FileHandler("logs/rfactortools-gui-%s.log" % time_str, mode='w')
     handler.setLevel(logging.DEBUG)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
