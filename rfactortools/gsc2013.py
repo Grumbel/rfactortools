@@ -224,8 +224,9 @@ class rFactorToGSC2013:
 
         if is_vehicle_thumbnail:
             rfactortools.resize_to_fit_img_file_with_target(source_file, target_file, 252, 64)
-        elif is_track_thumbnail and not self.cfg.force_track_thumbnails:
-            rfactortools.resize_to_fit_img_file_with_target(source_file, target_file, 252, 249)
+        elif is_track_thumbnail:
+            if not self.cfg.force_track_thumbnails:
+                rfactortools.resize_to_fit_img_file_with_target(source_file, target_file, 252, 249)
         else:
             shutil.copy(source_file, target_file)
 
