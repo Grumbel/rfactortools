@@ -1,6 +1,13 @@
 Frequently Asked Questions about converting rFactor mods 
 ========================================================
 
+Can I convert GTL, GTR2 or Race07 mods?
+---------------------------------------
+
+No. Those games use different .gmt file formats and conversion of
+those is not supported by rfactortools at the moment.
+
+
 How do rFactor and GSC2013 differ?
 ----------------------------------
 
