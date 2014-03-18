@@ -123,6 +123,10 @@ You can specify multiple classes by separating them by comma, e.g.
 "reiza5, Formula1 1994", useful in combination with "Clear Vehicle
 Classes".
 
+Track Filter Properties:
+The filter decides which cars can race on a track. The default of
+"StockV8 *" means all race cars can race on the track. If you want to
+race on a track with karts, change it to "Kart *".
 
 Disclaimer:
 -----------
@@ -232,6 +236,12 @@ class Application(Frame):
         self.reiza_class_entry = Entry(self.option_frame, textvariable=self.reiza_class)
         self.reiza_class_entry.grid(column=3, row=2, sticky=W)
 
+        self.track_filter_properties = StringVar(value="StockV8 *")
+        self.track_filter_properties_label = Label(self.option_frame, text="Track Filter Properties:")
+        self.track_filter_properties_label.grid(column=2, row=3, sticky=E)
+        self.track_filter_properties_entry = Entry(self.option_frame, textvariable=self.track_filter_properties)
+        self.track_filter_properties_entry.grid(column=3, row=3, sticky=W)
+
         # Buttons
         self.button_frame = Frame(self)
         self.button_frame.grid(column=0, row=3, columnspan=3, sticky=W+E+N+S)
@@ -297,6 +307,8 @@ class Application(Frame):
 
                 if self.reiza_class.get().strip():
                     cfg.reiza_class = self.reiza_class.get().strip()
+
+                cfg.track_filter_properties = self.track_filter_properties.get().strip()
 
                 converter = rfactortools.rFactorToGSC2013(self.source_directory.get(), cfg)
                 converter.convert_all(self.target_directory.get())

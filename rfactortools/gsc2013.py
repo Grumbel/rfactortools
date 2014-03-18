@@ -79,6 +79,7 @@ class rFactorToGSC2013Config:
         self.reiza_class = "reiza5"
         self.vehicle_category = None
         self.track_category = None
+        self.track_filter_properties = "StockV8 *"
 
 
 class rFactorToGSC2013:
@@ -109,7 +110,7 @@ class rFactorToGSC2013:
         with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
             for line in lines:
                 line = re.sub(r'Filter Properties *=.*',
-                              r'Filter Properties = StockV8 *',
+                              r'Filter Properties = %s' % self.cfg.track_filter_properties,
                               line, flags=re.IGNORECASE)
 
                 if self.cfg.track_category:
