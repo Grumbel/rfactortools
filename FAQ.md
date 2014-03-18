@@ -263,7 +263,8 @@ how to fix the mod itself, will probably need some tweaking of the
 VISGROUP.
 
 
-## The tires on a vehicle flicker
+The tires on a vehicle flicker
+------------------------------
 
 The `.gen` file for the vehicle likely contains a series of conditonal mesh entries, like this:
 
