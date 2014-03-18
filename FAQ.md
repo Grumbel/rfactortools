@@ -1,7 +1,8 @@
 Frequently Asked Questions about converting rFactor mods 
 ========================================================
 
-## How do rFactor and GSC2013 differ?
+How do rFactor and GSC2013 differ?
+----------------------------------
 
 The overall file structure is the same for both. In GSC2013 the
 content of `.mas` files and `.gmt` files have to be encrypted. The
@@ -9,7 +10,8 @@ content of `.mas` files and `.gmt` files have to be encrypted. The
 be adopted when converting mods.
 
 
-## What is the meaning the SearchPath in .gen files and of the <VEHDIR> and <TEAMDIR> variables?
+What is the meaning the SearchPath in .gen files and of the <VEHDIR> and <TEAMDIR> variables?
+---------------------------------------------------------------------------------------------
 
 * `<VEHDIR>` gets expanded to `[...]\GameData\Vehicles\`
 * `<TEAMDIR>` gets expanded to the directory where the `.veh` file is located
@@ -19,24 +21,28 @@ In rFactor <VEHDIR> seems to get expanded to
 the path in many mods.
 
 
-## "Error loading texture *name*"
+"Error loading texture *name*"
+------------------------------
 
 A texture file is missing, if you are sure that it is contained in
 the .mas, check for .mas file naming conflicts.
 
 
-## "Error loading mesh *name* to memory"
+"Error loading mesh *name* to memory"
+-------------------------------------
 
 A mesh file can't be found, either missing or a `.mas` name conflict.
 
 
-## "Wrong GMT Version(or GMT version not allowed)"
+"Wrong GMT Version(or GMT version not allowed)"
+-----------------------------------------------
 
 The .gmt file is not encrypted or encrypted with the wrong key, use
 rfactorcrypt.py to check what the status of the file is and fix it.
 
 
-## What are all the different file formats in rFactor/Race07/GameStockCar2013?
+What are all the different file formats in rFactor/Race07/GameStockCar2013?
+---------------------------------------------------------------------------
 
 * .aiw: AI waypoints
 * .ani: animated flag marshals
@@ -58,7 +64,8 @@ rfactorcrypt.py to check what the status of the file is and fix it.
 * .veh: vehicle file
 
 
-## How are vehicle menu graphics done in GameStockCar2013?
+How are vehicle menu graphics done in GameStockCar2013?
+-------------------------------------------------------
 
 A 252x64 TGA file placed next to the `.veh` file. For:
 
@@ -69,7 +76,8 @@ this becomes:
 `GameData/Vehicles/F_Reiza/Brackley GP/Brackley8number.tga`
 
 
-## How are track menu graphics done in GameStockCar2013?
+How are track menu graphics done in GameStockCar2013?
+-----------------------------------------------------
 
 If the track file is
 `GameData/Locations/Jacarepagua/Jacarepagua1/Jacarepagua1.gdb` then
@@ -86,7 +94,8 @@ Loading screens are ~1024x768 (size can varry)
 Menu thumbnails are ~252x249 (size can varry)
 
 
-## Add-on cars show up in the Mini Challenge races in GSC2013, how to fix that?
+Add-on cars show up in the Mini Challenge races in GSC2013, how to fix that?
+----------------------------------------------------------------------------
 
 All the converted vehicle mods currently go into the `reiza5` class,
 which is used for the Minis. To fix that edit the `.veh` files in 
@@ -102,7 +111,8 @@ There might be cleaner ways without modifying those files, but this
 seems to work, at least for single player.
 
 
-## How are tracks assigned to karts or race cars?
+How are tracks assigned to karts or race cars?
+----------------------------------------------
 
 This is done via the `Filter Properties` setting in the `.gdb` file of
 the track. GSC2013 uses these settings:
@@ -114,7 +124,8 @@ the track. GSC2013 uses these settings:
 rFactor mods use different ones, so they have to be changed to show up in GSC2013.
 
 
-## Sounds are not working when using older/newer GSC mods
+Sounds are not working when using older/newer GSC mods
+------------------------------------------------------
 
 GSC2012 has sounds stored in `GameData\Sounds\StockCarV8`
 
@@ -123,7 +134,8 @@ GSC2013 has sounds stored in `GameData\Sounds\`
 Move the sound into the proper directory to fix any issues.
 
 
-## Sound not working in converted rFactor mods
+Sound not working in converted rFactor mods
+-------------------------------------------
 
 The `.sfx` file defines which sounds are used, in some mods the file
 path needs to be changed to include the mod name. Other mods might
@@ -131,12 +143,14 @@ depend on a base mod that contains all the sound and not contain sound
 files themselves.
 
 
-## GameStockCar2013 crashes when starting the mod
+GameStockCar2013 crashes when starting the mod
+----------------------------------------------
 
 No idea, happens with a tiny handful of mods.
 
 
-## Some files need modifications, how do I automate that?
+Some files need modifications, how do I automate that?
+------------------------------------------------------
 
 If a `.gen` files contains the line `MASFile=Season_1990` and you want
 to change it to `MASFile=SRM_1990\Season_1990` for all the .gen files
@@ -152,7 +166,8 @@ Note that these are just rough examples, they might not work for your
 case.
 
 
-## What are the most common issues with vehicle conversion?
+What are the most common issues with vehicle conversion?
+--------------------------------------------------------
 
 Many mods contain a `cmaps.mas` that conflicts with the `cmaps.mas`
 provided by GameStockCar2013. Solution to that is to change all
@@ -167,7 +182,8 @@ name, i.e. `SearchPath=<VEHDIR>\SomeDir` would become
 Those two changes are all that should be needed for most vehicle mods.
 
 
-## What are the most common issues with track conversion?
+What are the most common issues with track conversion?
+------------------------------------------------------
 
 The skybox is handled slightly differently in rFactor and
 GameStockCar2013 and you will often get messages about `horizont.gmt`
@@ -193,7 +209,8 @@ The game might complain about missing RACEGROOVE.dds or SKIDHARD.dds,
 copy those files over into the directory of the `.scn` file.
 
 
-## A track is complaining about missing `sky` texture
+A track is complaining about missing `sky` texture
+--------------------------------------------------
 
 Copy the unencrypted `sky00.dds`, `sky01.dds`, `sky02.dds`,
 `sky03.dds` and `sky04.dds` over to `GameData/Locations/`. Copying it
@@ -213,7 +230,8 @@ Some more info can be found at:
 * http://isiforums.net/f/showthread.php/632-Tutorial-for-Skybox-and-Skyboxi
 
 
-## Part of the cockpit is cut off
+Part of the cockpit is cut off
+------------------------------
 
 In the cars `.cam` file adjust the `ClipPlanes` for the `COCKPIT` camera:
 
@@ -229,7 +247,8 @@ are cut off. The value must be positive and not null. To small values
 will lead to z-fighting graphic errors on the track.
 
 
-## Parts of the car are visible in the mirror
+Parts of the car are visible in the mirror
+------------------------------------------
 
 Editing your `.plr` file inside `USERDATA\(your name)` and changing
 the 15 in `Self In Cockpit Rearview="15"` to 0 might help. Not sure
@@ -255,7 +274,8 @@ entries to a single tire type should work, but then you won't get to
 see different tire profiles for different tire types.
 
 
-## Where can I find more info on conversion?
+Where can I find more info on conversion?
+-----------------------------------------
 
 This thread contains a lot more info on how to tweak specific things about tracks:
 
@@ -263,7 +283,8 @@ This thread contains a lot more info on how to tweak specific things about track
 * http://yoss.free.fr/rfactornfr/Modding_Tutorial_Website/overview.shtml
 
 
-## Cockpit camera positions seems broken (too low, too high, shifted too left/right)?
+Cockpit camera positions seems broken (too low, too high, shifted too left/right)?
+----------------------------------------------------------------------------------
 
 No idea, might be bugs in the original mod. GSC2013 allows you to
 adjust the seat position to fix that or if that isn't enough you can
@@ -271,22 +292,27 @@ turn on the free camera and navigate with the numpad into a better
 position (hold `Shift` for slower movement).
 
 
-## Steering wheel rotation is broken, it's rotation axis is wrong.
+Steering wheel rotation is broken, it's rotation axis is wrong.
+---------------------------------------------------------------
 
 No idea, might be a bug in the original mod.
 
 
-## Right suspension is missing from open wheel cars
+Right suspension is missing from open wheel cars
+------------------------------------------------
 
 No idea, happens in multiple mods, so it might be more then a random mod bug.
 
 
-## The track is to bright
+The track is to bright
+----------------------
 
 Find the `.scn` file for the track and edit the `Light` section, the
 intensity value should be 1.0 or smaller.
 
-## Track complains that it can't open the `.mas`
+
+Track complains that it can't open the `.mas`
+---------------------------------------------
 
 Check the `.scn` of the track, some tracks must be installed into a
 subdirectory and not into the toplevel `GameData/Locations/`, either

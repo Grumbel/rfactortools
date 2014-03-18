@@ -1,4 +1,5 @@
-# rFactor Tools
+rFactor Tools
+=============
 
 rFactorTools is a collections of tools for manipulating and converting
 rFactor related files. Main use of these tools right now is
@@ -11,7 +12,9 @@ Source code for rfactortools can be found at:
 
 * https://github.com/Grumbel/rfactortools
 
-## Features
+
+Features
+--------
 
 * conversion of track and vehicle mods from rFactor to GSC2013
 * automatic thumbnail generation for tracks
@@ -19,7 +22,9 @@ Source code for rfactortools can be found at:
 * automatic repacking and encryption of .mas files
 * automatic fixing of the SearchPath
 
-## Requirements
+
+Requirements
+------------
 
 * Python3.4 (`python3.4`)
 * Pillow (`python3-pil`, `python3-pil.imagetk`)
@@ -34,7 +39,9 @@ If Python3.3 is used `pathlib`, which is included in Python3.4, is required as w
 
 Windows binaries are build with `cx_freeze`, which currently only works with Python3.3.
 
-## Tools
+
+Tools
+-----
 
 ### `rfactortools-gui`
 
@@ -98,7 +105,9 @@ Another `.mas` unpacker, originally downloaded from:
 
 * http://aluigi.altervista.org/quickbms.htm
 
-## Converting Mods to GameStockCar2013
+
+Converting Mods to GameStockCar2013
+-----------------------------------
 
 First step to convert a rFactor mod is getting a copy of it's
 `GameData/` directory, as that is the only directory relevant for
@@ -126,7 +135,9 @@ about the mod, namely filenames of `.mas` files and which files
 reference them. This lets you quickly see if further work is needed.
 See `FAQ.md` for frequently occuring problems.
 
-## Disclaimer
+
+Disclaimer
+----------
 
 rfactortools is a homebrew tool collection for rFactor, Race07 and
 GSC2013 and in no way affiliated with Image Space Incorporated, SimBin
