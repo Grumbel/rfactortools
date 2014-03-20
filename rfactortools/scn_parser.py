@@ -34,9 +34,9 @@ def scn2posix_path(path):
     return posixpath.normpath(path)
 
 
-def process_scnfile(vfs, filename, parser):
+def process_scnfile(filename, parser):
     # print("processing", filename)
-    with vfs.open_read(filename, encoding='latin-1') as fin:
+    with open(filename, "r", encoding='latin-1') as fin:
         for orig_line in fin.read().splitlines():
             line = orig_line
 

@@ -27,7 +27,6 @@ from .util import find_files, lookup_path_icase, nt2posixpath
 from .sfx import parse_sfxfile, modify_sfxfile, try_fix_wav_path
 from .gdb import process_gdb_file
 from .veh import parse_vehfile, print_veh_tree, print_veh_info, process_veh_file
-from .vfs import VFS
 
 __all__ = [
     'parse_aiwfile', 'render_aiw',
@@ -43,7 +42,6 @@ __all__ = [
     "parse_sfxfile", "modify_sfxfile", "try_fix_wav_path",
     "process_gdb_file",
     "parse_vehfile", "print_veh_tree", "print_veh_info", "process_veh_file",
-    "VFS",
 ]
 
 # EOF #

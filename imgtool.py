@@ -24,19 +24,17 @@ import rfactortools
 
 
 def process_directory(directory):
-    vfs = rfactortools.VFS(directory)
-
-    for fname in vfs.files():
+    for fname in rfactortools.find_files(files):
         name, ext = os.path.splitext(fname)
         if ext.lower() == ".veh":
             img = os.path.join(name + "number.tga")
-            if vfs.file_exists(img):
-                rfactortools.resize_to_fit_img_file(vfs.lookup_file(img), 252, 64)
+            if rfactortools.path_exists(img):
+                rfactortools.resize_to_fit_img_file(img, 252, 64)
 
         elif ext.lower() == ".gdb":
             img = os.path.join(name + "mini.tga")
-            if vfs.file_exists(img):
-                rfactortools.resize_to_fit_img_file(vfs.lookup_file(img), 252, 249)
+            if rfactortools.path_exists(img):
+                rfactortools.resize_to_fit_img_file(img, 252, 249)
 
 
 if __name__ == "__main__":

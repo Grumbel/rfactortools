@@ -54,18 +54,18 @@ skybox_gsc2013 = """Instance=skyboxi
 """
 
 
-def modify_vehicle_file(vfs, gen, search_path, mas_files, vehdir, teamdir):
+def modify_vehicle_file(gen, search_path, mas_files, vehdir, teamdir):
     strio = io.StringIO()
     sr_parser = rfactortools.SearchReplaceScnParser(strio)
     sr_parser.mas_files = mas_files
     sr_parser.search_path = search_path
-    rfactortools.process_scnfile(vfs, gen, sr_parser)
+    rfactortools.process_scnfile(gen, sr_parser)
 
     with open(gen, "wt", encoding="latin-1", newline='\r\n', errors="replace") as fout:
         fout.write(strio.getvalue())
 
 
-def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
+def gen_check_errors(search_path, mas_files, vehdir, teamdir):
     def expand_path(p):
         p = re.sub(r'<VEHDIR>', (vehdir + "/").replace("\\", "\\\\"), p)
         p = re.sub(r'<TEAMDIR>', (teamdir + "/").replace("\\", "\\\\"), p)
@@ -77,7 +77,7 @@ def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
     warnings = []
 
     for p, d in zip(search_path, expanded_search_path):
-        if not vfs.directory_exists(d) and d != ".":
+        if not rfactortools.directory_exists(d) and d != ".":
             print("warning: couldn't locate SearchPath %s" % p)
             warnings.append("warning: couldn't locate SearchPath %s" % p)
 
@@ -86,7 +86,7 @@ def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
         mas_found = False
         for d in expanded_search_path:
             f = os.path.join(d, mas)
-            if vfs.file_exists(f):
+            if rfactortools.file_exists(f):
                 mas_found = True
                 break
         if not mas_found and mas.lower() not in default_mas_files:
@@ -97,15 +97,13 @@ def gen_check_errors(vfs, search_path, mas_files, vehdir, teamdir):
 
 
 def process_gen_directory(directory, fix):
-    vfs = rfactortools.VFS(directory)
-
     gen_files = []
     veh_files = []
     gdb_files = []
     scn_files = []
     mas_files = []
 
-    for fname in vfs.files():
+    for fname in rfactortools.find_files(directory):
         ext = os.path.splitext(fname)[1].lower()
         if ext == ".gen":
             gen_files.append(fname)
@@ -121,7 +119,7 @@ def process_gen_directory(directory, fix):
     errors = []
     for gdb in sorted(gdb_files):
         try:
-            rfactortools.process_gdb_file(vfs, gdb, fix, errors)
+            rfactortools.process_gdb_file(gdb, fix, errors)
         except Exception:
             e = traceback.format_exc()
             print("error:\n%s\n" % e)
@@ -129,7 +127,7 @@ def process_gen_directory(directory, fix):
 
     for veh in sorted(veh_files):
         try:
-            rfactortools.process_veh_file(vfs, veh, fix, errors)
+            rfactortools.process_veh_file(veh, fix, errors)
         except Exception as e:
             e = traceback.format_exc()
             print("raised error:\n%s\n" % e)

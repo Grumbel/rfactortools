@@ -49,10 +49,10 @@ def find_vehdir(path):
         raise Exception("couldn't locate <VEHDIR> in %s" % path)
 
 
-def find_file_backwards(vfs, dir, gen):
+def find_file_backwards(dir, gen):
     while True:
         filename = os.path.join(dir, gen)
-        if vfs.file_exists(filename):
+        if rfactortools.file_exists(filename):
             return filename
 
         newdir = os.path.dirname(dir)
@@ -130,34 +130,34 @@ def append_errors(context, errs, warns, errors):
         errors.append("%s: %s" % (context, warn))
 
 
-def process_scn_veh_file(vfs, modname, veh_filename, scn_short_filename, vehdir, teamdir, fix, errors):
+def process_scn_veh_file(modname, veh_filename, scn_short_filename, vehdir, teamdir, fix, errors):
     # resolve scn_filename to a proper path
-    scn_filename = find_file_backwards(vfs, os.path.dirname(veh_filename), scn_short_filename)
+    scn_filename = find_file_backwards(os.path.dirname(veh_filename), scn_short_filename)
     if not scn_filename:
         raise Exception("error: couldn't find .gen file '%s' '%s'" % (veh_filename, scn_short_filename))
 
     print("gen:", scn_filename)
 
     info = rfactortools.InfoScnParser()
-    rfactortools.process_scnfile(vfs, scn_filename, info)
+    rfactortools.process_scnfile(scn_filename, info)
 
     print("  SearchPath:", info.search_path)
     print("    MasFiles:", info.mas_files)
     print()
 
     if not fix:
-        orig_errs, orig_warns = rfactortools.gen_check_errors(vfs, info.search_path, info.mas_files, vehdir, teamdir)
+        orig_errs, orig_warns = rfactortools.gen_check_errors(info.search_path, info.mas_files, vehdir, teamdir)
         append_errors(scn_filename, orig_errs, orig_warns, errors)
     else:
         # if there is a cmaps in the mod, use that instead of the one in <VEHDIR>
-        cmaps = vfs.find_file("cmaps.mas")
+        cmaps = rfactortools.find_file("cmaps.mas")
         if cmaps:
             cmaps = os.path.relpath(cmaps, vehdir)
             for i, m in enumerate(info.mas_files):
                 if m.lower() == "cmaps.mas":
                     info.mas_files[i] = cmaps
 
-        orig_errs, orig_warns = rfactortools.gen_check_errors(vfs, info.search_path, info.mas_files, vehdir, teamdir)
+        orig_errs, orig_warns = rfactortools.gen_check_errors(info.search_path, info.mas_files, vehdir, teamdir)
 
         if orig_errs:
             # add modname to the SearchPath to avoid errors
@@ -167,23 +167,23 @@ def process_scn_veh_file(vfs, modname, veh_filename, scn_short_filename, vehdir,
             search_path = info.search_path
         search_path.sort()
 
-        new_errs, new_warns = rfactortools.gen_check_errors(vfs, search_path, info.mas_files, vehdir, teamdir)
+        new_errs, new_warns = rfactortools.gen_check_errors(search_path, info.mas_files, vehdir, teamdir)
 
         append_errors(scn_filename, new_errs, new_warns, errors)
 
         # write a new file if there are no or less errors
         if not new_errs or len(new_errs) < len(orig_errs):
-            rfactortools.modify_vehicle_file(vfs, scn_filename, search_path, info.mas_files, vehdir, teamdir)
+            rfactortools.modify_vehicle_file(scn_filename, search_path, info.mas_files, vehdir, teamdir)
         elif cmaps:
-            rfactortools.modify_vehicle_file(vfs, scn_filename, info.search_path, info.mas_files, vehdir, teamdir)
+            rfactortools.modify_vehicle_file(scn_filename, info.search_path, info.mas_files, vehdir, teamdir)
 
 
-def process_veh_file(vfs, veh_filename, fix, errors):
+def process_veh_file(veh_filename, fix, errors):
     teamdir = os.path.dirname(veh_filename)
     modname = find_modname(os.path.dirname(veh_filename))
 
     vehdir = find_vehdir(os.path.dirname(veh_filename))
-    veh_obj = parse_vehfile(vfs.lookup_file(veh_filename))
+    veh_obj = parse_vehfile(rfactortools.lookup_path_icase(veh_filename))
 
     print("[Vehicle]")
     print("veh:", veh_filename)
@@ -193,10 +193,10 @@ def process_veh_file(vfs, veh_filename, fix, errors):
     print("     spinner:", veh_obj.spinner_file)
 
     if veh_obj.graphics_file is not None:
-        process_scn_veh_file(vfs, modname, veh_filename, veh_obj.graphics_file, vehdir, teamdir, fix, errors)
+        process_scn_veh_file(modname, veh_filename, veh_obj.graphics_file, vehdir, teamdir, fix, errors)
 
     if veh_obj.spinner_file is not None:
-        process_scn_veh_file(vfs, modname, veh_filename, veh_obj.spinner_file, vehdir, teamdir, fix, errors)
+        process_scn_veh_file(modname, veh_filename, veh_obj.spinner_file, vehdir, teamdir, fix, errors)
 
 
 class Tree(defaultdict):

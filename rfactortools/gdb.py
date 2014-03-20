@@ -19,11 +19,11 @@ import os
 import rfactortools
 
 
-def process_gdb_file(vfs, gdb, fix, errors):
+def process_gdb_file(gdb, fix, errors):
     scn = os.path.splitext(gdb)[0] + ".scn"
 
     info = rfactortools.InfoScnParser()
-    rfactortools.process_scnfile(vfs, scn, info)
+    rfactortools.process_scnfile(scn, info)
     print("[Track]")
     print("  gdb: %s" % gdb)
     print("  scn: %s" % scn)

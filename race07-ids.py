@@ -95,8 +95,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.DIRECTORY:
-        vfs = rfactortools.VFS(args.DIRECTORY)
-        for fname in vfs.files():
+        for fname in rfactortools.find_files(args.DIRECTORY):
             ext = os.path.splitext(fname)[1].lower()
             if ext == ".car" or ext == ".inccar":
                 car = read_ids(fname)

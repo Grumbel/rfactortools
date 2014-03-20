@@ -36,11 +36,11 @@ class SFX:
     def check(self, gamedata_directory, modname):
         for wav in self.wavs:
             p = os.path.join(gamedata_directory, "Sounds", wav)
-            if rfactortools.lookup_path_icase(p):
+            if rfactortools.file_exists(p):
                 print("%s: ok" % wav)
             else:
                 p = os.path.join(gamedata_directory, "Sounds", modname, wav)
-                if rfactortools.lookup_path_icase(p):
+                if rfactortools.file_exists(p):
                     print("%s: ok with fix" % wav)
                 else:
                     print("%s: failure" % wav)
@@ -49,12 +49,12 @@ class SFX:
 def try_fix_wav_path(gamedata, modname, wav_file):
     """Return either ``None`` to change nothing or a new wav path"""
     p = os.path.join(gamedata, "Sounds", wav_file)
-    if rfactortools.lookup_path_icase(p):
+    if rfactortools.file_exists(p):
         logging.debug("%s: file ok" % wav_file)
         return None
     else:
         p = os.path.join(gamedata, "Sounds", modname, wav_file)
-        if rfactortools.lookup_path_icase(p):
+        if rfactortools.file_exists(p):
             r = os.path.join(modname, wav_file)
             logging.debug("%s: file ok" % r)
             return r
