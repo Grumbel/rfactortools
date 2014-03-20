@@ -1,0 +1,99 @@
+            ..:: rFactor to Game Stock Car 2013 ::..
+            ========================================
+
+This application allows you to convert rFactor mods so that they can
+be used with Game Stock Car 2013. Conversation is for most part
+automatic, but some issues may remain, the file FAQ.md explains how to
+fix or work around some of them.
+
+To convert a mod:
+
+1) extract it or if it comes as .exe install it into an empty directory
+
+2) select the directory where you installed the mod as "Input"
+
+3) select the directory where you want the conversion to be copied to
+   as "Output". Installing directly into the GSC2013 is not
+   recommended, use an empty directory instead.
+
+4) Hit the "Convert" button and wait a minute or two.
+
+5) Once the conversion is finished copy the mod over to the GSC2013
+   directory
+
+6) If you have converted a track, install gsc2013-missing-track-textures.7z,
+   it's a base mod that contains sky textures necessary to run converted mods.
+   It's available at:
+
+   https://mega.co.nz/#!zlRFTAjD!byvxHGBi-19Cj9maG4bSTUqMX19lJuULKCAQbQ7Lr0g
+
+7) If something goes wrong, full conversion logs are saved to
+   rfactortools-gui-*.log. For further tweaking, minised-gui.exe, a
+   tool that allows you to search&replace across multiple files is
+   included with rfactortools.
+
+8) If you want to report a bug or request a feature, you can do so at:
+
+   https://github.com/Grumbel/rfactortools/issues
+
+Car mods will show up in the same class as the Mini Challenge.
+
+
+Options:
+--------
+
+Unique Team Names:
+Adds a suffix to the 'Team' name in .veh files to make them unique and
+avoid conflicts with other mods
+
+Force Track Thumbnail:
+Always generate a new track thumbnail, ignoring the one from the
+original mod
+
+Clear Vehicle Classes:
+Empties the "Classes" tag in the .veh file and only uses the content of
+"Reiza Class", useful when in cases where
+
+Vehicle Category ("Category" tag in .veh files):
+Allows you to add a new folder for the car mod in the vehicle list,
+useful in cases the mod doesn't provide one by itself. Multiple
+folders can be created by separating the names with a comma, e.g.
+"Formula 1, 1994".
+
+Track Category (aka "VenueName" tag in .gdb files):
+Allows you to add a new folder for the car mod in the track list,
+useful in cases the mod doesn't provide one by itself. Multiple
+folders can be created by separating the names with a comma, e.g.
+"Anderstorp GP, 2003".
+
+Reiza Class (aka "Classes" tag in .veh files):
+Allows you to prepend a class to the "Classes" tag in the .veh file.
+Only vehicles containing a reiza class will show up in GSC2013. Valid
+classes are:
+
+reiza1: Camaro
+reiza2: ???
+reiza3: ???
+reiza4: ???
+reiza5: Mini
+reiza6: Opala
+reiza7: Kart Direct
+reiza8: Kart Bodywork
+reiza9: Formula Retro
+reiza10: Kart Shifter
+
+You can specify multiple classes by separating them by comma, e.g.
+"reiza5, Formula1 1994", useful in combination with "Clear Vehicle
+Classes".
+
+Track Filter Properties:
+The filter decides which cars can race on a track. The default of
+"StockV8 *" means all race cars can race on the track. If you want to
+race on a track with karts, change it to "Kart *".
+
+Disclaimer:
+-----------
+
+rfactortools is a homebrew tool collection for rFactor, Race07 and
+GSC2013 and in no way affiliated with Image Space Incorporated, SimBin
+Studios or Reiza Studios.

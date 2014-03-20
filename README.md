@@ -20,7 +20,7 @@ Features
 * automatic thumbnail generation for tracks
 * automatic resizing of track thumbnails and vehicle images
 * automatic repacking and encryption of .mas files
-* automatic fixing of the SearchPath
+* automatic fixing of the SearchPath in .gen and .scn files
 
 
 Requirements
@@ -37,37 +37,8 @@ On Windows Pillow can be installed with:
 
 If Python3.3 is used `pathlib`, which is included in Python3.4, is required as well.
 
-Windows binaries are build with `cx_freeze`, which currently only works with Python3.3.
-
-
-Converting rFactor Mods to GameStockCar2013
--------------------------------------------
-
-First step to convert a rFactor mod is getting a copy of it's
-`GameData/` directory, as that is the only directory relevant for
-GameStockCar2013. If the mod comes as `.exe` file, installing it into
-an empty directory will do the job even if no copy of rFactor is
-available. If the mod comes as `.7z`, `.rar` and `.zip` it has to be
-extracted as usual.
-
-Second step is running:
-
-    ./rfactor-to-gsc2013.py .../GameData/ -o gsc/GameData
-
-This will convert the `GameData/` from the mod and save the results in
-`gsc/GameData`.
-
-This will rescale all the overlarge menu graphics so that they fit
-properly into GameStockCar2013.
-
-The fourth step is:
-
-    ./gentool.py .../GameData/
-
-This won't modify anything, but instead will show you some information
-about the mod, namely filenames of `.mas` files and which files
-reference them. This lets you quickly see if further work is needed.
-See `FAQ.md` for frequently occuring problems.
+Windows binaries are build with `setup_cxfreeze.py`, which currently
+only works with Python3.3.
 
 
 Tools
