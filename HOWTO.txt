@@ -91,6 +91,13 @@ The filter decides which cars can race on a track. The default of
 "StockV8 *" means all race cars can race on the track. If you want to
 race on a track with karts, change it to "Kart *".
 
+Single GamaData/ Output:
+The input directory can contain multiple mods at once, if this option is
+selected only a single GameData/ directory containing all the mods
+will be created, otherwise all the mods will be stored in their own
+directories.
+
+
 Disclaimer:
 -----------
 

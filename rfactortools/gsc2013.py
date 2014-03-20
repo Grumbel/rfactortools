@@ -47,7 +47,7 @@ exclude_files = [
 exclude_files = [os.path.normpath(f) for f in exclude_files]
 
 
-def find_gamedata_directory(directory):
+def find_gamedata_directories(directory):
     """Returns the ``GameData/`` directory inside of ``directory``, throws
     exception when more then one ``GamaData/`` is found, return
     ``None``, if none is found (not an error, as tracks don't contain
@@ -56,18 +56,15 @@ def find_gamedata_directory(directory):
 
     basedir = os.path.basename(directory)
     if basedir.lower() == "gamedata":
-        return directory
+        return [directory]
     else:
-        gamedata = None
+        gamedata_dirs = []
         for path, dirs, files in os.walk(directory):
-            for d in dirs:
+            for d in list(dirs):
                 if d.lower() == "gamedata":
-                    if gamedata is not None:
-                        raise Exception("multiple \"GamaData/\" directories found in \"%s\", only one allowed"
-                                        % directory)
-                    else:
-                        gamedata = os.path.join(path, d)
-                        return gamedata
+                    gamedata_dirs.append(os.path.join(path, d))
+                    dirs.remove(d)
+        return gamedata_dirs
 
 
 class rFactorToGSC2013Config:
@@ -76,6 +73,7 @@ class rFactorToGSC2013Config:
         self.unique_team_names = True
         self.force_track_thumbnails = False
         self.clear_classes = False
+        self.single_gamadata = False
         self.reiza_class = "reiza5"
         self.vehicle_category = None
         self.track_category = None
@@ -91,9 +89,9 @@ class rFactorToGSC2013:
     def __init__(self, source_directory, cfg):
         self.source_directory = os.path.normpath(source_directory)
         self.cfg = cfg or rFactorToGSC2013Config()
-        self.source_gamedata_directory = find_gamedata_directory(self.source_directory)
+        self.source_gamedata_directories = find_gamedata_directories(self.source_directory)
 
-        if self.source_gamedata_directory is None:
+        if not self.source_gamedata_directories:
             raise Exception("couldn't locate 'GameData/' directory")
 
     def print_info(self):
@@ -101,7 +99,7 @@ class rFactorToGSC2013:
         track_count = len(self.files_by_type['.gdb'])
         print("Vehicles: %d" % vehicle_count)
         print("  Tracks: %d" % track_count)
-        print("GameData: \"%s\"" % self.source_gamedata_directory)
+        print("GameData: \"%s\"" % self.source_gamedata_directories)
 
     def convert_gdb(self, filename, target_file):
         with open(filename, "rt", encoding="latin-1") as fin:
@@ -302,16 +300,27 @@ class rFactorToGSC2013:
                 logging.exception("%s: %s: rfactortools.convert_file failed" % (source_file, target_file))
 
     def convert_all(self, target_directory):
-        target_gamedata_directory = os.path.join(os.path.normpath(target_directory), "GameData")
-        logging.info("converting %s to %s" % (self.source_gamedata_directory, target_gamedata_directory))
+        target_directory = os.path.normpath(target_directory)
 
-        self.convert_dirtree(self.source_gamedata_directory, target_gamedata_directory)
-        self.convert_gamedata(self.source_gamedata_directory, target_gamedata_directory)
+        for d in self.source_gamedata_directories:
+            self.source_gamedata_directory = os.path.normpath(d)
 
-        try:
-            rfactortools.process_gen_directory(target_gamedata_directory, True)
-        except Exception:
-            logging.exception("rfactortools.process_gen_directory")
+            if self.cfg.single_gamadata:
+                target_gamedata_directory = os.path.join(target_directory, "GameData")
+            else:
+                target_gamedata_directory = os.path.join(target_directory,
+                                                         os.path.relpath(self.source_gamedata_directory,
+                                                                         self.source_directory))
+
+            logging.info("converting %s to %s" % (self.source_gamedata_directory, target_gamedata_directory))
+
+            self.convert_dirtree(self.source_gamedata_directory, target_gamedata_directory)
+            self.convert_gamedata(self.source_gamedata_directory, target_gamedata_directory)
+
+            try:
+                rfactortools.process_gen_directory(target_gamedata_directory, True)
+            except Exception:
+                logging.exception("rfactortools.process_gen_directory")
 
 
 # EOF #

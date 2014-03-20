@@ -34,11 +34,13 @@ import traceback
 
 import rfactortools
 
+
 try:
     with open("HOWTO.txt", "r") as fin:
         welcome_text = fin.read()
 except Exception:
     welcome_text = "error: couldn't locate HOWTO.txt"
+
 
 def createDirectoryEntry(frame, name, row):
     directory_label = Label(frame, text=name)
@@ -120,6 +122,11 @@ class Application(Frame):
                                                   variable=self.clear_classes)
         self.clear_classes_checkbox.grid(column=0, row=2, columnspan=2, sticky=W)
 
+        self.single_gamedata = BooleanVar(value=True)
+        self.single_gamedata_checkbox = Checkbutton(self.option_frame, text="Single GamaData/ Output",
+                                                    variable=self.single_gamedata)
+        self.single_gamedata_checkbox.grid(column=0, row=3, columnspan=2, sticky=W)
+
         self.vehicle_category = StringVar(value="")
         self.vehicle_category_label = Label(self.option_frame, text="Vehicle Category:")
         self.vehicle_category_label.grid(column=2, row=0, sticky=E)
@@ -200,6 +207,7 @@ class Application(Frame):
                 cfg.unique_team_names = self.unique_team_names.get()
                 cfg.force_track_thumbnails = self.force_track_thumb.get()
                 cfg.clear_classes = self.clear_classes.get()
+                cfg.single_gamadata = self.single_gamedata.get()
 
                 if self.vehicle_category.get().strip():
                     cfg.vehicle_category = self.vehicle_category.get().strip()
