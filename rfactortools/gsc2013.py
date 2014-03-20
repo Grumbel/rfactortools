@@ -421,12 +421,12 @@ class rFactorToGSC2013:
 
             print("modname:", modname)
             if prefix:
-                target_directory = os.path.join(target_gamedata_directory, "Locations", prefix)
+                target_d = os.path.join(target_gamedata_directory, "Locations", prefix)
             else:
-                target_directory = os.path.join(target_gamedata_directory, "Locations")
+                target_d = os.path.join(target_gamedata_directory, "Locations")
             print("source_directory:", source_directory)
-            print("target_directory:", target_directory)
-            self.convert_mod_subdir(os.path.dirname(source_directory), target_directory, modname, modname)
+            print("target_directory:", target_d)
+            self.convert_mod_subdir(os.path.dirname(source_directory), target_d, modname, modname)
 
 
 # EOF #
