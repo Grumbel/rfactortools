@@ -17,6 +17,7 @@
 
 import logging
 import os
+import pathlib
 import re
 import shutil
 
@@ -47,7 +48,66 @@ exclude_files = [
 exclude_files = [os.path.normpath(f) for f in exclude_files]
 
 
-def find_gamedata_directories(directory):
+def prefix_split(lhs, rhs):
+    length = min(len(lhs), len(rhs))
+    for i in range(0, length):
+        if lhs[i].lower() != rhs[i].lower():
+            return lhs[0:i], lhs[i:], rhs[i:]
+    return lhs[0:length], lhs[length:], rhs[length:]
+
+
+def find_track_directory_from_searchpath(directory, search_path):
+    """
+    Given the directory of the ``.gdb`` file and a SearchPath, try to
+    locate the root directory of a track.
+
+    Returns a tuple of (root, prefix), prefix is either ``None`` or
+    set such the tracks will function when installed into
+    GameData/Locations/{prefix}/ (aka. the ``70tracks/`` problem).
+    """
+
+    directory = list(reversed(pathlib.Path(directory).parts))
+    length = 0
+    max_path = None
+    for p in search_path:
+        path = list(reversed(pathlib.Path(p).parts))
+        if length < len(path) and p != ".":
+            length = len(path)
+            max_path = path
+
+    if not max_path:
+        raise Exception("empty SearchPath")
+    else:
+        prefix, lhs, rhs = prefix_split(max_path, directory)
+
+        if prefix:
+            if lhs:
+                rest = str(pathlib.Path(*reversed(lhs)))
+            else:
+                rest = None
+            return (str(pathlib.Path(*reversed([prefix[-1]] + rhs))),
+                    rest)
+        else:
+            return (str(pathlib.Path(*reversed(rhs))),
+                    None)
+
+
+def find_track_directory(gdb_filename):
+    rest, ext = os.path.splitext(gdb_filename)
+    scn_filename = rest + ".scn"
+    scn_filename = rfactortools.lookup_path_icase(scn_filename)
+    if not scn_filename:
+        raise Exception("couldn't locate .scn file matching %s" % gdb_filename)
+    else:
+        info = rfactortools.InfoScnParser()
+        rfactortools.process_scnfile(scn_filename, info)
+
+        result = find_track_directory_from_searchpath(os.path.dirname(gdb_filename),
+                                                      info.search_path)
+        return result
+
+
+def find_data_directories(directory):
     """Returns the ``GameData/`` directory inside of ``directory``, throws
     exception when more then one ``GamaData/`` is found, return
     ``None``, if none is found (not an error, as tracks don't contain
@@ -59,12 +119,22 @@ def find_gamedata_directories(directory):
         return [directory]
     else:
         gamedata_dirs = []
+        track_dirs = []
         for path, dirs, files in os.walk(directory):
             for d in list(dirs):
                 if d.lower() == "gamedata":
                     gamedata_dirs.append(os.path.join(path, d))
                     dirs.remove(d)
-        return gamedata_dirs
+
+            for f in files:
+                rest, ext = os.path.splitext(f)
+                if ext.lower() == ".gdb":
+                    try:
+                        track_dirs.append(find_track_directory(os.path.join(path, f)))
+                    except Exception:
+                        logging.exception("track directory location failed")
+
+        return gamedata_dirs, track_dirs
 
 
 class rFactorToGSC2013Config:
@@ -89,9 +159,10 @@ class rFactorToGSC2013:
     def __init__(self, source_directory, cfg):
         self.source_directory = os.path.normpath(source_directory)
         self.cfg = cfg or rFactorToGSC2013Config()
-        self.source_gamedata_directories = find_gamedata_directories(self.source_directory)
+        self.source_gamedata_directories, self.source_track_directories \
+            = find_data_directories(self.source_directory)
 
-        if not self.source_gamedata_directories:
+        if not self.source_gamedata_directories and not self.source_track_directories:
             raise Exception("couldn't locate 'GameData/' directory")
 
     def print_info(self):
@@ -201,7 +272,8 @@ class rFactorToGSC2013:
         # shutil.copy("gsc2013/RACEGROOVE.dds", os.path.dirname(target_file))
         # shutil.copy("gsc2013/SKIDHARD.dds", os.path.dirname(target_file))
 
-    def convert_dirtree(self, source_directory, target_directory):
+    def copy_directory_hierachy(self, source_directory, target_directory):
+        """Recreates the directory hierachy in ``source_directory`` in target_directory"""
         if not os.path.isdir(target_directory):
             os.makedirs(os.path.normpath(target_directory))
 
@@ -216,10 +288,10 @@ class rFactorToGSC2013:
 
     def convert_tga(self, source_file, target_file):
         is_vehicle_thumbnail = bool(source_file.lower().endswith("number.tga") and
-                                    rfactortools.lookup_path_icase(source_file[:-10] + ".veh"))
+                                    rfactortools.file_exists(source_file[:-10] + ".veh"))
 
         is_track_thumbnail = bool(source_file.lower().endswith("mini.tga") and
-                                  rfactortools.lookup_path_icase(source_file[:-8] + ".gdb"))
+                                  rfactortools.file_exists(source_file[:-8] + ".gdb"))
 
         if is_vehicle_thumbnail:
             rfactortools.resize_to_fit_img_file_with_target(source_file, target_file, 252, 64)
@@ -264,7 +336,8 @@ class rFactorToGSC2013:
             relpath = os.path.relpath(path, source)
 
             for fname in files:
-                self.convert_file(source_directory, target_directory, os.path.join(dname, relpath, fname), modname)
+                self.convert_file(source_directory, target_directory,
+                                  os.path.normpath(os.path.join(dname, relpath, fname)), modname)
 
     def convert_file(self, source_directory, target_directory, filename, modname):
         logging.info("processing '%s' of mod '%s'" % (filename, modname))
@@ -302,6 +375,7 @@ class rFactorToGSC2013:
     def convert_all(self, target_directory):
         target_directory = os.path.normpath(target_directory)
 
+        # convert GamaData/ directories
         for d in self.source_gamedata_directories:
             self.source_gamedata_directory = os.path.normpath(d)
 
@@ -312,15 +386,47 @@ class rFactorToGSC2013:
                                                          os.path.relpath(self.source_gamedata_directory,
                                                                          self.source_directory))
 
-            logging.info("converting %s to %s" % (self.source_gamedata_directory, target_gamedata_directory))
+            logging.info("converting GameData %s to %s" % (self.source_gamedata_directory, target_gamedata_directory))
 
-            self.convert_dirtree(self.source_gamedata_directory, target_gamedata_directory)
+            self.copy_directory_hierachy(self.source_gamedata_directory, target_gamedata_directory)
             self.convert_gamedata(self.source_gamedata_directory, target_gamedata_directory)
 
             try:
                 rfactortools.process_gen_directory(target_gamedata_directory, True)
             except Exception:
                 logging.exception("rfactortools.process_gen_directory")
+
+        # convert tracks that don't have a toplevel GameData/ directory
+        for d, prefix in self.source_track_directories:
+            print("track:", d)
+            source_directory = os.path.normpath(d)
+
+            if self.cfg.single_gamadata:
+                target_gamedata_directory = os.path.join(target_directory, "GameData")
+            else:
+                target_gamedata_directory = os.path.join(target_directory,
+                                                         os.path.relpath(source_directory,
+                                                                         self.source_directory),
+                                                         "GameData")
+
+            logging.info("converting track %s to %s" % (source_directory, target_gamedata_directory))
+            # create directory hierachy
+            modname = os.path.basename(d)
+            if prefix:
+                self.copy_directory_hierachy(source_directory,
+                                             os.path.join(target_gamedata_directory, "Locations", prefix, modname))
+            else:
+                self.copy_directory_hierachy(source_directory,
+                                             os.path.join(target_gamedata_directory, "Locations", modname))
+
+            print("modname:", modname)
+            if prefix:
+                target_directory = os.path.join(target_gamedata_directory, "Locations", prefix)
+            else:
+                target_directory = os.path.join(target_gamedata_directory, "Locations")
+            print("source_directory:", source_directory)
+            print("target_directory:", target_directory)
+            self.convert_mod_subdir(os.path.dirname(source_directory), target_directory, modname, modname)
 
 
 # EOF #
