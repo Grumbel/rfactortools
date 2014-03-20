@@ -24,7 +24,7 @@ import rfactortools
 
 
 def process_directory(directory):
-    for fname in rfactortools.find_files(files):
+    for fname in rfactortools.find_files(directory):
         name, ext = os.path.splitext(fname)
         if ext.lower() == ".veh":
             img = os.path.join(name + "number.tga")
