@@ -18,17 +18,17 @@ To convert a mod:
 
 4) Hit the "Convert" button and wait a minute or two.
 
-5) Once the conversion is finished copy the mod over to the GSC2013
-   directory
+5) Once the conversion is finished copy the mod from the "Output"
+   directory over to the GSC2013 directory
 
 6) If you have converted a track, install gsc2013-missing-track-textures.7z,
-   it's a base mod that contains sky textures necessary to run converted mods.
-   It's available at:
+   it's a base mod that contains sky textures necessary to run converted
+   tracks. It's available at:
 
    https://mega.co.nz/#!zlRFTAjD!byvxHGBi-19Cj9maG4bSTUqMX19lJuULKCAQbQ7Lr0g
 
 7) If something goes wrong, full conversion logs are saved to
-   rfactortools-gui-*.log. For further tweaking, minised-gui.exe, a
+   logs/ directory. For further tweaking, minised-gui.exe, a
    tool that allows you to search&replace across multiple files is
    included with rfactortools.
 
