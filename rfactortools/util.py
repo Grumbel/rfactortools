@@ -115,17 +115,23 @@ def lookup_path_icase(filename):
 
 
 def path_exists(filename):
-    return bool(lookup_path_icase(filename))
+    return lookup_path_icase(filename) is not None
 
 
 def file_exists(filename):
     p = lookup_path_icase(filename)
-    return bool(os.path.isdir(p))
+    if p is not None:
+        return bool(os.path.isdir(p))
+    else:
+        return False
 
 
 def directory_exists(filename):
     p = lookup_path_icase(filename)
-    return bool(os.path.isfile(p))
+    if p is not None:
+        return bool(os.path.isfile(p))
+    else:
+        return False
 
 
 # EOF #
