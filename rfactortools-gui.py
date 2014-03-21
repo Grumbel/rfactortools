@@ -114,7 +114,7 @@ class Application(Frame):
                                                       variable=self.unique_team_names)
         self.unique_team_names_checkbox.grid(column=0, row=0, columnspan=2, sticky=W)
 
-        self.force_track_thumb = BooleanVar(value=defaults.force_track_thumb)
+        self.force_track_thumb = BooleanVar(value=defaults.force_track_thumbnails)
         self.force_track_thumb_checkbox = Checkbutton(self.option_frame, text="Force Track Thumbnail",
                                                       variable=self.force_track_thumb)
         self.force_track_thumb_checkbox.grid(column=0, row=1, columnspan=2, sticky=W)
@@ -125,7 +125,7 @@ class Application(Frame):
         self.clear_classes_checkbox.grid(column=0, row=2, columnspan=2, sticky=W)
 
         self.single_gamedata = BooleanVar(value=defaults.single_gamedata)
-        self.single_gamedata_checkbox = Checkbutton(self.option_frame, text="Single GamaData/ Output",
+        self.single_gamedata_checkbox = Checkbutton(self.option_frame, text="Single GameData/ Output",
                                                     variable=self.single_gamedata)
         self.single_gamedata_checkbox.grid(column=0, row=3, columnspan=2, sticky=W)
 
@@ -209,7 +209,7 @@ class Application(Frame):
                 cfg.unique_team_names = self.unique_team_names.get()
                 cfg.force_track_thumbnails = self.force_track_thumb.get()
                 cfg.clear_classes = self.clear_classes.get()
-                cfg.single_gamadata = self.single_gamedata.get()
+                cfg.single_gamedata = self.single_gamedata.get()
 
                 if self.vehicle_category.get().strip():
                     cfg.vehicle_category = self.vehicle_category.get().strip()

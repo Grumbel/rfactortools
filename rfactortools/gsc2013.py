@@ -111,7 +111,7 @@ def find_track_directory(gdb_filename):
 
 def find_data_directories(directory):
     """Returns the ``GameData/`` directory inside of ``directory``, throws
-    exception when more then one ``GamaData/`` is found, return
+    exception when more then one ``GameData/`` is found, return
     ``None``, if none is found (not an error, as tracks don't contain
     a ``GameData/``)
     """
@@ -145,7 +145,7 @@ class rFactorToGSC2013Config:
         self.unique_team_names = True
         self.force_track_thumbnails = True
         self.clear_classes = False
-        self.single_gamadata = True
+        self.single_gamedata = True
         self.reiza_class = "reiza5"
         self.vehicle_category = ""
         self.track_category = ""
@@ -377,11 +377,11 @@ class rFactorToGSC2013:
     def convert_all(self, target_directory):
         target_directory = os.path.normpath(target_directory)
 
-        # convert GamaData/ directories
+        # convert GameData/ directories
         for d in self.source_gamedata_directories:
             self.source_gamedata_directory = os.path.normpath(d)
 
-            if self.cfg.single_gamadata:
+            if self.cfg.single_gamedata:
                 target_gamedata_directory = os.path.join(target_directory, "GameData")
             else:
                 target_gamedata_directory = os.path.join(target_directory,
@@ -403,7 +403,7 @@ class rFactorToGSC2013:
             logging.debug("track: prefix:\"%s\" - directory:\"%s\"" % (prefix, d))
             source_directory = os.path.normpath(d)
 
-            if self.cfg.single_gamadata:
+            if self.cfg.single_gamedata:
                 target_gamedata_directory = os.path.join(target_directory, "GameData")
             else:
                 target_gamedata_directory = os.path.join(target_directory,
