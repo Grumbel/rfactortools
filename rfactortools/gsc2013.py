@@ -88,8 +88,9 @@ def find_track_directory_from_searchpath(directory, search_path):
             return (str(pathlib.Path(*reversed([prefix[-1]] + rhs))),
                     rest)
         else:
-            return (str(pathlib.Path(*reversed(rhs))),
-                    None)
+            raise Exception("no common prefix")
+            #return (str(pathlib.Path(*reversed(rhs))),
+            #        None)
 
 
 def find_track_directory(gdb_filename):
@@ -102,9 +103,14 @@ def find_track_directory(gdb_filename):
         info = rfactortools.InfoScnParser()
         rfactortools.process_scnfile(scn_filename, info)
 
-        result = find_track_directory_from_searchpath(os.path.dirname(gdb_filename),
-                                                      info.search_path)
-        return result
+        try:
+            result = find_track_directory_from_searchpath(os.path.dirname(gdb_filename),
+                                                          info.search_path)
+            return result
+        except:
+            result = find_track_directory_from_searchpath(os.path.dirname(os.path.dirname(gdb_filename)),
+                                                          info.search_path)
+            return result            
 
 
 def find_data_directories(directory):
@@ -398,7 +404,7 @@ class rFactorToGSC2013:
 
         # convert tracks that don't have a toplevel GameData/ directory
         for d, prefix in self.source_track_directories:
-            print("track:", d)
+            print("track:", prefix, " - ", d)
             source_directory = os.path.normpath(d)
 
             if self.cfg.single_gamadata:
