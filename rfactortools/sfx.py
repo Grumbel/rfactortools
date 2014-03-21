@@ -64,7 +64,7 @@ def try_fix_wav_path(gamedata, modname, wav_file):
 
 
 def modify_sfxfile(fout, filename, on_wav_file):
-    with open(filename, 'rt', encoding='latin-1') as fin:
+    with rfactortools.open_read(filename) as fin:
         lines = fin.read().splitlines()
 
     for orig_line in lines:
@@ -103,7 +103,7 @@ def modify_sfxfile(fout, filename, on_wav_file):
 def parse_sfxfile(filename):
     sfx = SFX()
 
-    with open(filename, 'rt', encoding='latin-1') as fin:
+    with rfactortools.open_read(filename) as fin:
         for orig_line in fin.read().splitlines():
             m = comment_regex.match(orig_line)
             if m:

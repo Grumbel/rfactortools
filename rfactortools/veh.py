@@ -93,7 +93,7 @@ def parse_vehfile(filename):
 
     veh.filename = filename
 
-    with open(filename, 'rt', encoding='latin-1') as fin:
+    with rfactortools.open_read(filename) as fin:
         for orig_line in fin.read().splitlines():
             line = orig_line
 

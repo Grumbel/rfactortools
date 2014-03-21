@@ -56,7 +56,7 @@ def prefix_split(lhs, rhs):
     return lhs[0:length], lhs[length:], rhs[length:]
 
 
-def find_track_directory_from_searchpath(directory, search_path):
+def find_track_directory_from_searchpath(directory_str, search_path_str, depth=0):
     """
     Given the directory of the ``.gdb`` file and a SearchPath, try to
     locate the root directory of a track.
@@ -66,10 +66,10 @@ def find_track_directory_from_searchpath(directory, search_path):
     GameData/Locations/{prefix}/ (aka. the ``70tracks/`` problem).
     """
 
-    directory = list(reversed(pathlib.Path(directory).parts))
+    directory = list(reversed(pathlib.Path(directory_str).parts))
     length = 0
     max_path = None
-    for p in search_path:
+    for p in search_path_str:
         path = list(reversed(pathlib.Path(p).parts))
         if length < len(path) and p != ".":
             length = len(path)
@@ -87,10 +87,11 @@ def find_track_directory_from_searchpath(directory, search_path):
                 rest = None
             return (str(pathlib.Path(*reversed([prefix[-1]] + rhs))),
                     rest)
+        elif depth < 2:
+            return find_track_directory_from_searchpath(os.path.dirname(directory_str), search_path_str,
+                                                        depth=depth+1)
         else:
             raise Exception("no common prefix")
-            #return (str(pathlib.Path(*reversed(rhs))),
-            #        None)
 
 
 def find_track_directory(gdb_filename):
@@ -103,14 +104,9 @@ def find_track_directory(gdb_filename):
         info = rfactortools.InfoScnParser()
         rfactortools.process_scnfile(scn_filename, info)
 
-        try:
-            result = find_track_directory_from_searchpath(os.path.dirname(gdb_filename),
-                                                          info.search_path)
-            return result
-        except:
-            result = find_track_directory_from_searchpath(os.path.dirname(os.path.dirname(gdb_filename)),
-                                                          info.search_path)
-            return result            
+        result = find_track_directory_from_searchpath(os.path.dirname(gdb_filename),
+                                                      info.search_path)
+        return result
 
 
 def find_data_directories(directory):
@@ -179,7 +175,7 @@ class rFactorToGSC2013:
         print("GameData: \"%s\"" % self.source_gamedata_directories)
 
     def convert_gdb(self, filename, target_file):
-        with open(filename, "rt", encoding="latin-1") as fin:
+        with rfactortools.open_read(filename) as fin:
             lines = fin.readlines()
 
         with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
@@ -218,7 +214,7 @@ class rFactorToGSC2013:
             img.save(target_mini_file)
 
     def convert_veh(self, source_file, target_file, mod_name):
-        with open(source_file, "rt", encoding="latin-1") as fin:
+        with rfactortools.open_read(source_file) as fin:
             lines = fin.readlines()
 
         if self.cfg.unique_team_names:
@@ -404,7 +400,7 @@ class rFactorToGSC2013:
 
         # convert tracks that don't have a toplevel GameData/ directory
         for d, prefix in self.source_track_directories:
-            print("track:", prefix, " - ", d)
+            logging.debug("track: prefix:\"%s\" - directory:\"%s\"" % (prefix, d))
             source_directory = os.path.normpath(d)
 
             if self.cfg.single_gamadata:
@@ -425,13 +421,13 @@ class rFactorToGSC2013:
                 self.copy_directory_hierachy(source_directory,
                                              os.path.join(target_gamedata_directory, "Locations", modname))
 
-            print("modname:", modname)
+            logging.debug("modname: %s" % modname)
             if prefix:
                 target_d = os.path.join(target_gamedata_directory, "Locations", prefix)
             else:
                 target_d = os.path.join(target_gamedata_directory, "Locations")
-            print("source_directory:", source_directory)
-            print("target_directory:", target_d)
+            logging.debug("track: source_directory: %s" % source_directory)
+            logging.debug("track: target_directory: %s" % target_d)
             self.convert_mod_subdir(os.path.dirname(source_directory), target_d, modname, modname)
 
 

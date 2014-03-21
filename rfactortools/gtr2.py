@@ -45,7 +45,7 @@ class GTR2ToGSC2013:
         rfactortools.mas_pack_from_data(encrypted_mas_content, target_file)
 
     def convert_trk(self, source_file, target_file):
-        with open(source_file, "rt", encoding="latin-1") as fin:
+        with rfactortools.open_read(source_file) as fin:
             lines = fin.readlines()
 
         with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:

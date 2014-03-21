@@ -23,6 +23,8 @@ import os
 import re
 import tempfile
 
+import rfactortools
+
 
 keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
 vec3_regex = re.compile(r'\((-?\d*(\.\d*)?),\s*(-?\d*(\.\d*)?),\s*(-?\d*(\.\d*)?)\)')
@@ -106,7 +108,7 @@ class Waypoint:
 def parse_aiwfile(filename):
     aiw = AIW()
 
-    with open(filename, "rt", encoding="latin-1", errors="replace") as fout:
+    with rfactortools.open_read(filename) as fout:
         parse_waypoints = False
 
         waypoint = Waypoint()

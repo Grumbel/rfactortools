@@ -19,6 +19,8 @@ import re
 import ntpath
 import posixpath
 
+import rfactortools
+
 
 keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
 comment_regex = re.compile(r'(.*?)(//.*)')
@@ -36,7 +38,7 @@ def scn2posix_path(path):
 
 def process_scnfile(filename, parser):
     # print("processing", filename)
-    with open(filename, "r", encoding='latin-1') as fin:
+    with rfactortools.open_read(filename) as fin:
         for orig_line in fin.read().splitlines():
             line = orig_line
 

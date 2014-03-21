@@ -26,6 +26,30 @@ def nt2posixpath(path):
     return path.replace(ntpath.sep, posixpath.sep)
 
 
+def open_read(filename, encoding="latin-1"):
+    path = lookup_path_icase(filename)
+    if path:
+        return open(path, "rt", encoding=encoding)
+    else:
+        # this will fail, but it gives us a nice FileNotFoundError
+        return open(filename, "rt", encoding=encoding)
+
+
+def in_directory(path, directory):
+    """Check if ``path`` is within ``directory`` or is ``directory`` itself"""
+
+    path = pathlib.Path(os.path.abspath(path)).parts
+    directory = pathlib.Path(os.path.abspath(directory)).parts
+
+    if len(path) < len(directory):
+        return False
+    else:
+        for lhs, rhs in zip(path, directory):
+            if lhs.lower() != rhs.lower():
+                return False
+        return True
+
+
 def find_files(directory, ext=None):
     """Traverses a directory and returns all files contained within, if
     ``ext`` is given, only files ending with ``ext`` are returned"""
@@ -102,8 +126,6 @@ def file_exists(filename):
 def directory_exists(filename):
     p = lookup_path_icase(filename)
     return bool(os.path.isfile(p))
-
-# .find_file
 
 
 # EOF #
