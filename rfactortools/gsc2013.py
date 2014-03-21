@@ -145,10 +145,10 @@ class rFactorToGSC2013Config:
         self.unique_team_names = True
         self.force_track_thumbnails = True
         self.clear_classes = False
-        self.single_gamadata = False
+        self.single_gamadata = True
         self.reiza_class = "reiza5"
-        self.vehicle_category = None
-        self.track_category = None
+        self.vehicle_category = ""
+        self.track_category = ""
         self.track_filter_properties = "StockV8 *"
 
 
