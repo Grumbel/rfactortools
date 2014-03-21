@@ -112,7 +112,7 @@ class Application(Frame):
                                                       variable=self.unique_team_names)
         self.unique_team_names_checkbox.grid(column=0, row=0, columnspan=2, sticky=W)
 
-        self.force_track_thumb = BooleanVar(value=False)
+        self.force_track_thumb = BooleanVar(value=True)
         self.force_track_thumb_checkbox = Checkbutton(self.option_frame, text="Force Track Thumbnail",
                                                       variable=self.force_track_thumb)
         self.force_track_thumb_checkbox.grid(column=0, row=1, columnspan=2, sticky=W)

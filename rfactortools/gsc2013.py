@@ -143,7 +143,7 @@ class rFactorToGSC2013Config:
 
     def __init__(self):
         self.unique_team_names = True
-        self.force_track_thumbnails = False
+        self.force_track_thumbnails = True
         self.clear_classes = False
         self.single_gamadata = False
         self.reiza_class = "reiza5"
