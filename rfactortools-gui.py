@@ -107,45 +107,47 @@ class Application(Frame):
         self.option_frame.grid(column=0, row=2, columnspan=3, sticky=N+S+W+E, padx=8, pady=4)
         self.option_frame.grid_columnconfigure(1, minsize=200)
 
-        self.unique_team_names = BooleanVar(value=True)
+        defaults = rfactortools.rFactorToGSC2013Config()
+
+        self.unique_team_names = BooleanVar(value=defaults.unique_team_names)
         self.unique_team_names_checkbox = Checkbutton(self.option_frame, text="Unique Team Names",
                                                       variable=self.unique_team_names)
         self.unique_team_names_checkbox.grid(column=0, row=0, columnspan=2, sticky=W)
 
-        self.force_track_thumb = BooleanVar(value=True)
+        self.force_track_thumb = BooleanVar(value=defaults.force_track_thumb)
         self.force_track_thumb_checkbox = Checkbutton(self.option_frame, text="Force Track Thumbnail",
                                                       variable=self.force_track_thumb)
         self.force_track_thumb_checkbox.grid(column=0, row=1, columnspan=2, sticky=W)
 
-        self.clear_classes = BooleanVar(value=False)
+        self.clear_classes = BooleanVar(value=defaults.clear_classes)
         self.clear_classes_checkbox = Checkbutton(self.option_frame, text="Clear Vehicle Classes",
                                                   variable=self.clear_classes)
         self.clear_classes_checkbox.grid(column=0, row=2, columnspan=2, sticky=W)
 
-        self.single_gamedata = BooleanVar(value=True)
+        self.single_gamedata = BooleanVar(value=defaults.single_gamedata)
         self.single_gamedata_checkbox = Checkbutton(self.option_frame, text="Single GamaData/ Output",
                                                     variable=self.single_gamedata)
         self.single_gamedata_checkbox.grid(column=0, row=3, columnspan=2, sticky=W)
 
-        self.vehicle_category = StringVar(value="")
+        self.vehicle_category = StringVar(value=defaults.vehicle_category)
         self.vehicle_category_label = Label(self.option_frame, text="Vehicle Category:")
         self.vehicle_category_label.grid(column=2, row=0, sticky=E)
         self.vehicle_category_entry = Entry(self.option_frame, textvariable=self.vehicle_category)
         self.vehicle_category_entry.grid(column=3, row=0, sticky=W)
 
-        self.track_category = StringVar(value="")
+        self.track_category = StringVar(value=defaults.track_category)
         self.track_category_label = Label(self.option_frame, text="Track Category:")
         self.track_category_label.grid(column=2, row=1, sticky=E)
         self.track_category_entry = Entry(self.option_frame, textvariable=self.track_category)
         self.track_category_entry.grid(column=3, row=1, sticky=W)
 
-        self.reiza_class = StringVar(value="reiza5")
+        self.reiza_class = StringVar(value=defaults.reiza_class)
         self.reiza_class_label = Label(self.option_frame, text="Reiza Class:")
         self.reiza_class_label.grid(column=2, row=2, sticky=E)
         self.reiza_class_entry = Entry(self.option_frame, textvariable=self.reiza_class)
         self.reiza_class_entry.grid(column=3, row=2, sticky=W)
 
-        self.track_filter_properties = StringVar(value="StockV8 *")
+        self.track_filter_properties = StringVar(value=defaults.track_filter_properties)
         self.track_filter_properties_label = Label(self.option_frame, text="Track Filter Properties:")
         self.track_filter_properties_label.grid(column=2, row=3, sticky=E)
         self.track_filter_properties_entry = Entry(self.option_frame, textvariable=self.track_filter_properties)
