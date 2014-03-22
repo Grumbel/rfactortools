@@ -8,6 +8,7 @@ py_env.ParseConfig("python3-config --cflags --ldflags | sed -e 's/-Werror=declar
 py_env.SharedLibrary('rfactortools/_crypt', ['rfactortools_crypt.cpp'])
 
 Command(None, [Glob("*.py"), Glob("rfactortools/*.py")],
-        "flake8 *.py --max-line-length=120 $SOURCES")
+        "flake8 --max-line-length=120 $SOURCES")
+
 
 # EOF #
