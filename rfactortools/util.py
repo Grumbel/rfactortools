@@ -65,6 +65,14 @@ def find_files(directory, ext=None):
     return results
 
 
+def find_file(directory, name):
+    for path, dirs, files in os.walk(directory):
+        for fname in files:
+            if fname.lower() == name.lower():
+                return os.path.join(path, fname)
+    return None
+
+
 def _lookup_path_icase(root, rest):
     """
     Given a root directory and a list of directory parts, find all

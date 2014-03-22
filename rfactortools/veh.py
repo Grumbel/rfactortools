@@ -150,7 +150,7 @@ def process_scn_veh_file(modname, veh_filename, scn_short_filename, vehdir, team
         append_errors(scn_filename, orig_errs, orig_warns, errors)
     else:
         # if there is a cmaps in the mod, use that instead of the one in <VEHDIR>
-        cmaps = rfactortools.find_file("cmaps.mas")
+        cmaps = rfactortools.find_file(vehdir, "cmaps.mas")
         if cmaps:
             cmaps = os.path.relpath(cmaps, vehdir)
             for i, m in enumerate(info.mas_files):

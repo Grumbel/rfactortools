@@ -24,7 +24,7 @@ from .mas import mas_pack, mas_unpack, mas_list, mas_pack_from_data, mas_unpack_
 from .scn import gen_check_errors, process_gen_directory, modify_vehicle_file
 from .scn_parser import ScnParser, InfoScnParser, SearchReplaceScnParser, process_scnfile
 from .util import find_files, lookup_path_icase, nt2posixpath, in_directory, \
-    path_exists, file_exists, directory_exists, open_read
+    path_exists, file_exists, directory_exists, open_read, find_file
 from .sfx import parse_sfxfile, modify_sfxfile, try_fix_wav_path
 from .gdb import process_gdb_file
 from .veh import parse_vehfile, print_veh_tree, print_veh_info, process_veh_file
@@ -40,7 +40,7 @@ __all__ = [
     "gen_check_errors", "process_gen_directory", "modify_vehicle_file",
     "ScnParser", "InfoScnParser", "SearchReplaceScnParser", "process_scnfile",
     "find_files", "lookup_path_icase", "nt2posixpath", "in_directory",
-    "path_exists", "file_exists", "directory_exists", "open_read",
+    "path_exists", "file_exists", "directory_exists", "open_read", "find_file",
     "parse_sfxfile", "modify_sfxfile", "try_fix_wav_path",
     "process_gdb_file",
     "parse_vehfile", "print_veh_tree", "print_veh_info", "process_veh_file",
