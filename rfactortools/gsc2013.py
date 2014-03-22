@@ -344,6 +344,8 @@ class rFactorToGSC2013:
                     self.convert_sfx(source_file, target_file, modname)
                 elif ext == ".tga":
                     self.convert_tga(source_file, target_file)
+                elif ext == ".gfx":
+                    pass
                 else:
                     shutil.copy(source_file, target_file)
 
