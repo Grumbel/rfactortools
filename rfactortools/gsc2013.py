@@ -320,7 +320,7 @@ class rFactorToGSC2013:
     def convert_file(self, source_directory, target_directory, filename, modname):
         logging.info("processing '%s' of mod '%s'" % (filename, modname))
 
-        if filename.lower() in exclude_files:
+        if filename.lower() in rfactortools.exclude_files:
             pass
         else:
             source_file = os.path.join(source_directory, filename)
