@@ -24,30 +24,6 @@ import shutil
 import rfactortools
 
 
-exclude_files = [
-    "locations/commonmaps.mas",
-    "locations/terrain.tdf",
-    "scripts/pits.mas",
-    "shared/coreshaders.mas",
-    "vehicles/rfhud.mas",
-    "vehicles/cmaps.mas",
-    "vehicles/damage.ini",
-    "vehicles/default.cam",
-    "vehicles/default.sfx",
-    "vehicles/doublewishbone.pm",
-    "vehicles/multicar.mas",
-    "vehicles/multiplayervehicle.scn",
-    "vehicles/night_lightfield.tga",
-    "vehicles/f3_ambientshadow.dds",
-    "vehicles/headphysics.ini",
-    "vehicles/showroom.mas",
-    "vehicles/spark.tga",
-    "vehicles/vehicle_commonmaps.mas",
-    "vehicles/vview.scn",
-]
-exclude_files = [os.path.normpath(f) for f in exclude_files]
-
-
 def prefix_split(lhs, rhs):
     length = min(len(lhs), len(rhs))
     for i in range(0, length):
