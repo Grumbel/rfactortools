@@ -286,7 +286,7 @@ def main():
     args = parser.parse_args()
 
     root = tkinter.Tk()
-    root.wm_title("rFactor to Game Stock Car 2013 Mod Converter V0.2.1")
+    root.wm_title("rFactor to Game Stock Car 2013 Mod Converter V0.2.2")
     root.minsize(640, 400)
     app = Application(master=root)
 

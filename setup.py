@@ -21,7 +21,7 @@ from distutils.core import setup
 from distutils.extension import Extension
 
 setup(name='rfactortools',
-      version='0.2.1',
+      version='0.2.2',
       scripts=[
           "aiwtool.py",
           "dirtool.py",
