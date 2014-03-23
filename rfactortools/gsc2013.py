@@ -58,7 +58,7 @@ def _find_track_directory_from_searchpath(directory, search_path, depth=0):
             # SearchPath doesn't go to the track directory, so cut track directory one short and try again
             return _find_track_directory_from_searchpath(directory[1:], search_path, depth+1)
         else:
-            raise Exception("no common prefix")
+            raise Exception("no common prefix for track: director: %s SearchPath: %s" % (directory, search_path))
 
 
 def find_track_directory_from_searchpath(directory_str, search_path_lst):
