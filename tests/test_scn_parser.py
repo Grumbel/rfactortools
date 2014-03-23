@@ -29,12 +29,18 @@ class SCNParserTestCase(unittest.TestCase):
         pass  # print("tearDown()")
 
     def test_posix2scn_path(self):
-        self.assertEqual(rfactortools.scn_parser.posix2scn_path("<TEAMDIR>/.."), "<TEAMDIR>\\..")
-        self.assertEqual(rfactortools.scn_parser.posix2scn_path("<TEAMDIR>"), "<TEAMDIR>")
+        for input, expected in [("<TEAMDIR>/..", "<TEAMDIR>\\.."),
+                                ("<TEAMDIR>/foobar/", "<TEAMDIR>\\foobar"),
+                                ("<TEAMDIR>", "<TEAMDIR>")]:
+            self.assertEqual(rfactortools.scn_parser.posix2scn_path(input), expected)
 
     def test_scn2posix_path(self):
-        self.assertEqual(rfactortools.scn_parser.scn2posix_path("<TEAMDIR>\\.."), "<TEAMDIR>/..")
-        self.assertEqual(rfactortools.scn_parser.scn2posix_path("<TEAMDIR>"), "<TEAMDIR>")
+        for input, expected in [("<TEAMDIR>\\..", "<TEAMDIR>/.."),
+                                ("<TEAMDIR>..", "<TEAMDIR>/.."),
+                                ("<TEAMDIR>/foobar/", "<TEAMDIR>/foobar"),
+                                ("<TEAMDIR>foobar", "<TEAMDIR>/foobar"),
+                                ("<TEAMDIR>", "<TEAMDIR>")]:
+            self.assertEqual(rfactortools.scn_parser.scn2posix_path(input), expected)
 
 
 if __name__ == '__main__':

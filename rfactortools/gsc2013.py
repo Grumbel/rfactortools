@@ -32,7 +32,36 @@ def prefix_split(lhs, rhs):
     return lhs[0:length], lhs[length:], rhs[length:]
 
 
-def find_track_directory_from_searchpath(directory_str, search_path_str, depth=0):
+def find_sublist(haystack, needle):
+    for i in range(0, len(haystack) - len(needle)):
+        if haystack[i:len(needle)] == needle:
+            return haystack[i+len(needle)-1:]
+    return None
+
+
+def _find_track_directory_from_searchpath(directory, search_path, depth=0):
+    result = find_sublist(directory, search_path)
+    if result is not None:
+        return (result, None)
+    else:
+        # assume that the ``SearchPath`` contains elements not found
+        # in ``directory ``, i.e. 70tracks is missing from the mod
+        prefix, lhs, rhs = prefix_split(search_path, directory)
+
+        if prefix:
+            if lhs:
+                rest = lhs
+            else:
+                rest = None
+            return (([prefix[-1]] + rhs), rest)
+        elif depth < 3 and len(directory) > 1:
+            # SearchPath doesn't go to the track directory, so cut track directory one short and try again
+            return _find_track_directory_from_searchpath(directory[1:], search_path, depth+1)
+        else:
+            raise Exception("no common prefix")
+
+
+def find_track_directory_from_searchpath(directory_str, search_path_lst):
     """
     Given the directory of the ``.gdb`` file and a SearchPath, try to
     locate the root directory of a track.
@@ -45,7 +74,7 @@ def find_track_directory_from_searchpath(directory_str, search_path_str, depth=0
     directory = list(reversed(pathlib.Path(directory_str).parts))
     length = 0
     max_path = None
-    for p in search_path_str:
+    for p in search_path_lst:
         path = list(reversed(pathlib.Path(p).parts))
         if length < len(path) and p != ".":
             length = len(path)
@@ -54,20 +83,13 @@ def find_track_directory_from_searchpath(directory_str, search_path_str, depth=0
     if not max_path:
         raise Exception("empty SearchPath")
     else:
-        prefix, lhs, rhs = prefix_split(max_path, directory)
-
-        if prefix:
-            if lhs:
-                rest = str(pathlib.Path(*reversed(lhs)))
-            else:
-                rest = None
-            return (str(pathlib.Path(*reversed([prefix[-1]] + rhs))),
-                    rest)
-        elif depth < 2:
-            return find_track_directory_from_searchpath(os.path.dirname(directory_str), search_path_str,
-                                                        depth=depth+1)
+        result, prefix = _find_track_directory_from_searchpath(directory, max_path)
+        if prefix is not None:
+            return (str(pathlib.Path(*reversed(result))),
+                    str(pathlib.Path(*reversed(prefix))))
         else:
-            raise Exception("no common prefix")
+            return (str(pathlib.Path(*reversed(result))),
+                    prefix)
 
 
 def find_track_directory(gdb_filename):
