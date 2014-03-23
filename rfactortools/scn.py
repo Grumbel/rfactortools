@@ -23,37 +23,6 @@ import traceback
 import rfactortools
 
 
-skybox_rfactor = """Instance=skyboxi
-{
-  Moveable=True
-  MeshFile=skyboxi.gmt CollTarget=False HATTarget=False
-  Instance=Sky
-  {
-    Moveable=True
-    MeshFile=Sky.gmt CollTarget=False HATTarget=False
-  }
-}
-"""
-
-skybox_gsc2013 = """Instance=skyboxi
-{
-  Moveable=True
-  MeshFile=skyboxi.gmt CollTarget=False HATTarget=False Render=False
-  Instance=CLOUDS
-  {
-
-    Moveable=True
-    MeshFile=skyboxi.gmt CollTarget=False HATTarget=False
-    Instance=Sky
-    {
-      Moveable=True
-      MeshFile=Sky.gmt CollTarget=False HATTarget=False
-    }
-  }
-}
-"""
-
-
 def modify_vehicle_file(gen, search_path, mas_files, vehdir, teamdir):
     strio = io.StringIO()
     sr_parser = rfactortools.SearchReplaceScnParser(strio)
