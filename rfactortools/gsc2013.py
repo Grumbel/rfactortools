@@ -71,11 +71,11 @@ def find_track_directory_from_searchpath(directory_str, search_path_lst):
     GameData/Locations/{prefix}/ (aka. the ``70tracks/`` problem).
     """
 
-    directory = list(reversed(pathlib.PurePosixPath(directory_str).parts))
+    directory = list(reversed(pathlib.PurePath(directory_str).parts))
     length = 0
     max_path = None
     for p in search_path_lst:
-        path = list(reversed(pathlib.PurePosixPath(p).parts))
+        path = list(reversed(pathlib.PurePath(p).parts))
         if length < len(path) and p != ".":
             length = len(path)
             max_path = path
