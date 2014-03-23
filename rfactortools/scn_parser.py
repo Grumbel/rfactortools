@@ -28,12 +28,28 @@ section_start_regex = re.compile(r'\s*{')
 section_end_regex = re.compile(r'\s*}')
 
 
+def posix2scn_path(path):
+    # minor path cleanup only, not using posixpath.normpath() as that
+    # would replace "<TEAMDIR>/.." with ".", not what we want
+    path = re.sub(r'/+', r'/', path)
+    path = re.sub(r'/$', r'', path)
+
+    path = path.replace(posixpath.sep, ntpath.sep)
+
+    return path
+
+
 def scn2posix_path(path):
     path = path.replace(ntpath.sep, posixpath.sep)
     path = re.sub(r'<VEHDIR>', r'<VEHDIR>/', path, count=1, flags=re.I)
     path = re.sub(r'<TEAMDIR>', r'<TEAMDIR>/', path, count=1, flags=re.I)
 
-    return posixpath.normpath(path)
+    # minor path cleanup only, not using posixpath.normpath() as that
+    # would replace "<TEAMDIR>/.." with ".", not what we want
+    path = re.sub(r'/+', r'/', path)
+    path = re.sub(r'/$', r'', path)
+
+    return path
 
 
 def process_scnfile(filename, parser):
@@ -132,7 +148,7 @@ class SearchReplaceScnParser(ScnParser):
             elif key.lower() == "masfile":
                 if self.mas_files is not None:
                     for p in self.mas_files:
-                        self.fout.write("MASFile=%s\n" % ntpath.normpath(p))
+                        self.fout.write("MASFile=%s\n" % posix2scn_path(p))
 
                     self.mas_files = None
                     self.delete_mas_file = True
@@ -143,7 +159,7 @@ class SearchReplaceScnParser(ScnParser):
             elif key.lower() == "searchpath":
                 if self.search_path is not None:
                     for p in self.search_path:
-                        self.fout.write("SearchPath=%s\n" % ntpath.normpath(p))
+                        self.fout.write("SearchPath=%s\n" % posix2scn_path(p))
 
                     self.search_path = None
                     self.delete_search_path = True
