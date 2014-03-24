@@ -119,19 +119,19 @@ def find_data_directories(directory):
     if basedir.lower() == "gamedata":
         return [directory]
     else:
-        gamedata_dirs = []
-        track_dirs = []
+        gamedata_dirs = set()
+        track_dirs = set()
         for path, dirs, files in os.walk(directory):
             for d in list(dirs):
                 if d.lower() == "gamedata":
-                    gamedata_dirs.append(os.path.join(path, d))
+                    gamedata_dirs.add(os.path.join(path, d))
                     dirs.remove(d)
 
             for f in files:
                 rest, ext = os.path.splitext(f)
                 if ext.lower() == ".gdb":
                     try:
-                        track_dirs.append(find_track_directory(os.path.join(path, f)))
+                        track_dirs.add(find_track_directory(os.path.join(path, f)))
                     except Exception:
                         logging.exception("track directory location failed")
 
