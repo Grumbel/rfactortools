@@ -28,6 +28,14 @@ class GSC2013TestCase(unittest.TestCase):
     def tearDown(self):
         pass  # print("tearDown()")
 
+    def test_find_sublist(self):
+        self.assertEqual(rfactortools.gsc2013.find_sublist([0, 1, 2, 3, 4, 5, 6, 7, 8], [3, 4, 5]), 3)
+        self.assertEqual(rfactortools.gsc2013.find_sublist([0, 1, 2, 3, 4, 5, 6, 7, 8], [6, 7]), 6)
+        self.assertEqual(rfactortools.gsc2013.find_sublist([0, 1, 2, 3, 4], [0, 1, 2, 3, 4]), 0)
+        self.assertEqual(rfactortools.gsc2013.find_sublist([0, 1, 2, 3, 4], []), 0)
+        self.assertIsNone(rfactortools.gsc2013.find_sublist([0, 1], [0, 1, 2, 3, 4, 5]))
+        self.assertIsNone(rfactortools.gsc2013.find_sublist([0, 1, 2, 3, 4, 5, 6, 7, 8], [3, 4, 8]))
+
     def test_find_track_directory_from_searchpath(self):
         lst = [
             # everything normal
@@ -49,6 +57,10 @@ class GSC2013TestCase(unittest.TestCase):
             # SearchPath is to short and 70tracks is missing
             (("mods/75monza/barakuda", [".", "TrackCol/70tracks", "TrackCol/70tracks/75monza"]),
              ("mods/75monza", "TrackCol/70tracks")),
+
+            # real world 75Monza track problem
+            (("mods/70stracks/75Monza/75Monza", [".", "70stracks", "70stracks/75Monza"]),
+             ("mods/70stracks", None)),
         ]
         for (d, sp), expected in lst:
             self.assertEqual(rfactortools.gsc2013.find_track_directory_from_searchpath(d, sp), expected,

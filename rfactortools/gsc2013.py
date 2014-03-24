@@ -33,16 +33,17 @@ def prefix_split(lhs, rhs):
 
 
 def find_sublist(haystack, needle):
-    for i in range(0, len(haystack) - len(needle)):
-        if haystack[i:len(needle)] == needle:
-            return haystack[i+len(needle)-1:]
+    for i in range(0, len(haystack) - len(needle) + 1):
+        if haystack[i:i+len(needle)] == needle:
+            return i
     return None
 
 
 def _find_track_directory_from_searchpath(directory, search_path, depth=0):
     result = find_sublist(directory, search_path)
     if result is not None:
-        return (result, None)
+        return (directory[result + len(search_path) - 1:],
+                None)
     else:
         # assume that the ``SearchPath`` contains elements not found
         # in ``directory ``, i.e. 70tracks is missing from the mod
