@@ -247,7 +247,6 @@ rfactor_decrypt_c(const char* input, int length, int skip)
 static PyObject*
 rfactor_encrypt_c(const char* input, int length, u64 key, u64 sign, int skip)
 {
-  assert(length >= 16);
   assert(skip == 0 || skip == 4);
 
   const GameSignature* game = isi_game_from_sign(sign);
