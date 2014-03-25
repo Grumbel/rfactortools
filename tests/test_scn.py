@@ -33,6 +33,8 @@ class SCNTestCase(unittest.TestCase):
         shutil.rmtree(self.tmpdir)
 
     def test_cmaps_fix(self):
+        """Make sure that MASFile=cmaps.mas is fixed when the mod contains a cmaps.mas"""
+
         input_directory = os.path.join(self.test_datadir, "cmaps_fix/GameData/")
         output_directory = os.path.join(self.tmpdir, "cmap_fix")
 
@@ -44,6 +46,21 @@ class SCNTestCase(unittest.TestCase):
                                                  "GameData/Vehicles/TheMod/Subdir/graphics.gen")) as fin:
             self.assertEqual(fin.read(),
                              "MASFile=TheMod\\cmaps.mas\n")
+
+    def test_cmaps_dontfix(self):
+        """Make sure that MASFile=cmaps.mas is not fixed when the cmaps is in another mod directory"""
+
+        input_directory = os.path.join(self.test_datadir, "cmaps_dontfix/GameData/")
+        output_directory = os.path.join(self.tmpdir, "cmap_dontfix")
+
+        cfg = rfactortools.rFactorToGSC2013Config()
+        converter = rfactortools.rFactorToGSC2013(input_directory, cfg)
+        converter.convert_all(output_directory)
+
+        with rfactortools.open_read(os.path.join(output_directory,
+                                                 "GameData/Vehicles/TheMod/Subdir/graphics.gen")) as fin:
+            self.assertEqual(fin.read(),
+                             "MASFile=cmaps.mas\n")
 
 
 if __name__ == '__main__':
