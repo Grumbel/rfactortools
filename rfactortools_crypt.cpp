@@ -285,7 +285,7 @@ rfactor_encrypt(PyObject* self, PyObject* args)
   unsigned long long sign;
   int   skip;
 
-  if (!PyArg_ParseTuple(args, "s#KKi", &input, &length, &key, &sign, &skip))
+  if (!PyArg_ParseTuple(args, "y#KKi", &input, &length, &key, &sign, &skip))
   {
     return NULL;
   }
@@ -308,7 +308,7 @@ rfactor_decrypt(PyObject* self, PyObject* args)
   int   length;
   int   skip;
 
-  if (!PyArg_ParseTuple(args, "s#i", &input, &length, &skip))
+  if (!PyArg_ParseTuple(args, "y#i", &input, &length, &skip))
   {
     return NULL;
   }
