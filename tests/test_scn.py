@@ -17,16 +17,33 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import os
+import rfactortools
+import tempfile
 import unittest
-# import rfactortools.scn
+import shutil
 
 
-class SCNParserTestCase(unittest.TestCase):
+class SCNTestCase(unittest.TestCase):
     def setUp(self):
-        pass
+        self.test_datadir = os.path.join(os.path.dirname(__file__), 'data')
+        self.tmpdir = tempfile.mkdtemp(prefix='rfactortools')
 
     def tearDown(self):
-        pass
+        shutil.rmtree(self.tmpdir)
+
+    def test_cmaps_fix(self):
+        input_directory = os.path.join(self.test_datadir, "cmaps_fix/GameData/")
+        output_directory = os.path.join(self.tmpdir, "cmap_fix")
+
+        cfg = rfactortools.rFactorToGSC2013Config()
+        converter = rfactortools.rFactorToGSC2013(input_directory, cfg)
+        converter.convert_all(output_directory)
+
+        with rfactortools.open_read(os.path.join(output_directory,
+                                                 "GameData/Vehicles/TheMod/Subdir/graphics.gen")) as fin:
+            self.assertEqual(fin.read(),
+                             "MASFile=TheMod\\cmaps.mas\n")
 
 
 if __name__ == '__main__':
