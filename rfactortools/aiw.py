@@ -17,11 +17,8 @@
 
 import PIL.Image
 import PIL.ImageDraw
-import logging
 import math
-import os
 import re
-import tempfile
 
 import rfactortools
 
@@ -56,7 +53,7 @@ class AIW:
         self.waypoints = []
 
     def get_waypoints(self, branch_id=0):
-        return list(filter(lambda w: w.branch_id == branch_id, self.waypoints))
+        return [w for w in self.waypoints if w.branch_id == branch_id]
 
     def get_bounding_box(self):
         x, y, z = self.waypoints[0].pos
@@ -138,19 +135,6 @@ def point_distance(p1, p2):
     return math.sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
 
 
-def draw_path_cairo(cr, scale, waypoints):
-    x, y, z = waypoints[0].pos
-    cr.move_to(x * scale, z * scale)
-    for w in waypoints[1:]:
-        x, y, z = w.pos
-        cr.line_to(x * scale, z * scale)
-
-    # fudge factor to find hillclimb tracks that don't close
-    d = point_distance(waypoints[0].pos, waypoints[-1].pos)
-    if d < 200:
-        cr.close_path()
-
-
 def draw_path(draw, scale, waypoints, ofx, ofy):
     # fudge factor to find hillclimb tracks that don't close
     d = point_distance(waypoints[0].pos, waypoints[-1].pos)
@@ -180,61 +164,19 @@ def render_aiw(aiw, width=512, height=512):
     # aren't clipped
     scale = min(sx, sy) * 0.9
 
-    try:
-        import cairo
+    # render at 2x scale to get a bit of anti-aliasing, rendering
+    # quality is still much worse then cairo
+    img = PIL.Image.new("RGBA", (width*2, height*2))
 
-        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
-        cr = cairo.Context(surface)
+    ofx = width / 2 + (-x1 - w / 2) * scale
+    ofy = height / 2 + (-y1 - h / 2) * scale
 
-        cr.save()
-        cr.translate(width / 2, height / 2)
+    draw = PIL.ImageDraw.Draw(img)
+    draw_path(draw, scale*2.0, aiw.get_waypoints(0), ofx*2.0, ofy*2.0)
 
-        cr.translate((-x1 - w / 2) * scale,
-                     (-y1 - h / 2) * scale)
+    img = img.resize((width, height), PIL.Image.ANTIALIAS)
 
-        for i in reversed(range(0, 1)):
-            draw_path_cairo(cr, scale, aiw.get_waypoints(i))
-
-            cr.set_line_width(12.0)
-            cr.set_source_rgb(0, 0, 0)
-            cr.stroke()
-
-        for i in reversed(range(0, 1)):
-            draw_path_cairo(cr, scale, aiw.get_waypoints(i))
-            if i == 0:
-                cr.set_source_rgb(1, 1, 1)
-            else:
-                cr.set_source_rgb(0.75, 0.75, 0.75)
-            cr.set_line_width(4.0)
-            cr.stroke()
-
-        cr.restore()
-
-        # TODO: img.get_data() is not implemented in pycairo, thus we save
-        # to .png, load it and save as .tga again
-        tmpfile = tempfile.mkstemp(suffix=".png")[1]
-        surface.write_to_png(tmpfile)
-        pil_img = PIL.Image.open(tmpfile)
-        os.unlink(tmpfile)
-
-        return pil_img
-
-    except ImportError as err:
-        logging.info("Cairo not found, rendering with lower quality PIL: %s" % err)
-
-        # render at 2x scale to get a bit of anti-aliasing, rendering
-        # quality is still much worse then cairo
-        img = PIL.Image.new("RGBA", (width*2, height*2))
-
-        ofx = width / 2 + (-x1 - w / 2) * scale
-        ofy = height / 2 + (-y1 - h / 2) * scale
-
-        draw = PIL.ImageDraw.Draw(img)
-        draw_path(draw, scale*2.0, aiw.get_waypoints(0), ofx*2.0, ofy*2.0)
-
-        img = img.resize((width, height), PIL.Image.ANTIALIAS)
-
-        return img
+    return img
 
 
 # EOF #
