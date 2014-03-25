@@ -23,15 +23,15 @@ import os
 import rfactortools
 
 
-def show_buildin_ids():
+def show_buildin_ids(args):
     if args.class_id:
         if args.inverse:
             for i in range(0, 256):
                 if not i in rfactortools.race07.class_ids:
                     print(i)
         else:
-            for id, name in rfactortools.race07.class_ids.items():
-                print("%3d: %r" % (id, name))
+            for class_id, name in rfactortools.race07.class_ids.items():
+                print("%3d: %r" % (class_id, name))
 
     if args.model_id:
         if args.inverse:
@@ -39,8 +39,8 @@ def show_buildin_ids():
                 if not i in rfactortools.race07.class_ids:
                     print(i)
         else:
-            for id, name in rfactortools.race07.model_ids.items():
-                print("%3d: %r" % (id, name))
+            for class_id, name in rfactortools.race07.model_ids.items():
+                print("%3d: %r" % (class_id, name))
 
 keyvalue_regex = re.compile(r'^\s*([^=]+)\s*=\s*(.*)\s*')
 comment_regex = re.compile(r'(.*?)(//.*)')
@@ -82,7 +82,8 @@ def read_ids(filename):
 
     return car
 
-if __name__ == "__main__":
+
+def main():
     parser = argparse.ArgumentParser(description="Race07 Tool")
     parser.add_argument('DIRECTORY', action='store', type=str,
                         help='directory containing .gen and .veh files')
@@ -105,5 +106,10 @@ if __name__ == "__main__":
                     print("%4s %4s %s" % (car.class_id, car.model_id, fname))
                 else:
                     print("%4d %4d %s" % (car.class_id, car.model_id, fname))
+
+
+if __name__ == "__main__":
+    main()
+
 
 # EOF #

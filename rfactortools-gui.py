@@ -200,8 +200,8 @@ class Application(Frame):
                                          parent=self)
 
         else:
-            logging.info("source-directory: %s" % self.source_directory.get())
-            logging.info("target-directory: %s" % self.target_directory.get())
+            logging.info("source-directory: %s", self.source_directory.get())
+            logging.info("target-directory: %s", self.target_directory.get())
 
             try:
                 cfg = rfactortools.rFactorToGSC2013Config()

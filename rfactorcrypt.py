@@ -11,7 +11,8 @@ class store_int_from_hex(argparse.Action):
         setattr(namespace, self.dest, int(values, 0))
         return
 
-if __name__ == "__main__":
+
+def main():
     parser = argparse.ArgumentParser(description='rFactor MAS packer')
     parser.add_argument('FILE', action='store', type=str, nargs='+',
                         help='.mas file to unpack')
@@ -37,5 +38,10 @@ if __name__ == "__main__":
             rfactortools.encrypt_file(filename, filename, args.key, args.sign)
         elif args.decrypt:
             rfactortools.decrypt_file(filename, filename)
+
+
+if __name__ == "__main__":
+    main()
+
 
 # EOF #

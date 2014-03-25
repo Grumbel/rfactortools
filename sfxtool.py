@@ -26,7 +26,7 @@ import logging
 import rfactortools
 
 
-if __name__ == "__main__":
+def main():
     logging.basicConfig(level=logging.DEBUG)
 
     parser = argparse.ArgumentParser(description='rFactor .sfx processor')
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         for filename in files:
             sout = io.StringIO()
             rfactortools.modify_sfxfile(sout, filename,
-                                        lambda wav: rfactortools.try_fix_wav_path(gamedata, wav))
+                                        lambda wav: rfactortools.try_fix_wav_path(gamedata, "F1SR", wav))
 
             if args.in_place:
                 if args.backup:
@@ -78,6 +78,10 @@ if __name__ == "__main__":
                     fout.write(sout.getvalue())
             else:
                 sys.stdout.write(sout.getvalue())
+
+
+if __name__ == "__main__":
+    main()
 
 
 # EOF #

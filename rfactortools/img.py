@@ -50,10 +50,10 @@ def resize_to_fit_img_file_with_target(source_file, target_file, w, h):
     newimg = resize_to_fit(img, w, h)
 
     if img is not newimg:
-        logging.debug("%s: resizing from %s to %s, saving to %s" % (source_file, img.size, newimg.size, target_file))
+        logging.debug("%s: resizing from %s to %s, saving to %s", source_file, img.size, newimg.size, target_file)
         newimg.save(target_file)
     else:
-        logging.debug("%s: not resizing %s, saving to %s" % (source_file, newimg.size, target_file))
+        logging.debug("%s: not resizing %s, saving to %s", source_file, newimg.size, target_file)
         newimg.save(target_file)
 
 

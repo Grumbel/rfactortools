@@ -22,8 +22,8 @@ import struct
 import argparse
 
 
-def asciz2py(bytes):
-    return bytes.split(b'\0', 1)[0].decode('latin-1')
+def asciz2py(asciiz):
+    return asciiz.split(b'\0', 1)[0].decode('latin-1')
 
 
 def process_gmt(filename, verbose=False):

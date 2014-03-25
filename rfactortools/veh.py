@@ -49,17 +49,17 @@ def find_vehdir(path):
         raise Exception("couldn't locate <VEHDIR> in %s" % path)
 
 
-def find_file_backwards(dir, gen):
+def find_file_backwards(directory, gen):
     while True:
-        filename = os.path.join(dir, gen)
+        filename = os.path.join(directory, gen)
         if rfactortools.file_exists(filename):
             return filename
 
-        newdir = os.path.dirname(dir)
-        if newdir == dir:  # reached the root of the path
+        newdir = os.path.dirname(directory)
+        if newdir == directory:  # reached the root of the path
             return None
         else:
-            dir = newdir
+            directory = newdir
 
 
 class Veh:
@@ -240,13 +240,13 @@ def print_veh_tree(vehs):
 
 
 def print_veh_info(vehs):
-        for veh in vehs:
-            print("    file:", veh.filename)
-            print(" classes:", veh.classes)
-            print("graphics:", veh.graphics_file)
-            print("category:", veh.category)
-            print("    team:", veh.team)
-            print()
+    for veh in vehs:
+        print("    file:", veh.filename)
+        print(" classes:", veh.classes)
+        print("graphics:", veh.graphics_file)
+        print("category:", veh.category)
+        print("    team:", veh.team)
+        print()
 
 
 # EOF #

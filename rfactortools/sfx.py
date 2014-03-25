@@ -50,16 +50,16 @@ def try_fix_wav_path(gamedata, modname, wav_file):
     """Return either ``None`` to change nothing or a new wav path"""
     p = os.path.join(gamedata, "Sounds", wav_file)
     if rfactortools.file_exists(p):
-        logging.debug("%s: file ok" % wav_file)
+        logging.debug("%s: file ok", wav_file)
         return None
     else:
         p = os.path.join(gamedata, "Sounds", modname, wav_file)
         if rfactortools.file_exists(p):
             r = os.path.join(modname, wav_file)
-            logging.debug("%s: file ok" % r)
+            logging.debug("%s: file ok", r)
             return r
         else:
-            logging.error("%s: couldn't locate file" % wav_file)
+            logging.error("%s: couldn't locate file", wav_file)
             return None
 
 

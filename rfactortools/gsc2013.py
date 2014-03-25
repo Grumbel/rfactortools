@@ -167,10 +167,10 @@ class rFactorToGSC2013:
             raise Exception("couldn't locate 'GameData/' directory")
 
     def print_info(self):
-        vehicle_count = len(self.files_by_type['.veh'])
-        track_count = len(self.files_by_type['.gdb'])
-        print("Vehicles: %d" % vehicle_count)
-        print("  Tracks: %d" % track_count)
+        #vehicle_count = len(self.files_by_type['.veh'])
+        #track_count = len(self.files_by_type['.gdb'])
+        #print("Vehicles: %d" % vehicle_count)
+        #print("  Tracks: %d" % track_count)
         print("GameData: \"%s\"" % self.source_gamedata_directories)
 
     def convert_gdb(self, filename, target_file):
@@ -206,7 +206,7 @@ class rFactorToGSC2013:
         source_mini_file = os.path.join(rest + "mini.tga")
         target_mini_file = os.path.join(trest + "mini.tga")
 
-        logging.info("generating track thumbnail: %s" % target_mini_file)
+        logging.info("generating track thumbnail: %s", target_mini_file)
         if not rfactortools.lookup_path_icase(source_mini_file) or self.cfg.force_track_thumbnails:
             aiw = rfactortools.parse_aiwfile(source_file)
             img = rfactortools.render_aiw(aiw, 252, 249)
@@ -254,13 +254,13 @@ class rFactorToGSC2013:
         rfactortools.encrypt_file(source_file, target_file)
 
     def convert_mas(self, source_file, target_file):
-        logging.info("mas unpacking %s" % source_file)
+        logging.info("mas unpacking %s", source_file)
         mas_content = rfactortools.mas_unpack_to_data(source_file)
 
         logging.info("encrypting files")
         encrypted_mas_content = []
         for i, (name, data) in enumerate(mas_content):
-            logging.debug("processing %d/%d: %s" % (i, len(mas_content), name))
+            logging.debug("processing %d/%d: %s", i, len(mas_content), name)
             encrypted_data = rfactortools.encrypt_data(data, 1, 0x4b1dca9f960524e8, rfactortools.get_skip(name))
             encrypted_mas_content.append((name, encrypted_data))
 
@@ -283,7 +283,7 @@ class rFactorToGSC2013:
 
             for d in dirs:
                 t = os.path.join(target_directory, relpath, d)
-                logging.info("creating %s" % t)
+                logging.info("creating %s", t)
                 if not os.path.isdir(t):
                     os.mkdir(t)
 
@@ -311,7 +311,7 @@ class rFactorToGSC2013:
             elif os.path.isfile(path):
                 self.convert_file(source_directory, target_directory, fname)
             else:
-                logging.error("%s: ignoring unknown file" % path)
+                logging.error("%s: ignoring unknown file", path)
 
     def convert_toplevel_subdir(self, source_directory, target_directory, dname):
         """Convert ``Vehicles``, ``Locations``, etc."""
@@ -326,7 +326,7 @@ class rFactorToGSC2013:
             elif os.path.isfile(path):
                 self.convert_file(source_directory, target_directory, os.path.join(dname, fname), None)
             else:
-                logging.error("%s: ignoring unknown file" % path)
+                logging.error("%s: ignoring unknown file", path)
 
     def convert_mod_subdir(self, source_directory, target_directory, dname, modname):
         """Convert ``Vehicles/some_mod/``, ``Locations/some_mod``, etc."""
@@ -341,7 +341,7 @@ class rFactorToGSC2013:
                                   os.path.normpath(os.path.join(dname, relpath, fname)), modname)
 
     def convert_file(self, source_directory, target_directory, filename, modname=None):
-        logging.info("processing '%s' of mod '%s'" % (filename, modname))
+        logging.info("processing '%s' of mod '%s'", filename, modname)
 
         if filename.lower() in rfactortools.exclude_files:
             pass
@@ -373,7 +373,7 @@ class rFactorToGSC2013:
                     shutil.copy(source_file, target_file)
 
             except Exception:
-                logging.exception("%s: %s: rfactortools.convert_file failed" % (source_file, target_file))
+                logging.exception("%s: %s: rfactortools.convert_file failed", source_file, target_file)
 
     def convert_all(self, target_directory):
         target_directory = os.path.normpath(target_directory)
@@ -389,7 +389,7 @@ class rFactorToGSC2013:
                                                          os.path.relpath(self.source_gamedata_directory,
                                                                          self.source_directory))
 
-            logging.info("converting GameData %s to %s" % (self.source_gamedata_directory, target_gamedata_directory))
+            logging.info("converting GameData %s to %s", self.source_gamedata_directory, target_gamedata_directory)
 
             self.copy_directory_hierachy(self.source_gamedata_directory, target_gamedata_directory)
             self.convert_gamedata(self.source_gamedata_directory, target_gamedata_directory)
@@ -401,7 +401,7 @@ class rFactorToGSC2013:
 
         # convert tracks that don't have a toplevel GameData/ directory
         for d, prefix in self.source_track_directories:
-            logging.debug("track: prefix:\"%s\" - directory:\"%s\"" % (prefix, d))
+            logging.debug("track: prefix:\"%s\" - directory:\"%s\"", prefix, d)
             source_directory = os.path.normpath(d)
 
             if self.cfg.single_gamedata:
@@ -412,7 +412,7 @@ class rFactorToGSC2013:
                                                                          self.source_directory),
                                                          "GameData")
 
-            logging.info("converting track %s to %s" % (source_directory, target_gamedata_directory))
+            logging.info("converting track %s to %s", source_directory, target_gamedata_directory)
             # create directory hierachy
             modname = os.path.basename(d)
             if prefix:
@@ -422,13 +422,13 @@ class rFactorToGSC2013:
                 self.copy_directory_hierachy(source_directory,
                                              os.path.join(target_gamedata_directory, "Locations", modname))
 
-            logging.debug("modname: %s" % modname)
+            logging.debug("modname: %s", modname)
             if prefix:
                 target_d = os.path.join(target_gamedata_directory, "Locations", prefix)
             else:
                 target_d = os.path.join(target_gamedata_directory, "Locations")
-            logging.debug("track: source_directory: %s" % source_directory)
-            logging.debug("track: target_directory: %s" % target_d)
+            logging.debug("track: source_directory: %s", source_directory)
+            logging.debug("track: target_directory: %s", target_d)
             self.convert_mod_subdir(os.path.dirname(source_directory), target_d, modname, modname)
 
 

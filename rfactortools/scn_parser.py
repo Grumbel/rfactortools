@@ -100,6 +100,8 @@ class ScnParser:
 class InfoScnParser(ScnParser):
 
     def __init__(self):
+        super().__init__()
+
         self.section = 0
         self.search_path = []
         self.mas_files = []
@@ -129,6 +131,8 @@ class InfoScnParser(ScnParser):
 class SearchReplaceScnParser(ScnParser):
 
     def __init__(self, fout):
+        super().__init__()
+
         self.fout = fout
 
         self.section = 0

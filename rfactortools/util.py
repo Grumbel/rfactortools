@@ -118,7 +118,7 @@ def lookup_path_icase(filename):
         return None
     else:
         if len(results) > 1:
-            logging.warning("%s: filename not unique, returning first match:\n" % "\n".join(results))
+            logging.warning("%s: filename not unique, returning first match:\n", "\n".join(results))
         return results[0]
 
 

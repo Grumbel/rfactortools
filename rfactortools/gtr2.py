@@ -29,7 +29,7 @@ class GTR2ToGSC2013:
         self.source_directory = os.path.normpath(source_directory)
 
     def convert_gtr(self, source_file, target_file):
-        logging.info("mas unpacking %s" % source_file)
+        logging.info("mas unpacking %s", source_file)
         mas_content = rfactortools.mas_unpack_to_data(source_file)
 
         # TOOD: This doesn't work .gmt files have different formats in
@@ -38,7 +38,7 @@ class GTR2ToGSC2013:
         logging.info("encrypting files")
         encrypted_mas_content = []
         for i, (name, data) in enumerate(mas_content):
-            logging.debug("processing %d/%d: %s" % (i, len(mas_content), name))
+            logging.debug("processing %d/%d: %s", i, len(mas_content), name)
             encrypted_data = rfactortools.encrypt_data(data, 1, 0x4b1dca9f960524e8, rfactortools.get_skip(name))
             encrypted_mas_content.append((name, encrypted_data))
 
@@ -56,7 +56,7 @@ class GTR2ToGSC2013:
         target_directory = os.path.normpath(target_directory)
 
         if not os.path.isdir(target_directory):
-            logging.info("creating %s" % target_directory)
+            logging.info("creating %s", target_directory)
             os.mkdir(target_directory)
 
         for path, dirs, files in os.walk(self.source_directory):
@@ -65,7 +65,7 @@ class GTR2ToGSC2013:
             for d in dirs:
                 target_d = os.path.join(target_directory, relpath, d)
                 if not os.path.isdir(target_d):
-                    logging.info("creating %s" % target_d)
+                    logging.info("creating %s", target_d)
                     os.mkdir(target_d)
 
             for fname in files:
