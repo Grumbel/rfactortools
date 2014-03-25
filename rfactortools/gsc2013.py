@@ -117,7 +117,7 @@ def find_data_directories(directory):
 
     basedir = os.path.basename(directory)
     if basedir.lower() == "gamedata":
-        return [directory]
+        return set([directory]), set()
     else:
         gamedata_dirs = set()
         track_dirs = set()
