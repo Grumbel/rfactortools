@@ -31,11 +31,12 @@ scripts = [
 ]
 
 AlwaysBuild(Alias("test", [], "python3 -m unittest discover"))
-Default("test", flake_check)
 
 for i in scripts + Glob("rfactortools/*.py", strings=True) + Glob("tests/*.py", strings=True):
     Alias("pylint", Command(i + ".pylint", i, "epylint $SOURCE"))
     # Alias("pylint", [], "epylint %s" % i)
     # AlwaysBuild("pylint")
+
+Default(flake_check)
 
 # EOF #
