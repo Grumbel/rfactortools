@@ -14,15 +14,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 from concurrent.futures import ThreadPoolExecutor
+import io
 import logging
 import os
 import struct
 import zlib
 
+
 mas_type0 = b"GMOTORMAS10\0\0\0\0\0"
 mas_type1 = b"\xC8\xCF\xD2\xD8\xCE\xD8\xE6\xC9\xCA\xDD\xD8\xBE\xBB\xA6\xBF\x90"
 mas_type3 = b"CUBEMAS4.10\0\0\0\0\0"
+ifd_header = b'IFD\x01\x00\x00\x00\x00\x00\x00\x00'
 
 
 class MASFileType:
@@ -51,6 +55,10 @@ def get_mas_type(signature):
         return 1
     elif signature == mas_type3:
         return 3
+    elif signature.startswith(ifd_header):
+        return 4
+    elif signature == b'':
+        return 5
     else:
         raise RuntimeError("unknown mas type: %s" % signature)
 
@@ -77,8 +85,6 @@ def get_file_type(filename):
     else:
         logging.warning("%s: unknown file type", filename)
         return MASFileType.UNKNOWN
-
-# MAS file packing
 
 
 def mas_pack_from_data(files, masfile, mas_type=1):
@@ -163,8 +169,6 @@ def mas_pack(files, masfile, mas_type):
 
     mas_pack_from_data(files_with_data, masfile, mas_type)
 
-# MAS file unpacking and listing
-
 
 def mas_list(masfile, verbose=False, with_filename=False):
     with open(masfile, "rb") as fin:
@@ -243,30 +247,44 @@ def mas_unpack_to_data(masfile):
 
 def mas_unpack_file_table(fin):
     signature = fin.read(16)
-
     mas_type = get_mas_type(signature)
 
+    if mas_type == 5:  # empty file
+        return []
+
     if mas_type == 1:
+        fin.seek(16)
         file_count, data_size = struct.unpack("<4xll", fin.read(12))
+    elif mas_type == 4:
+        fin.seek(11)
+        file_count, data_size, data_zsize = struct.unpack("III", fin.read(12))
     else:
+        fin.seek(16)
         file_count, data_size = struct.unpack("<ll", fin.read(8))
+
+    if mas_type == 4:
+        mas_type = 1  # once uncompressed, IFD file behaves same as mas_type=1
+        toc = fin.read(data_size)
+        toc_in = io.BytesIO(zlib.decompress(toc))
+    else:
+        toc_in = fin
 
     file_table = []
     for i in range(0, file_count):
         if mas_type == 0:
-            offset, size, zsize, name = struct.unpack("<4xlll240s", fin.read(256))
+            offset, size, zsize, name = struct.unpack("<4xlll240s", toc_in.read(256))
             entry = MASFileEntry(0,  # type
                                  0,  # flags
                                  name, offset, size, zsize)
-        elif mas_type == 1:
-            entry = MASFileEntry(*struct.unpack("<BBxx236slll4x", fin.read(256)))
+        elif mas_type == 1 or mas_type == 4:
+            entry = MASFileEntry(*struct.unpack("<BBxx236slll4x", toc_in.read(256)))
         elif mas_type == 2:
-            name, offset, size, zsize = struct.unpack("<4x16slll4x", fin.read(256))
+            name, offset, size, zsize = struct.unpack("<4x16slll4x", toc_in.read(256))
             entry = MASFileEntry(0,  # type
                                  0,  # flags
                                  name, offset, size, zsize)
         elif mas_type == 3:
-            name, offset, size, zsize = struct.unpack("<4xlll4x236s", fin.read(256))
+            name, offset, size, zsize = struct.unpack("<4xlll4x236s", toc_in.read(256))
             entry = MASFileEntry(0,  # type
                                  0,  # flags
                                  name, offset, size, zsize)
@@ -285,5 +303,6 @@ def mas_unpack_file_table(fin):
         entry.offset += base_offset
 
     return file_table
+
 
 # EOF #
