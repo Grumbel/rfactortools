@@ -287,6 +287,15 @@ class rFactorToGSC2013:
                 if not os.path.isdir(t):
                     os.mkdir(t)
 
+    def convert_jpg(self, source_file, target_file):
+        is_track_loading = bool(source_file.lower().endswith("_loading.jpg") and
+                                rfactortools.file_exists(source_file[:-12] + ".gdb"))
+
+        if is_track_loading:
+            rfactortools.resize_to_aspect_ratio_from_file(source_file, target_file, 4, 3)
+        else:
+            shutil.copy(source_file, target_file)
+
     def convert_tga(self, source_file, target_file):
         is_vehicle_thumbnail = bool(source_file.lower().endswith("number.tga") and
                                     rfactortools.file_exists(source_file[:-10] + ".veh"))
@@ -367,6 +376,8 @@ class rFactorToGSC2013:
                     self.convert_sfx(source_file, target_file, modname)
                 elif ext == ".tga":
                     self.convert_tga(source_file, target_file)
+                elif ext == ".jpg":
+                    self.convert_jpg(source_file, target_file)
                 elif ext == ".gfx":
                     pass
                 else:

@@ -17,6 +17,23 @@
 
 from PIL import Image
 import logging
+from fractions import Fraction
+
+
+def resize_to_aspect_ratio(source_img, aspect_x, aspect_y):
+    """Resizes the image to fit aspect ratio, height is preseved, width is changed"""
+
+    w, h = source_img.size
+    if Fraction(w, h) == Fraction(aspect_x, aspect_y):
+        return source_img
+    else:
+        return source_img.resize((int(w * aspect_y / aspect_x), h), Image.ANTIALIAS)
+
+
+def resize_to_aspect_ratio_from_file(source_file, target_file, aspect_x, aspect_y):
+    source_img = Image.open(source_file)
+    result_img = resize_to_aspect_ratio(source_img, aspect_x, aspect_y)
+    result_img.save(target_file)
 
 
 def resize_to_fit(img, w, h):
