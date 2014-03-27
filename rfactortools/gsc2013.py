@@ -231,7 +231,7 @@ class rFactorToGSC2013:
                                   line, flags=re.IGNORECASE)
                 else:
                     line = re.sub(r'^Classes="',
-                                  r'Classes="%s, ' % self.cfg.reiza_class,
+                                  r'Classes="%s,' % self.cfg.reiza_class,
                                   line, flags=re.IGNORECASE)
 
                 # Adding a suffix to Team is needed as conflicts in
