@@ -22,6 +22,7 @@ import rfactortools
 import tempfile
 import unittest
 import shutil
+from PIL import Image
 
 
 class SCNTestCase(unittest.TestCase):
@@ -62,8 +63,27 @@ class SCNTestCase(unittest.TestCase):
             self.assertEqual(fin.read(),
                              "MASFile=cmaps.mas\n")
 
+    def test_loading_aspect(self):
+        """Test that the aspect ratio of the loading screen is properly converted
+
+        This test gives a "ResourceWarning: unclosed file" warning, see:
+        https://github.com/python-imaging/Pillow/issues/477
+        """
+
+        input_directory = os.path.join(self.test_datadir, "loading_aspect/GameData/")
+        output_directory = os.path.join(self.tmpdir, "loading_aspect")
+
+        cfg = rfactortools.rFactorToGSC2013Config()
+        converter = rfactortools.rFactorToGSC2013(input_directory, cfg)
+        converter.convert_all(output_directory)
+
+        img = Image.open(os.path.join(output_directory,
+                                      "GameData/Locations/TestTrack/TestTrack_loading.jpg"))
+        self.assertEqual(img.size, (960, 720))
+
 
 if __name__ == '__main__':
     unittest.main()
+
 
 # EOF #
