@@ -20,10 +20,10 @@ import logging
 from fractions import Fraction
 
 
-def resize_to_file(source_file, target_file, w, h):
+def resize_to_file(source_file, target_file, sizes):
     source_img = Image.open(source_file)
-    if source_img.size != (w, h):
-        result_img = source_img.resize((w, h), Image.ANTIALIAS)
+    if source_img.size not in sizes:
+        result_img = source_img.resize(sizes[0], Image.ANTIALIAS)
         result_img.save(target_file)
     else:
         source_img.save(target_file)
