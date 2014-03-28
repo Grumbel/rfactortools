@@ -21,7 +21,7 @@ from .gtr2 import GTR2ToGSC2013
 from .gsc2013 import rFactorToGSC2013, rFactorToGSC2013Config
 from .gsc2013_excludes import exclude_files
 from .img import resize_to_fit_img_file, resize_to_fit_img_file_with_target, \
-    resize_to_aspect_ratio, resize_to_aspect_ratio_from_file
+    resize_to_aspect_ratio, resize_to_aspect_ratio_from_file, resize_to_file
 from .mas import mas_pack, mas_unpack, mas_list, mas_pack_from_data, mas_unpack_to_data
 from .scn import gen_check_errors, process_gen_directory, modify_vehicle_file
 from .scn_parser import ScnParser, InfoScnParser, SearchReplaceScnParser, process_scnfile
@@ -39,7 +39,7 @@ __all__ = [
     "rFactorToGSC2013", "rFactorToGSC2013Config",
     "exclude_files",
     "resize_to_fit_img_file", "resize_to_fit_img_file_with_target",
-    "resize_to_aspect_ratio", "resize_to_aspect_ratio_from_file",
+    "resize_to_aspect_ratio", "resize_to_aspect_ratio_from_file", "resize_to_file",
     "mas_pack", "mas_unpack", "mas_list", "mas_pack_from_data", "mas_unpack_to_data",
     "gen_check_errors", "process_gen_directory", "modify_vehicle_file",
     "ScnParser", "InfoScnParser", "SearchReplaceScnParser", "process_scnfile",

@@ -20,6 +20,15 @@ import logging
 from fractions import Fraction
 
 
+def resize_to_file(source_file, target_file, w, h):
+    source_img = Image.open(source_file)
+    if source_img.size != (w, h):
+        result_img = source_img.resize((w, h), Image.ANTIALIAS)
+        result_img.save(target_file)
+    else:
+        source_img.save(target_file)
+
+
 def resize_to_aspect_ratio(source_img, aspect_x, aspect_y):
     """Resizes the image to fit aspect ratio, height is preseved, width is changed"""
 

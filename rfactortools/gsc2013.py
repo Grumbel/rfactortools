@@ -317,7 +317,7 @@ class rFactorToGSC2013:
                                 rfactortools.file_exists(source_file[:-12] + ".gdb"))
 
         if is_track_loading:
-            rfactortools.resize_to_aspect_ratio_from_file(source_file, target_file, 4, 3)
+            rfactortools.resize_to_file(source_file, target_file, 1024, 768)
         else:
             shutil.copy(source_file, target_file)
 

@@ -79,7 +79,7 @@ class SCNTestCase(unittest.TestCase):
 
         img = Image.open(os.path.join(output_directory,
                                       "GameData/Locations/TestTrack/TestTrack_loading.jpg"))
-        self.assertEqual(img.size, (960, 720))
+        self.assertEqual(img.size, (1024, 768))
 
 
 if __name__ == '__main__':
