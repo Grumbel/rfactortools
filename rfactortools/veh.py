@@ -163,10 +163,10 @@ def process_scn_veh_file(modname, veh_filename, scn_short_filename, vehdir, team
             # add modname to the SearchPath to avoid errors
             search_path = [re.sub(r'<VEHDIR>', r'<VEHDIR>/%s' % modname, p) for p in info.search_path]
 
-            rel_teamdir = posixpath.relpath(teamdir, vehdir)
+            rel_teamdir = os.path.relpath(teamdir, vehdir)
             while rel_teamdir:
-                search_path.append(posixpath.join("<VEHDIR>", rel_teamdir))
-                rel_teamdir = posixpath.dirname(rel_teamdir)
+                search_path.append(os.path.join("<VEHDIR>", rel_teamdir))
+                rel_teamdir = os.path.dirname(rel_teamdir)
             search_path.append("<VEHDIR>")
         else:
             search_path = info.search_path
