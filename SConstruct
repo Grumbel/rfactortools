@@ -39,4 +39,6 @@ for i in scripts + Glob("rfactortools/*.py", strings=True) + Glob("tests/*.py", 
 
 Default(flake_check)
 
+Alias("all", [flake_check, "pylint", "test"])
+
 # EOF #
