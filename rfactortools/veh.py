@@ -162,10 +162,17 @@ def process_scn_veh_file(modname, veh_filename, scn_short_filename, vehdir, team
         if orig_errs:
             # add modname to the SearchPath to avoid errors
             search_path = [re.sub(r'<VEHDIR>', r'<VEHDIR>/%s' % modname, p) for p in info.search_path]
-            search_path.insert(0, "<VEHDIR>")
+
+            rel_teamdir = posixpath.relpath(teamdir, vehdir)
+            while rel_teamdir:
+                search_path.append(posixpath.join("<VEHDIR>", rel_teamdir))
+                rel_teamdir = posixpath.dirname(rel_teamdir)
+            search_path.append("<VEHDIR>")
         else:
             search_path = info.search_path
-        search_path.sort()
+
+        # make list items unique
+        search_path = sorted(set(search_path))
 
         new_errs, new_warns = rfactortools.gen_check_errors(search_path, info.mas_files, vehdir, teamdir)
 
