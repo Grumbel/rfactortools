@@ -25,7 +25,7 @@ def resize_to_file(source_file, target_file, sizes):
     source_img = Image.open(source_file)
     if source_img.size not in sizes:
         result_img = source_img.resize(sizes[0], Image.ANTIALIAS)
-        result_img.save(target_file)
+        result_img.save(target_file, quality=100)
     else:
         shutil.copy(source_file, target_file)
 
