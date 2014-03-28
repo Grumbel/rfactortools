@@ -190,6 +190,31 @@ class rFactorToGSC2013:
 
                 fout.write(line)
 
+    def convert_track_scn(self, source_file, target_file, modname):
+        with rfactortools.open_read(source_file) as fin:
+            lines = fin.readlines()
+
+        with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
+            for line in lines:
+                # fix light intensity
+                m = re.match(r'\s*Type=Directional.*Intensity=\(([0-9.]+)\).*', line)
+                if m:
+                    print("TRACK!!!", m, line)
+                    try:
+                        intensity = float(m.group(1))
+                        if intensity > 1.0:
+                            intensity = 0.9
+                            line = re.sub(r'Intensity=\([^\)]*\)',
+                                          r'Intensity=(%f)' % intensity,
+                                          line, flags=re.IGNORECASE)
+                    except ValueError:
+                        logging.exception("%s: couldn't parse light intensity: %s", source_file, m.group(1))
+                fout.write(line)
+
+    def convert_scn(self, source_file, target_file, modname):
+        if rfactortools.file_exists(source_file[:-4] + ".gdb"):
+            self.convert_track_scn(source_file, target_file, modname)
+
     def convert_sfx(self, source_file, target_file, modname):
         with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
             rfactortools.modify_sfxfile(fout, source_file,
@@ -364,6 +389,8 @@ class rFactorToGSC2013:
                     self.convert_gdb(source_file, target_file)
                 elif ext == ".veh":
                     self.convert_veh(source_file, target_file, modname)
+                elif ext == ".scn":
+                    self.convert_scn(source_file, target_file, modname)
                 elif ext == ".aiw":
                     self.convert_aiw(source_file, target_file)
                 elif ext == ".gmt":
