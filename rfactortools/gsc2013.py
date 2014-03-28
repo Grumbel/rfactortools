@@ -254,7 +254,7 @@ class rFactorToGSC2013:
                     line = re.sub(r'^Classes=".*',
                                   r'Classes="%s"' % self.cfg.reiza_class,
                                   line, flags=re.IGNORECASE)
-                else:
+                elif self.cfg.reiza_class:
                     line = re.sub(r'^Classes="',
                                   r'Classes="%s,' % self.cfg.reiza_class,
                                   line, flags=re.IGNORECASE)

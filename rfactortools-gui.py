@@ -217,8 +217,7 @@ class Application(Frame):
                 if self.track_category.get().strip():
                     cfg.track_category = self.track_category.get().strip()
 
-                if self.reiza_class.get().strip():
-                    cfg.reiza_class = self.reiza_class.get().strip()
+                cfg.reiza_class = self.reiza_class.get().strip()
 
                 cfg.track_filter_properties = self.track_filter_properties.get().strip()
 
