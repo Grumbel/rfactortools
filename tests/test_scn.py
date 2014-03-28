@@ -17,12 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from PIL import Image
+import filecmp
 import os
 import rfactortools
+import shutil
 import tempfile
 import unittest
-import shutil
-from PIL import Image
 
 
 class SCNTestCase(unittest.TestCase):
@@ -77,10 +78,21 @@ class SCNTestCase(unittest.TestCase):
         converter = rfactortools.rFactorToGSC2013(input_directory, cfg)
         converter.convert_all(output_directory)
 
+        # check that images that aren't 800x600 or 1024x768 are resized properly
         img = Image.open(os.path.join(output_directory,
                                       "GameData/Locations/TestTrack/TestTrack_loading.jpg"))
         self.assertEqual(img.size, (1024, 768))
 
+        # check that images that already are 800x600 or 1024x768 stay untouched
+        self.assertTrue(filecmp.cmp(os.path.join(input_directory,
+                                                 "Locations/TestTrack2/TestTrack2_loading.jpg"),
+                                    os.path.join(output_directory,
+                                                 "GameData/Locations/TestTrack2/TestTrack2_loading.jpg")))
+
+        self.assertTrue(filecmp.cmp(os.path.join(input_directory,
+                                                 "Locations/TestTrack3/TestTrack3_loading.jpg"),
+                                    os.path.join(output_directory,
+                                                 "GameData/Locations/TestTrack3/TestTrack3_loading.jpg")))
 
 if __name__ == '__main__':
     unittest.main()

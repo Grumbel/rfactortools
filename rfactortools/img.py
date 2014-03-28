@@ -16,8 +16,9 @@
 
 
 from PIL import Image
-import logging
 from fractions import Fraction
+import logging
+import shutil
 
 
 def resize_to_file(source_file, target_file, sizes):
@@ -26,7 +27,7 @@ def resize_to_file(source_file, target_file, sizes):
         result_img = source_img.resize(sizes[0], Image.ANTIALIAS)
         result_img.save(target_file)
     else:
-        source_img.save(target_file)
+        shutil.copy(source_file, target_file)
 
 
 def resize_to_aspect_ratio(source_img, aspect_x, aspect_y):
