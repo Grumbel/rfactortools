@@ -21,7 +21,6 @@ from tkinter import \
     Button, Checkbutton, Entry, Frame, Label, LabelFrame, Scrollbar, Text, Toplevel, \
     N, S, W, E, CENTER, BOTH, LEFT, RIGHT, END, DISABLED, \
     StringVar, BooleanVar
-from tkinter.ttk import Progressbar
 import PIL.Image
 import PIL.ImageTk
 import argparse
@@ -68,40 +67,119 @@ def do_ask_directory(directory):
 
 
 class ProgressWindow(Toplevel):
-    
+
     def __init__(self, parent):
         super().__init__(parent)
+        self.title("rfactortools: Conversion Progress")
         self.transient(parent)
 
-        self.gui_progressbar = tkinter.ttk.Progressbar(self)
-        self.gui_progressbar.pack()
-
-        self.grab_set()
+        self.minsize(600, 480)
 
         self.protocol("WM_DELETE_WINDOW", self.cancel)
         self.geometry("+%d+%d" % (parent.winfo_rootx()+50,
                                   parent.winfo_rooty()+50))
-        self.focus_set()
-        # self.wait_window(self)
 
-        confirm_button_frame = Frame(self)
-        confirm_button_frame.pack()
+        self.conversion_had_errors = False
+        # self.gui_progressbar = None
+        self.text = None
+        self.createWidgets()
+
+    def createWidgets(self):
+        label = tkinter.Label(self, text="Converting:")
+        label.pack(anchor=tkinter.W, fill=tkinter.X, expand=0, pady=8, padx=8)
+
+        # gui_progressbar = tkinter.ttk.Progressbar(self, mode='determinate', maximum=100)
+        # gui_progressbar.pack(anchor=CENTER, fill=tkinter.X, expand=1, pady=4, padx=8)
+        # self.gui_progressbar = gui_progressbar
+
+        textarea = Frame(self)
+        textarea.pack(expand=1, fill=tkinter.BOTH)
+
+        textarea.grid_rowconfigure(0, weight=1)
+        textarea.grid_columnconfigure(0, weight=1)
+
+        scrollbar = Scrollbar(textarea)
+        scrollbar.grid(column=1, row=0, sticky=N+S)
+
+        text = Text(textarea, yscrollcommand=scrollbar.set)
+        text.config(state=DISABLED)
+        text.grid(column=0, row=0, sticky=N+S+W+E)
+        scrollbar.config(command=text.yview)
+
+        frame = Frame(self)
+        frame.pack(anchor=S+W, expand=0, fill=tkinter.X)
+
+        confirm_button_frame = tkinter.Frame(frame)
+        confirm_button_frame.pack(side=tkinter.RIGHT)
 
         cancel_btn = Button(confirm_button_frame)
-        cancel_btn["text"] = "Cancel"
+        cancel_btn["text"] = "Finish"
         cancel_btn["command"] = self.cancel
+        cancel_btn.config(state=DISABLED)
         cancel_btn.grid(column=3, row=0, sticky=S, pady=8, padx=8)
 
-        finish_btn = Button(confirm_button_frame)
-        finish_btn["text"] = "Finish"
-        finish_btn["command"] = self.finish
-        finish_btn.grid(column=4, row=0, sticky=S, pady=8, padx=8)
-
-    def finish(self):
-        print("-- finish")
+        self.cancel_btn = cancel_btn
+        self.text = text
 
     def cancel(self):
         print("-- cancel")
+        self.destroy()
+
+    def update_progress(self, msg, *args):
+        # self.gui_progressbar.step()
+
+        if msg == "start":
+            self.conversion_had_errors = False
+
+        elif msg == "finished":
+            self.cancel_btn["text"] = "Finish"
+            self.cancel_btn.config(state=tkinter.NORMAL)
+
+            self.text.config(state=tkinter.NORMAL)
+            self.text.insert(END, "-------------------------------------------------------------------\n")
+            self.text.insert(END, "Conversion finished")
+            if self.conversion_had_errors:
+                self.text.insert(END, "but there have been errors, check the logs/ for more details")
+            self.text.config(state=tkinter.DISABLED)
+
+        elif msg == "error":
+            self.text.config(state=tkinter.NORMAL)
+            self.text.insert(END, "ERROR: conversion failed, see logs/ for more details")
+            self.text.config(state=tkinter.DISABLED)
+
+        elif msg == "file_ignored":
+            self.text.config(state=tkinter.NORMAL)
+            self.text.insert(END, " ignored\n")
+            self.text.config(state=tkinter.DISABLED)
+
+        elif msg == "file_error":
+            self.text.config(state=tkinter.NORMAL)
+            self.text.insert(END, "  error\n")
+            self.text.config(state=tkinter.DISABLED)
+            self.conversion_had_errors = True
+
+        elif msg == "file_done":
+            self.text.config(state=tkinter.NORMAL)
+            self.text.insert(END, "   done\n")
+            self.text.config(state=tkinter.DISABLED)
+
+        elif msg == "file":
+            modname, filename = args
+
+            txt = "%s: %-50s" % (modname, filename + "...")
+
+            self.text.config(state=tkinter.NORMAL)
+            self.text.insert(END, txt)
+            self.text.config(state=tkinter.DISABLED)
+
+        elif msg == "directory":
+            directory = args
+            self.text.config(state=tkinter.NORMAL)
+            self.text.insert(END, "Converting directory '%s':\n" % directory)
+            self.text.config(state=tkinter.DISABLED)
+
+        else:
+            raise RuntimeError("unknown msg: %s %s" % (msg, args))
 
 
 class Application(Frame):
@@ -115,10 +193,8 @@ class Application(Frame):
         self.createWidgets()
         self.pack(anchor=CENTER, fill=BOTH, expand=1)
 
-        self.msgbox = queue.Queue()      
+        self.msgbox = queue.Queue()
         self.converter_thread = converter_thread
-
-        self.gui_progress_window = ProgressWindow(self)
 
     def check_msgbox(self):
         try:
@@ -129,11 +205,14 @@ class Application(Frame):
         except queue.Empty:
             pass
 
+        self.after(15, self.check_msgbox)
+
     def request(self, msg, *args):
         self.msgbox.put((msg,) + args)
 
     def update_progress(self, *args):
-        print("progress:", args)
+        if self.gui_progress_window:
+            self.gui_progress_window.update_progress(*args)
 
     def createWidgets(self):
         self.grid_columnconfigure(1, weight=1)
@@ -281,11 +360,25 @@ class Application(Frame):
             cfg.track_filter_properties = self.track_filter_properties.get().strip()
 
             print("Requesting conversion")
-            self.converter_thread.request("convert", 
+            self.show_progress_window()
+            self.converter_thread.request("convert",
                                           self.source_directory.get(),
                                           self.target_directory.get(),
                                           cfg)
+
+            self.gui_progress_window.grab_set()
+            self.gui_progress_window.focus_set()
+            self.check_msgbox()
+            self.wait_window(self.gui_progress_window)
             # self.config(state=DISABLED)
+
+    def show_progress_window(self):
+        self.gui_progress_window = ProgressWindow(self)
+
+        # self.gui_progress_window.withdraw()
+        # self.gui_progress_window.update()
+        # self.gui_progress_window.deiconify()
+        # self.convert_btn.config(state=DISABLED)
 
     def do_veh_tree(self):
         print("--- veh tree: start ---")
@@ -341,9 +434,8 @@ class ConverterThread(threading.Thread):
         self.cancel_ = True
         self.request("cancel")
 
-    def progress_callback(self, msg, count, total):
-        print("#### progress: %s %s/%s" % (msg, count, total))
-        self.parent.request("progress", msg, count, total)
+    def progress_callback(self, *args):
+        self.parent.request("progress", *args)
         if self.cancel_:
             raise RuntimeError("cancel called")
 
@@ -351,13 +443,14 @@ class ConverterThread(threading.Thread):
         print("Convert: %s %s %s" % (source_directory, target_directory, cfg))
         try:
             converter = rfactortools.rFactorToGSC2013(source_directory, cfg)
-            converter.convert_all(target_directory, self.progress_callback)
+            converter.progress_cb = self.progress_callback
+            converter.convert_all(target_directory)
             print("-- rfactor-to-gsc2013 conversion complete --")
 
             #tkinter.messagebox.showinfo("Conversion finished",
             #                            "Conversion finished",
             #                            parent=self)
-        except Exception as e:
+        except Exception:
             tb = traceback.format_exc()
             print(tb)
             #tkinter.messagebox.showerror("Conversion failed",
@@ -392,7 +485,7 @@ def main():
     args = parser.parse_args()
 
     root = tkinter.Tk()
-    root.wm_title("rFactor to Game Stock Car 2013 Mod Converter V0.3.0")
+    root.wm_title("rfactortools: rFactor to Game Stock Car 2013 Mod Converter V0.3.0")
     root.minsize(640, 400)
 
     converter_thread = ConverterThread(None)
@@ -400,7 +493,7 @@ def main():
 
     app = Application(converter_thread, master=root)
     converter_thread.parent = app
-    
+
     if args.INPUTDIR is not None:
         app.source_directory.set(args.INPUTDIR)
 

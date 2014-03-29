@@ -163,8 +163,13 @@ class rFactorToGSC2013:
         self.source_gamedata_directories, self.source_track_directories \
             = find_data_directories(self.source_directory)
 
+        self.progress_cb = None
         if not self.source_gamedata_directories and not self.source_track_directories:
             raise Exception("couldn't locate 'GameData/' directory")
+
+    def report_progress(self, *args):
+        if self.progress_cb:
+            self.progress_cb(*args)
 
     def print_info(self):
         #vehicle_count = len(self.files_by_type['.veh'])
@@ -199,7 +204,6 @@ class rFactorToGSC2013:
                 # fix light intensity
                 m = re.match(r'\s*Type=Directional.*Intensity=\(([0-9.]+)\).*', line)
                 if m:
-                    print("TRACK!!!", m, line)
                     try:
                         intensity = float(m.group(1))
                         if intensity > 1.0:
@@ -376,9 +380,10 @@ class rFactorToGSC2013:
 
     def convert_file(self, source_directory, target_directory, filename, modname=None):
         logging.info("processing '%s' of mod '%s'", filename, modname)
+        self.report_progress("file", modname, filename)
 
         if filename.lower() in rfactortools.exclude_files:
-            pass
+            self.report_progress("file_ignored", modname, filename)
         else:
             source_file = os.path.join(source_directory, filename)
             target_file = os.path.join(target_directory, filename)
@@ -412,13 +417,19 @@ class rFactorToGSC2013:
 
             except Exception:
                 logging.exception("%s: %s: rfactortools.convert_file failed", source_file, target_file)
+                self.report_progress("file_error", modname, filename)
 
-    def convert_all(self, target_directory, progress_cb):
+            else:
+                self.report_progress("file_done", modname, filename)
+
+    def convert_all(self, target_directory):
+        self.report_progress("start")
+
         target_directory = os.path.normpath(target_directory)
 
         # convert GameData/ directories
         for d in self.source_gamedata_directories:
-            progress_cb("progress in converting", 0, 0)
+            self.report_progress("directory", d)
 
             self.source_gamedata_directory = os.path.normpath(d)
 
@@ -441,7 +452,7 @@ class rFactorToGSC2013:
 
         # convert tracks that don't have a toplevel GameData/ directory
         for d, prefix in self.source_track_directories:
-            progress_cb("progress in converting", 0, 0)
+            self.report_progress("directory", d)
 
             logging.debug("track: prefix:\"%s\" - directory:\"%s\"", prefix, d)
             source_directory = os.path.normpath(d)
@@ -473,5 +484,6 @@ class rFactorToGSC2013:
             logging.debug("track: target_directory: %s", target_d)
             self.convert_mod_subdir(os.path.dirname(source_directory), target_d, modname, modname)
 
+        self.report_progress("finished")
 
 # EOF #
