@@ -67,8 +67,9 @@ def do_ask_directory(directory):
 
 class ProgressWindow(Toplevel):
 
-    def __init__(self, parent):
+    def __init__(self, parent, source_directory, target_directory, cfg):
         super().__init__(parent)
+
         self.title("rfactortools: Conversion Progress")
         self.transient(parent)
 
@@ -84,7 +85,7 @@ class ProgressWindow(Toplevel):
         self.createWidgets()
 
         self.msgbox = queue.Queue()
-        self.converter_thread = ConverterThread(self)
+        self.converter_thread = ConverterThread(self, source_directory, target_directory, cfg)
         self.converter_thread.start()
 
     def wait_for_conversion(self):
@@ -151,6 +152,11 @@ class ProgressWindow(Toplevel):
                                      parent=self)
         self.destroy()
 
+    def finish(self):
+        self.converter_thread.cancel()
+        self.converter_thread.join()
+        self.destroy()
+
     def update_progress(self, *args):
         msg, *args = args
 
@@ -159,11 +165,12 @@ class ProgressWindow(Toplevel):
 
         elif msg == "finished":
             self.cancel_btn["text"] = "Finish"
+            self.cancel_btn["command"] = self.finish
             self.cancel_btn.config(state=tkinter.NORMAL)
 
             self.text.config(state=tkinter.NORMAL)
-            self.text.insert(END, "-------------------------------------------------------------------\n")
-            if self.conversion_had_errors:
+            self.text.insert(END, "_" * 100 + "\n\n")
+            if not self.conversion_had_errors:
                 self.text.insert(END, "Conversion finished")
             else:
                 self.text.insert(END,
@@ -198,7 +205,7 @@ class ProgressWindow(Toplevel):
         elif msg == "file":
             modname, filename = args
 
-            txt = "%s: %-60s" % (modname, filename + "...")
+            txt = "%s: %-80s" % (modname, filename + "...")
 
             self.text.config(state=tkinter.NORMAL)
             self.text.insert(END, txt)
@@ -225,9 +232,6 @@ class MainWindow(Frame):
 
         self.createWidgets()
         self.pack(anchor=CENTER, fill=BOTH, expand=1)
-
-    def do_close_window(self):
-        print("----------------- close window")
 
     def createWidgets(self):
         self.grid_columnconfigure(1, weight=1)
@@ -377,12 +381,10 @@ class MainWindow(Frame):
             self._do_conversion(cfg)
 
     def _do_conversion(self, cfg):
-        self.gui_progress_window = ProgressWindow(self)
-
-        self.gui_progress_window.converter_thread.request("convert",
-                                                          self.source_directory.get(),
-                                                          self.target_directory.get(),
-                                                          cfg)
+        self.gui_progress_window = ProgressWindow(self,
+                                                  self.source_directory.get(),
+                                                  self.target_directory.get(),
+                                                  cfg)
         self.gui_progress_window.wait_for_conversion()
         self.gui_progress_window = None
 
@@ -411,39 +413,19 @@ class MainWindow(Frame):
 
 class ConverterThread(threading.Thread):
 
-    def __init__(self, parent):
+    def __init__(self, parent, source_directory, target_directory, cfg):
         super().__init__()
         self.msgbox = queue.Queue()
         self.quit = False
         self.cancel_ = False
         self.parent = parent
 
+        self.source_directory = source_directory
+        self.target_directory = target_directory
+        self.cfg = cfg
+
     def run(self):
-        self.check_msgbox()
-
-    def check_msgbox(self):
-        while not self.quit:
-            msg, *args = self.msgbox.get()
-            if msg == "convert":
-                self.convert(*args)
-            elif msg == "cancel":
-                self.quit = True
-            else:
-                logging.error("unknown message: %s %s", msg, args)
-
-    def request(self, *args):
-        self.msgbox.put(args)
-
-    def cancel(self):
-        self.cancel_ = True
-        self.request("cancel")
-
-    def progress_callback(self, *args):
-        if args:
-            self.parent.request(*args)
-
-        if self.cancel_:
-            raise RuntimeError("ConvertThread: cancel received")
+        self.convert(self.source_directory, self.target_directory, self.cfg)
 
     def convert(self, source_directory, target_directory, cfg):
         print("Convert: %s %s %s" % (source_directory, target_directory, cfg))
@@ -455,6 +437,16 @@ class ConverterThread(threading.Thread):
         except Exception as e:
             logging.exception("conversation failed")
             self.parent.request("error", e)
+
+    def cancel(self):
+        self.cancel_ = True
+
+    def progress_callback(self, *args):
+        if args:
+            self.parent.request(*args)
+
+        if self.cancel_:
+            raise RuntimeError("ConvertThread: cancel received")
 
 
 class Application:

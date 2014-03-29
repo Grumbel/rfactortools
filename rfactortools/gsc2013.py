@@ -488,4 +488,5 @@ class rFactorToGSC2013:
 
         self.report_progress("finished")
 
+
 # EOF #
