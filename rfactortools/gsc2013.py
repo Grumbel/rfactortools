@@ -165,7 +165,7 @@ class rFactorToGSC2013:
 
         self.progress_cb = None
         if not self.source_gamedata_directories and not self.source_track_directories:
-            raise Exception("couldn't locate 'GameData/' directory")
+            raise Exception("couldn't locate 'GameData/' or track directory")
 
     def report_progress(self, *args):
         if self.progress_cb:
@@ -285,10 +285,12 @@ class rFactorToGSC2013:
     def convert_mas(self, source_file, target_file):
         logging.info("mas unpacking %s", source_file)
         mas_content = rfactortools.mas_unpack_to_data(source_file)
+        self.report_progress()
 
         logging.info("encrypting files")
         encrypted_mas_content = []
         for i, (name, data) in enumerate(mas_content):
+            self.report_progress()
             logging.debug("processing %d/%d: %s", i, len(mas_content), name)
             encrypted_data = rfactortools.encrypt_data(data, 1, 0x4b1dca9f960524e8, rfactortools.get_skip(name))
             encrypted_mas_content.append((name, encrypted_data))
