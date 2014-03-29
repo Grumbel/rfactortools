@@ -230,6 +230,8 @@ class MainWindow(Frame):
         self.source_directory = None
         self.target_directory = None
 
+        self.gui_progress_window = None
+
         self.createWidgets()
         self.pack(anchor=CENTER, fill=BOTH, expand=1)
 
