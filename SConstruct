@@ -9,7 +9,7 @@ py_env.SharedLibrary('rfactortools/_crypt', ['rfactortools_crypt.cpp'])
 
 sources = Glob("*.py", strings=True) + Glob("rfactortools/*.py", strings=True) + Glob("tests/*.py", strings=True)
 flake_check = Command(None, sources,
-                "flake8 --max-line-length=120 $SOURCES")
+                "python3 -m flake8.run --max-line-length=120 $SOURCES")
 
 scripts = [
     "aiwtool.py",
