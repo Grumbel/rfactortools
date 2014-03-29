@@ -18,16 +18,19 @@
 
 
 from tkinter import \
-    Button, Checkbutton, Entry, Frame, Label, LabelFrame, Scrollbar, Text, \
+    Button, Checkbutton, Entry, Frame, Label, LabelFrame, Scrollbar, Text, Toplevel, \
     N, S, W, E, CENTER, BOTH, LEFT, RIGHT, END, DISABLED, \
     StringVar, BooleanVar
+from tkinter.ttk import Progressbar
 import PIL.Image
 import PIL.ImageTk
 import argparse
 import datetime
 import logging
 import os
+import queue
 import sys
+import threading
 import tkinter.filedialog
 import tkinter.messagebox
 import traceback
@@ -64,16 +67,73 @@ def do_ask_directory(directory):
         directory.set(d)
 
 
+class ProgressWindow(Toplevel):
+    
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.transient(parent)
+
+        self.gui_progressbar = tkinter.ttk.Progressbar(self)
+        self.gui_progressbar.pack()
+
+        self.grab_set()
+
+        self.protocol("WM_DELETE_WINDOW", self.cancel)
+        self.geometry("+%d+%d" % (parent.winfo_rootx()+50,
+                                  parent.winfo_rooty()+50))
+        self.focus_set()
+        # self.wait_window(self)
+
+        confirm_button_frame = Frame(self)
+        confirm_button_frame.pack()
+
+        cancel_btn = Button(confirm_button_frame)
+        cancel_btn["text"] = "Cancel"
+        cancel_btn["command"] = self.cancel
+        cancel_btn.grid(column=3, row=0, sticky=S, pady=8, padx=8)
+
+        finish_btn = Button(confirm_button_frame)
+        finish_btn["text"] = "Finish"
+        finish_btn["command"] = self.finish
+        finish_btn.grid(column=4, row=0, sticky=S, pady=8, padx=8)
+
+    def finish(self):
+        print("-- finish")
+
+    def cancel(self):
+        print("-- cancel")
+
+
 class Application(Frame):
 
-    def __init__(self, master=None):
-        Frame.__init__(self, master)
+    def __init__(self, converter_thread, master=None):
+        super().__init__(master)
 
         self.source_directory = None
         self.target_directory = None
 
         self.createWidgets()
         self.pack(anchor=CENTER, fill=BOTH, expand=1)
+
+        self.msgbox = queue.Queue()      
+        self.converter_thread = converter_thread
+
+        self.gui_progress_window = ProgressWindow(self)
+
+    def check_msgbox(self):
+        try:
+            msg, *args = self.msgbox.get_nowait()
+            if msg == "progress":
+                self.update_progress(*args)
+
+        except queue.Empty:
+            pass
+
+    def request(self, msg, *args):
+        self.msgbox.put((msg,) + args)
+
+    def update_progress(self, *args):
+        print("progress:", args)
 
     def createWidgets(self):
         self.grid_columnconfigure(1, weight=1)
@@ -203,37 +263,29 @@ class Application(Frame):
             logging.info("source-directory: %s", self.source_directory.get())
             logging.info("target-directory: %s", self.target_directory.get())
 
-            try:
-                cfg = rfactortools.rFactorToGSC2013Config()
+            cfg = rfactortools.rFactorToGSC2013Config()
 
-                cfg.unique_team_names = self.unique_team_names.get()
-                cfg.force_track_thumbnails = self.force_track_thumb.get()
-                cfg.clear_classes = self.clear_classes.get()
-                cfg.single_gamedata = self.single_gamedata.get()
+            cfg.unique_team_names = self.unique_team_names.get()
+            cfg.force_track_thumbnails = self.force_track_thumb.get()
+            cfg.clear_classes = self.clear_classes.get()
+            cfg.single_gamedata = self.single_gamedata.get()
 
-                if self.vehicle_category.get().strip():
-                    cfg.vehicle_category = self.vehicle_category.get().strip()
+            if self.vehicle_category.get().strip():
+                cfg.vehicle_category = self.vehicle_category.get().strip()
 
-                if self.track_category.get().strip():
-                    cfg.track_category = self.track_category.get().strip()
+            if self.track_category.get().strip():
+                cfg.track_category = self.track_category.get().strip()
 
-                cfg.reiza_class = self.reiza_class.get().strip()
+            cfg.reiza_class = self.reiza_class.get().strip()
 
-                cfg.track_filter_properties = self.track_filter_properties.get().strip()
+            cfg.track_filter_properties = self.track_filter_properties.get().strip()
 
-                converter = rfactortools.rFactorToGSC2013(self.source_directory.get(), cfg)
-                converter.convert_all(self.target_directory.get())
-                print("-- rfactor-to-gsc2013 conversion complete --")
-
-                tkinter.messagebox.showinfo("Conversion finished",
-                                            "Conversion finished",
-                                            parent=self)
-            except Exception as e:
-                tb = traceback.format_exc()
-                print(tb)
-                tkinter.messagebox.showerror("Conversion failed",
-                                             "Conversion failed with:\n\nError: %s" % e,
-                                             parent=self)
+            print("Requesting conversion")
+            self.converter_thread.request("convert", 
+                                          self.source_directory.get(),
+                                          self.target_directory.get(),
+                                          cfg)
+            # self.config(state=DISABLED)
 
     def do_veh_tree(self):
         print("--- veh tree: start ---")
@@ -256,6 +308,61 @@ class Application(Frame):
         path = self.target_directory.get()
         rfactortools.process_gen_directory(path, False)
         print("--- gen check: end ---")
+
+
+class ConverterThread(threading.Thread):
+
+    def __init__(self, parent):
+        super().__init__()
+        self.msgbox = queue.Queue()
+        self.quit = False
+        self.cancel_ = False
+        self.parent = parent
+
+    def run(self):
+        print("Thread start")
+        while not self.quit:
+            print("block")
+            msg, *args = self.msgbox.get()
+            print("Message arrived:", msg, args)
+            if msg == "convert":
+                self.convert(*args)
+            elif msg == "cancel":
+                self.quit = True
+            else:
+                logging.error("unknown message: %s %s", msg, args)
+        print("Thread stop")
+
+    def request(self, *args):
+        print("received request:", *args)
+        self.msgbox.put(args)
+
+    def cancel(self):
+        self.cancel_ = True
+        self.request("cancel")
+
+    def progress_callback(self, msg, count, total):
+        print("#### progress: %s %s/%s" % (msg, count, total))
+        self.parent.request("progress", msg, count, total)
+        if self.cancel_:
+            raise RuntimeError("cancel called")
+
+    def convert(self, source_directory, target_directory, cfg):
+        print("Convert: %s %s %s" % (source_directory, target_directory, cfg))
+        try:
+            converter = rfactortools.rFactorToGSC2013(source_directory, cfg)
+            converter.convert_all(target_directory, self.progress_callback)
+            print("-- rfactor-to-gsc2013 conversion complete --")
+
+            #tkinter.messagebox.showinfo("Conversion finished",
+            #                            "Conversion finished",
+            #                            parent=self)
+        except Exception as e:
+            tb = traceback.format_exc()
+            print(tb)
+            #tkinter.messagebox.showerror("Conversion failed",
+            #                             "Conversion failed with:\n\nError: %s" % e,
+            #                             parent=self)
 
 
 def main():
@@ -287,8 +394,13 @@ def main():
     root = tkinter.Tk()
     root.wm_title("rFactor to Game Stock Car 2013 Mod Converter V0.3.0")
     root.minsize(640, 400)
-    app = Application(master=root)
 
+    converter_thread = ConverterThread(None)
+    converter_thread.start()
+
+    app = Application(converter_thread, master=root)
+    converter_thread.parent = app
+    
     if args.INPUTDIR is not None:
         app.source_directory.set(args.INPUTDIR)
 
@@ -297,6 +409,8 @@ def main():
 
     app.mainloop()
 
+    converter_thread.cancel()
+    converter_thread.join()
 
 if __name__ == "__main__":
     main()

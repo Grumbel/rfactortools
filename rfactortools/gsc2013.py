@@ -413,11 +413,13 @@ class rFactorToGSC2013:
             except Exception:
                 logging.exception("%s: %s: rfactortools.convert_file failed", source_file, target_file)
 
-    def convert_all(self, target_directory):
+    def convert_all(self, target_directory, progress_cb):
         target_directory = os.path.normpath(target_directory)
 
         # convert GameData/ directories
         for d in self.source_gamedata_directories:
+            progress_cb("progress in converting", 0, 0)
+
             self.source_gamedata_directory = os.path.normpath(d)
 
             if self.cfg.single_gamedata:
@@ -439,6 +441,8 @@ class rFactorToGSC2013:
 
         # convert tracks that don't have a toplevel GameData/ directory
         for d, prefix in self.source_track_directories:
+            progress_cb("progress in converting", 0, 0)
+
             logging.debug("track: prefix:\"%s\" - directory:\"%s\"", prefix, d)
             source_directory = os.path.normpath(d)
 
