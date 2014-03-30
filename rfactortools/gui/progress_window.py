@@ -32,7 +32,7 @@ class ProgressWindow(Toplevel):
         self.title("rfactortools: Conversion Progress")
         self.transient(parent)
 
-        self.minsize(730, 300)
+        self.minsize(720, 480)
 
         self.protocol("WM_DELETE_WINDOW", self.cancel)
         self.geometry("+%d+%d" % (parent.winfo_rootx()+50,
@@ -134,7 +134,7 @@ class ProgressWindow(Toplevel):
             else:
                 self.text.insert(END,
                                  "Conversion finished, but there have been errors, "
-                                 "check the logs/ for more details")
+                                 "check logs/ for more details")
             self.text.config(state=tkinter.DISABLED)
 
         elif msg == "error":
