@@ -12,6 +12,10 @@ Source code for rfactortools can be found at:
 
 * https://github.com/Grumbel/rfactortools
 
+Bug reports can be submitted at:
+
+* https://github.com/Grumbel/rfactortools/issues
+
 
 Features
 --------
