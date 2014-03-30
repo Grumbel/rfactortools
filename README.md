@@ -1,14 +1,14 @@
-rFactor Tools
-=============
+rFactorTools
+============
 
 rFactorTools is a collections of tools for manipulating and converting
-rFactor related files. Main use of these tools right now is
-semi-automatic conversion of rFactor mods over to GameStockCar2013.
-Conversion is at this point not 100% automatic for all mods, but it
-will get you most of the way. The file `FAQ.md` provides solutions for
+rFactor related files. The main use of these tools right now is
+automatic conversion of rFactor mods over to GameStockCar2013.
+Conversion is at this point completely automatic for most mods, but
+some problems might remain. The file `FAQ` provides solutions for
 common problems.
 
-Source code for rfactortools can be found at:
+Full source code for rfactortools can be found at:
 
 * https://github.com/Grumbel/rfactortools
 
@@ -21,6 +21,7 @@ Features
 --------
 
 * conversion of track and vehicle mods from rFactor to GSC2013
+* ablity to tweak class and categories
 * automatic thumbnail generation for tracks
 * automatic resizing of track thumbnails and vehicle images
 * automatic repacking and encryption of .mas files
@@ -47,6 +48,13 @@ only works with Python3.3.
 
 Tools
 -----
+
+`rfactortools-gui` and `minised-gui` are the main tools of this
+package. The `rfactortools-gui` is a GUI that allows you to convert rFactor
+track and car mods to Game Stock Car 2013 and `minised-gui` is a text
+search&replace tool that works across multiple files at once. The rest
+of the tools don't provide a GUI and are meant to be used from command
+line and are rarely needed.
 
 ### `rfactortools-gui`
 
