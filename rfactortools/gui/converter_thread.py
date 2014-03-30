@@ -45,7 +45,7 @@ class ConverterThread(threading.Thread):
             converter.convert_all(target_directory)
             print("-- rfactor-to-gsc2013 conversion complete --")
         except Exception as e:
-            logging.exception("conversation failed")
+            logging.exception("conversion failed")
             self.parent.request("error", e)
 
     def cancel(self):

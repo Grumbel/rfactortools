@@ -1,18 +1,65 @@
 Frequently Asked Questions about converting rFactor mods 
 ========================================================
 
+
+Add-on cars show up in the Mini Challenge races in GSC2013, how to fix that?
+----------------------------------------------------------------------------
+
+All the converted vehicle mods currently go into the `reiza5` class,
+which is used for the Minis and causes them to show up in races with
+the Mini Challenge. To fix that edit the `.veh` files in
+`GameData/Vehicles/Mini_Challenge/` and change:
+
+    Classes="reiza5"
+
+to:
+
+    Classes="reiza5,MiniChallenge"
+
+There might be cleaner ways without modifying those files, but this
+seems to work, at least for single player.
+
+
+"Error loading texture sky.tga for material Sky"
+------------------------------------------------
+
+To use converted tracks, you need to install the base mod
+gsc2013-missing-track-textures.7z, it contains the missing sky textures:
+
+https://mega.co.nz/#!zlRFTAjD!byvxHGBi-19Cj9maG4bSTUqMX19lJuULKCAQbQ7Lr0g
+
+If you want to tweak the sky textures manually, copy the unencrypted
+`sky00.dds`, `sky01.dds`, `sky02.dds`, `sky03.dds` and `sky04.dds`
+over to `GameData/Locations/`. Copying those files into the track's
+directory, into the same directory where the `.mas` files are, works
+too.
+
+The different sky textures are used for the different daytimes:
+
+* 00: dusk
+* 01: day
+* 02: clouds
+* 03: dawn
+* 04: night
+
+Some more info can be found at:
+
+* http://isiforums.net/f/showthread.php/632-Tutorial-for-Skybox-and-Skyboxi
+
+
 Can I convert GTL, GTR2 or Race07 mods?
 ---------------------------------------
 
-No. Those games use different .gmt file formats and conversion of
-those is not supported by rfactortools at the moment.
+No. Those games use a different .gmt file format and conversion of
+those files is not supported by rfactortools at the moment.
 
 
 How do rFactor and GSC2013 differ?
 ----------------------------------
 
-The overall file structure is the same for both. In GSC2013 the
-content of `.mas` files and `.gmt` files have to be encrypted. The
+rFactor and GSC2013 use the same engine. The overall file structure is
+the same for both. In GSC2013 the content of `.mas` files and `.gmt`
+files have to be encrypted to be recognized by the game. The
 `SearchPath` for `.mas` files is also handled differently and needs to
 be adopted when converting mods.
 
@@ -23,7 +70,7 @@ What is the meaning the SearchPath in .gen files and of the <VEHDIR> and <TEAMDI
 * `<VEHDIR>` gets expanded to `[...]\GameData\Vehicles\`
 * `<TEAMDIR>` gets expanded to the directory where the `.veh` file is located
 
-In rFactor <VEHDIR> seems to get expanded to
+In rFactor `<VEHDIR>` seems to get expanded to
 `[...]\GameData\Vehicles\{MODNAME}\` which makes it necessary to tweak
 the path in many mods.
 
@@ -96,26 +143,10 @@ and the menu thumbnail becomes
 
 `GameData/Locations/Jacarepagua/Jacarepagua1/Jacarepagua1mini.tga`
 
-Loading screens are ~1024x768 (size can varry)
+Loading screens are 800x600 or 1024x768, they get stretched to the
+full screen resolution inside the game.
 
 Menu thumbnails are ~252x249 (size can varry)
-
-
-Add-on cars show up in the Mini Challenge races in GSC2013, how to fix that?
-----------------------------------------------------------------------------
-
-All the converted vehicle mods currently go into the `reiza5` class,
-which is used for the Minis. To fix that edit the `.veh` files in 
-`GameData/Vehicles/Mini_Challenge/` and change:
-
-    Classes="reiza5"
-
-to:
-
-    Classes="reiza5, MiniChallenge"
-
-There might be cleaner ways without modifying those files, but this
-seems to work, at least for single player.
 
 
 How are tracks assigned to karts or race cars?
@@ -153,24 +184,17 @@ files themselves.
 GameStockCar2013 crashes when starting the mod
 ----------------------------------------------
 
-No idea, happens with a tiny handful of mods.
+No idea, happens with a tiny handful of mods. Use `GSC Sync.exe` to
+make sure that no important files got accidentally overwritten and
+remove the mod.
 
 
 Some files need modifications, how do I automate that?
 ------------------------------------------------------
 
-If a `.gen` files contains the line `MASFile=Season_1990` and you want
-to change it to `MASFile=SRM_1990\Season_1990` for all the .gen files
-you can do that with a simple call to `find` and `sed`, like this:
-
-    find .../GameData/ -name "*.gen" -exec sed -i 's/MASFile=Season_1990/MASFile=SRM_1990\\Season_1990/i' {} \;
-
-Adding a new `SearchPath` entry works something like this: 
-
-    find .../GameData/ -name "*.gen" -exec sed -i 's#SearchPath=<VEHDIR>#SearchPath=<VEHDIR>\nSearchPath=<VEHDIR>\\WRC_By_TeamFMR#i' {} \;
-
-Note that these are just rough examples, they might not work for your
-case.
+`minised-gui.exe` is included with `rfactortools` and allows you to
+search and replace text easily across multiple files. It has full
+support for regular expressions if you need them.
 
 
 What are the most common issues with vehicle conversion?
@@ -187,6 +211,9 @@ name, i.e. `SearchPath=<VEHDIR>\SomeDir` would become
 `SearchPath=<VEHDIR>\Modname\SomeDir`.
 
 Those two changes are all that should be needed for most vehicle mods.
+
+The latest versions of `rfactortools` should make those changes
+automatically.
 
 
 What are the most common issues with track conversion?
@@ -214,27 +241,6 @@ In the `.tdf` the grip levels might need adjustments, i.e. change
 
 The game might complain about missing RACEGROOVE.dds or SKIDHARD.dds,
 copy those files over into the directory of the `.scn` file.
-
-
-A track is complaining about missing `sky` texture
---------------------------------------------------
-
-Copy the unencrypted `sky00.dds`, `sky01.dds`, `sky02.dds`,
-`sky03.dds` and `sky04.dds` over to `GameData/Locations/`. Copying it
-over to the track's directory, into the same directory where the
-`.mas` files are, works too.
-
-The different sky textures are used for the different daytimes:
-
-* 00: dusk
-* 01: day
-* 02: clouds
-* 03: dawn
-* 04: night
-
-Some more info can be found at:
-
-* http://isiforums.net/f/showthread.php/632-Tutorial-for-Skybox-and-Skyboxi
 
 
 Part of the cockpit is cut off
@@ -317,6 +323,9 @@ The track is to bright
 
 Find the `.scn` file for the track and edit the `Light` section, the
 intensity value should be 1.0 or smaller.
+
+The latest versions of `rfactortools` should make those changes
+automatically.
 
 
 Track complains that it can't open the `.mas`

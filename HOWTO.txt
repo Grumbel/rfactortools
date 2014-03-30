@@ -2,41 +2,44 @@
             ========================================
 
 This application allows you to convert rFactor mods so that they can
-be used with Game Stock Car 2013. Conversation is for most part
+be used with Game Stock Car 2013. Conversation is for most part fully
 automatic, but some issues may remain, the file FAQ.md explains how to
 fix or work around some of them.
 
 To convert a mod:
 
-1) extract it or if it comes as .exe install it into an empty directory
-
-2) select the directory where you installed the mod as "Input"
-
-3) select the directory where you want the conversion to be copied to
-   as "Output". Installing directly into the GSC2013 is not
-   recommended, use an empty directory instead.
-
-4) Hit the "Convert" button and wait a minute or two.
-
-5) Once the conversion is finished copy the mod from the "Output"
-   directory over to the GSC2013 directory
-
-6) If you have converted a track, install gsc2013-missing-track-textures.7z,
-   it's a base mod that contains sky textures necessary to run converted
-   tracks. It's available at:
+1) Download and install the base mod gsc2013-missing-track-textures.7z,
+   it contains sky textures necessary to run converted tracks. It's 
+   available at:
 
    https://mega.co.nz/#!zlRFTAjD!byvxHGBi-19Cj9maG4bSTUqMX19lJuULKCAQbQ7Lr0g
 
-7) If something goes wrong, full conversion logs are saved to
-   logs/ directory. For further tweaking, minised-gui.exe, a
-   tool that allows you to search&replace across multiple files is
-   included with rfactortools.
+2) Extract your mod into an empty directory. If your mod comes as .exe
+   install it into an empty directory. Do not install it directly into
+   the rFactor or GSC2013 directory.
 
-8) If you want to report a bug or request a feature, you can do so at:
+3) Select the directory where you unpacked the mod as "Input".
+
+4) Select the directory where you want the conversion to be copied to
+   as "Output". Installing directly into the GSC2013 is not
+   recommended, use an empty directory instead.
+
+5) Hit the "Convert" button and wait a minute or two while the
+   conversion takes place.
+
+6) Once the conversion is finished copy the mod from the "Output"
+   directory over to the GSC2013 directory.
+
+7) If something goes wrong, full conversion logs are saved to the
+   logs/ directory.
+
+   For further tweaking, minised-gui.exe, a tool that allows you to
+   search&replace across multiple files is included with rfactortools.
+
+8) If you want to report a bug, request a feature or report a mod that
+   doesn't convert properly, you can do so at:
 
    https://github.com/Grumbel/rfactortools/issues
-
-Car mods will show up in the same class as the Mini Challenge.
 
 
 Options:
