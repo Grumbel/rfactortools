@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # rFactorTools GUI
 # Copyright (C) 2014 Ingo Ruhnke <grumbel@gmail.com>
 #
@@ -17,12 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from rfactortools.gui import Application
+from .application import Application
 
-
-if __name__ == "__main__":
-    app = Application()
-    app.main()
+__all__ = ["Application"]
 
 
 # EOF #

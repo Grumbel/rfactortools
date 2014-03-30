@@ -7,7 +7,10 @@ py_env = Environment(SHLIBPREFIX = '',
 py_env.ParseConfig("python3-config --cflags --ldflags | sed -e 's/-Werror=declaration-after-statement//' -e 's/-Wstrict-prototypes//'")
 py_env.SharedLibrary('rfactortools/_crypt', ['rfactortools_crypt.cpp'])
 
-sources = Glob("*.py", strings=True) + Glob("rfactortools/*.py", strings=True) + Glob("tests/*.py", strings=True)
+sources = Glob("*.py", strings=True) + \
+          Glob("rfactortools/*.py", strings=True) + \
+          Glob("rfactortools/gui/*.py", strings=True) + \
+          Glob("tests/*.py", strings=True)
 flake_check = Command(None, sources,
                 "python3 -m flake8.run --max-line-length=120 $SOURCES")
 
