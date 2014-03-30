@@ -47,6 +47,14 @@ Some more info can be found at:
 * http://isiforums.net/f/showthread.php/632-Tutorial-for-Skybox-and-Skyboxi
 
 
+Force Feedback is inverted in some mods
+---------------------------------------
+
+The exact reason for this unknown, but force feedback can be inverted
+in the GSC2013 settings or by pressing `Ctrl+Numpad_8` directly in the
+game.
+
+
 Can I convert GTL, GTR2 or Race07 mods?
 ---------------------------------------
 
