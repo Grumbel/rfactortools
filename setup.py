@@ -40,7 +40,7 @@ setup(name='rfactortools',
           "sfxtool.py",
           "vehtool.py",
       ],
-      packages=['rfactortools'],
+      packages=['rfactortools', 'rfactortools.gui'],
       ext_modules=[Extension('rfactortools._crypt', ['rfactortools_crypt.cpp'])],
       requires=['PIL', 'pathlib'])
 
