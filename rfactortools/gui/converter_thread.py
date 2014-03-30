@@ -24,16 +24,16 @@ import rfactortools
 
 class ConverterThread(threading.Thread):
 
-    def __init__(self, parent, source_directory, target_directory, cfg):
+    def __init__(self, source_directory, target_directory, cfg):
         super().__init__()
         self.msgbox = queue.Queue()
         self.quit = False
         self.cancel_ = False
-        self.parent = parent
 
         self.source_directory = source_directory
         self.target_directory = target_directory
         self.cfg = cfg
+        self.progress_cb = lambda *args: None
 
     def run(self):
         self.convert(self.source_directory, self.target_directory, self.cfg)
@@ -46,14 +46,14 @@ class ConverterThread(threading.Thread):
             print("-- rfactor-to-gsc2013 conversion complete --")
         except Exception as e:
             logging.exception("conversion failed")
-            self.parent.request("error", e)
+            self.progress_cb("error", e)
 
     def cancel(self):
         self.cancel_ = True
 
     def progress_callback(self, *args):
         if args:
-            self.parent.request(*args)
+            self.progress_cb(*args)
 
         if self.cancel_:
             raise RuntimeError("ConvertThread: cancel received")

@@ -15,24 +15,39 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import tkinter
 import argparse
 import datetime
 import logging
 import os
 import sys
 
-
 from .main_window import MainWindow
+from .progress_window import ProgressWindow
+from .converter_thread import ConverterThread
 
 
 class Application:
 
-    def on_close_window_request(self, *args):
-        if self.app.gui_progress_window:
-            pass  # ignore close requests while conversion is running
-        else:
-            self.root.destroy()
+    def __init__(self):
+        self.converter_thread = None
+
+    def start_conversion(self, source_directory, target_directory, cfg):
+        assert self.converter_thread is None
+
+        progress_window = ProgressWindow(self, self.gui_main_window)
+        self.converter_thread = ConverterThread(source_directory, target_directory, cfg)
+        self.converter_thread.progress_cb = progress_window.request
+
+        self.converter_thread.start()
+        progress_window.wait_for_conversion()
+        self.cancel_conversion()
+        progress_window = None
+        self.converter_thread = None
+
+    def cancel_conversion(self):
+        if self.converter_thread is not None:
+            self.converter_thread.cancel()
+            self.converter_thread.join()
 
     def main(self):
         logger = logging.getLogger()
@@ -58,22 +73,22 @@ class Application:
                             help='directory containing the mod')
         parser.add_argument('OUTPUTDIR', action='store', type=str, nargs='?',
                             help='directory where the conversion will be written')
+        parser.add_argument('-s', '--start', action='store_true',
+                            help='start conversion instantly')
         args = parser.parse_args()
 
-        self.root = tkinter.Tk()
-        self.root.wm_title("rfactortools: rFactor to Game Stock Car 2013 Mod Converter V0.3.0")
-        self.root.minsize(640, 400)
-        self.root.protocol("WM_DELETE_WINDOW", self.on_close_window_request)
-
-        self.app = MainWindow(master=self.root)
+        self.gui_main_window = MainWindow(self)
 
         if args.INPUTDIR is not None:
-            self.app.source_directory.set(args.INPUTDIR)
+            self.gui_main_window.source_directory.set(args.INPUTDIR)
 
         if args.OUTPUTDIR is not None:
-            self.app.target_directory.set(args.OUTPUTDIR)
+            self.gui_main_window.target_directory.set(args.OUTPUTDIR)
 
-        self.app.mainloop()
+        if args.start:
+            self.gui_main_window.do_conversion()
+
+        self.gui_main_window.mainloop()
 
 
 # EOF #

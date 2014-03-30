@@ -163,13 +163,12 @@ class rFactorToGSC2013:
         self.source_gamedata_directories, self.source_track_directories \
             = find_data_directories(self.source_directory)
 
-        self.progress_cb = None
+        self.progress_cb = lambda *args: None
         if not self.source_gamedata_directories and not self.source_track_directories:
             raise Exception("couldn't locate 'GameData/' or track directory")
 
     def report_progress(self, *args):
-        if self.progress_cb:
-            self.progress_cb(*args)
+        self.progress_cb(*args)
 
     def print_info(self):
         #vehicle_count = len(self.files_by_type['.veh'])
