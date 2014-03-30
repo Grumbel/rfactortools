@@ -39,7 +39,6 @@ class ConverterThread(threading.Thread):
         self.convert(self.source_directory, self.target_directory, self.cfg)
 
     def convert(self, source_directory, target_directory, cfg):
-        print("Convert: %s %s %s" % (source_directory, target_directory, cfg))
         try:
             converter = rfactortools.rFactorToGSC2013(source_directory, cfg)
             converter.progress_cb = self.progress_callback
