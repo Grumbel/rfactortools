@@ -27,6 +27,7 @@ py_env.SharedLibrary('rfactortools/_crypt', ['rfactortools_crypt.cpp'])
 sources = Glob("*.py", strings=True) + \
           Glob("rfactortools/*.py", strings=True) + \
           Glob("rfactortools/gui/*.py", strings=True) + \
+          Glob("rfactortools/gui/*.pyw", strings=True) + \
           Glob("tests/*.py", strings=True)
 
 flake_check = Command(None, sources,
