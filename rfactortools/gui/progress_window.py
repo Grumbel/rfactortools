@@ -162,7 +162,10 @@ class ProgressWindow(tk.Toplevel):
 
         else:
             raise RuntimeError("ProgressWindow: unknown msg: %s %s" % (msg, args))
-        self.text.yview(tk.END)
+
+        # only autoscroll if the view is at the bottom of the text
+        if self.text.yview()[1] == 1.0:
+            self.text.yview(tk.END)
 
 
 # EOF #
