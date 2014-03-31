@@ -131,6 +131,11 @@ class MainWindow(tk.Tk):
                                                        variable=self.single_gamedata)
         self.single_gamedata_checkbox.grid(column=0, row=3, columnspan=2, sticky=W)
 
+        self.fix_light_intensity = tk.BooleanVar(value=defaults.fix_light_intensity)
+        self.fix_light_intensity_checkbox = tk.Checkbutton(self.option_frame, text="Fix Light Intensity",
+                                                           variable=self.fix_light_intensity)
+        self.fix_light_intensity_checkbox.grid(column=0, row=4, columnspan=2, sticky=W)
+
         self.vehicle_category = tk.StringVar(value=defaults.vehicle_category)
         self.vehicle_category_label = tk.Label(self.option_frame, text="Vehicle Category:")
         self.vehicle_category_label.grid(column=2, row=0, sticky=E)
@@ -211,6 +216,7 @@ class MainWindow(tk.Tk):
             cfg.force_track_thumbnails = self.force_track_thumb.get()
             cfg.clear_classes = self.clear_classes.get()
             cfg.single_gamedata = self.single_gamedata.get()
+            cfg.fix_light_intensity = self.fix_light_intensity.get()
 
             if self.vehicle_category.get().strip():
                 cfg.vehicle_category = self.vehicle_category.get().strip()

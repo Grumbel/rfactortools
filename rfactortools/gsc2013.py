@@ -149,6 +149,7 @@ class rFactorToGSC2013Config:
         self.vehicle_category = ""
         self.track_category = ""
         self.track_filter_properties = "StockV8 *"
+        self.fix_light_intensity = True
 
 
 class rFactorToGSC2013:
@@ -201,17 +202,19 @@ class rFactorToGSC2013:
         with open(target_file, "wt", newline='\r\n', encoding="latin-1", errors="replace") as fout:
             for line in lines:
                 # fix light intensity
-                m = re.match(r'\s*Type=Directional.*Intensity=\(([0-9.]+)\).*', line)
-                if m:
-                    try:
-                        intensity = float(m.group(1))
-                        if intensity > 1.0:
-                            intensity = 0.9
-                            line = re.sub(r'Intensity=\([^\)]*\)',
-                                          r'Intensity=(%f)' % intensity,
-                                          line, flags=re.IGNORECASE)
-                    except ValueError:
-                        logging.exception("%s: couldn't parse light intensity: %s", source_file, m.group(1))
+                if self.cfg.fix_light_intensity:
+                    m = re.match(r'\s*Type=Directional.*Intensity=\(([0-9.]+)\).*', line)
+                    if m:
+                        try:
+                            intensity = float(m.group(1))
+                            if intensity > 1.0:
+                                intensity = 0.9
+                                line = re.sub(r'Intensity=\([^\)]*\)',
+                                              r'Intensity=(%f)' % intensity,
+                                              line, flags=re.IGNORECASE)
+                        except ValueError:
+                            logging.exception("%s: couldn't parse light intensity: %s", source_file, m.group(1))
+
                 fout.write(line)
 
     def convert_scn(self, source_file, target_file, modname):
