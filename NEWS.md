@@ -1,3 +1,24 @@
+rfactortools-0.3.0
+------------------
+
+* removed command line terminal and added progress reporting into the GUI
+* fixed issue with "TEAMDIR\.." getting replaced by "."
+* fixed handling of empty .mas files
+* fixed cmaps.mas path fixing when multiple mods where involved
+* added support for Simraceway .mas files
+* added option to fix Light intensity on tracks
+* added track loading screen rescaling
+* added more aggressive SearchPath fixing
+
+
+rfactortools-0.2.2
+------------------
+
+* fixes for some bugs that got introduced with 0.2.1
+* prevents mods from overwriting GSC2013 files
+* no longer copies .gfx files, as those tend to break GSC2013
+
+
 rfactortools-0.2.1
 ------------------
 
