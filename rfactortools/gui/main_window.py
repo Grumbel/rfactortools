@@ -22,6 +22,7 @@ import logging
 import tkinter as tk
 import tkinter.filedialog
 import tkinter.messagebox
+import io
 
 import rfactortools
 
@@ -231,26 +232,31 @@ class MainWindow(tk.Tk):
             self.app.start_conversion(self.source_directory.get(), self.target_directory.get(), cfg)
 
     def do_veh_tree(self):
-        print("--- veh tree: start ---")
         path = self.target_directory.get()
         files = rfactortools.find_files(path, ".veh")
         vehs = [rfactortools.parse_vehfile(filename) for filename in files]
-        rfactortools.print_veh_tree(vehs)
-        print("--- veh tree: end ---")
+
+        sout = io.StringIO()
+        rfactortools.print_veh_tree(vehs, sout)
+
+        self.app.show_text_window("rfactortools: .veh tree", sout.getvalue())        
 
     def do_veh_check(self):
-        print("--- veh check: start ---")
         path = self.target_directory.get()
         files = rfactortools.find_files(path, ".veh")
         vehs = [rfactortools.parse_vehfile(filename) for filename in files]
-        rfactortools.print_veh_info(vehs)
-        print("--- veh check: end ---")
+
+        sout = io.StringIO()
+        rfactortools.print_veh_info(vehs, sout)
+
+        self.app.show_text_window("rfactortools: .veh check", sout.getvalue())
 
     def do_gen_check(self):
-        print("--- gen check: start ---")
         path = self.target_directory.get()
-        rfactortools.process_gen_directory(path, False)
-        print("--- gen check: end ---")
 
+        sout = io.StringIO()
+        rfactortools.process_gen_directory(path, False, sout)
+
+        self.app.show_text_window("rfactortools: .gen check", sout.getvalue())
 
 # EOF #

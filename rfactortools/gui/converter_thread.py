@@ -43,7 +43,7 @@ class ConverterThread(threading.Thread):
             converter = rfactortools.rFactorToGSC2013(source_directory, cfg)
             converter.progress_cb = self.progress_callback
             converter.convert_all(target_directory)
-            print("-- rfactor-to-gsc2013 conversion complete --")
+
         except Exception as e:
             logging.exception("conversion failed")
             self.progress_cb("error", e)

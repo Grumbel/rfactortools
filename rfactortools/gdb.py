@@ -19,17 +19,18 @@ import os
 import rfactortools
 
 
-def process_gdb_file(gdb, fix, errors):
+def process_gdb_file(gdb, fix, errors, fout):
     scn = os.path.splitext(gdb)[0] + ".scn"
 
     info = rfactortools.InfoScnParser()
     rfactortools.process_scnfile(scn, info)
-    print("[Track]")
-    print("  gdb: %s" % gdb)
-    print("  scn: %s" % scn)
-    print("  SearchPath:", info.search_path)
-    print("    MasFiles:", info.mas_files)
-    print()
+
+    fout.write("[Track]\n")
+    fout.write("  gdb: %s\n" % gdb)
+    fout.write("  scn: %s\n" % scn)
+    fout.write("  SearchPath: %s\n" % info.search_path)
+    fout.write("    MasFiles: %s\n" % info.mas_files)
+    fout.write("\n")
 
 
 # EOF #

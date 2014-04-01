@@ -19,6 +19,7 @@
 
 import argparse
 import os
+import sys
 
 import rfactortools
 
@@ -41,8 +42,8 @@ if __name__ == "__main__":
     vehs = [rfactortools.parse_vehfile(filename) for filename in files]
 
     if args.tree:
-        rfactortools.print_veh_tree(vehs)
+        rfactortools.print_veh_tree(vehs, sys.stdout)
     else:
-        rfactortools.print_veh_info(vehs)
+        rfactortools.print_veh_info(vehs, sys.stdout)
 
 # EOF #

@@ -53,7 +53,6 @@ def scn2posix_path(path):
 
 
 def process_scnfile(filename, parser):
-    # print("processing", filename)
     with rfactortools.open_read(filename) as fin:
         for orig_line in fin.read().splitlines():
             line = orig_line

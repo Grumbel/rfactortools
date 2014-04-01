@@ -18,6 +18,7 @@
 import io
 import os
 import re
+import sys
 import traceback
 
 import rfactortools
@@ -34,7 +35,7 @@ def modify_vehicle_file(gen, search_path, mas_files, vehdir, teamdir):
         fout.write(strio.getvalue())
 
 
-def gen_check_errors(search_path, mas_files, vehdir, teamdir):
+def gen_check_errors(search_path, mas_files, vehdir, teamdir, fout=sys.stdout):
     def expand_path(p):
         p = re.sub(r'<VEHDIR>', (vehdir + "/").replace("\\", "\\\\"), p)
         p = re.sub(r'<TEAMDIR>', (teamdir + "/").replace("\\", "\\\\"), p)
@@ -47,7 +48,7 @@ def gen_check_errors(search_path, mas_files, vehdir, teamdir):
 
     for p, d in zip(search_path, expanded_search_path):
         if not rfactortools.directory_exists(d) and d != ".":
-            print("warning: couldn't locate SearchPath %s" % p)
+            fout.write("warning: couldn't locate SearchPath %s\n" % p)
             warnings.append("warning: couldn't locate SearchPath %s" % p)
 
     default_mas_files = ["cmaps.mas"]
@@ -59,13 +60,13 @@ def gen_check_errors(search_path, mas_files, vehdir, teamdir):
                 mas_found = True
                 break
         if not mas_found and mas.lower() not in default_mas_files:
-            print("error: couldn't locate %s" % mas)
+            fout.write("error: couldn't locate %s\n" % mas)
             errors.append("error: couldn't locate %s" % mas)
 
     return errors, warnings
 
 
-def process_gen_directory(directory, fix):
+def process_gen_directory(directory, fix, fout=sys.stdout):
     gen_files = []
     veh_files = []
     gdb_files = []
@@ -88,32 +89,32 @@ def process_gen_directory(directory, fix):
     errors = []
     for gdb in sorted(gdb_files):
         try:
-            rfactortools.process_gdb_file(gdb, fix, errors)
+            rfactortools.process_gdb_file(gdb, fix, errors, fout)
         except Exception:
             e = traceback.format_exc()
-            print("error:\n%s\n" % e)
+            fout.write("error:\n%s\n\n" % e)
             errors.append(e)
 
     for veh in sorted(veh_files):
         try:
-            rfactortools.process_veh_file(veh, fix, errors)
+            rfactortools.process_veh_file(veh, fix, errors, fout)
         except Exception as e:
             e = traceback.format_exc()
-            print("raised error:\n%s\n" % e)
+            fout.write("raised error:\n%s\n\n" % e)
             errors.append(e)
 
-    print("[MASFiles]")
+    fout.write("[MASFiles]\n")
     for mas in sorted(mas_files):
-        print("  %s" % mas)
-    print()
+        fout.write("  %s\n" % mas)
+    fout.write("\n")
 
     if errors:
-        print("Error summary:")
-        print("==============")
+        fout.write("Error summary:\n")
+        fout.write("==============\n")
         for e in errors:
-            print("error:", e)
+            fout.write("error: %s\n" % e)
     else:
-        print("No errors")
+        fout.write("No errors\n")
 
 
 # EOF #

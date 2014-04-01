@@ -130,20 +130,20 @@ def append_errors(context, errs, warns, errors):
         errors.append("%s: %s" % (context, warn))
 
 
-def process_scn_veh_file(modname, veh_filename, scn_short_filename, vehdir, teamdir, fix, errors):
+def process_scn_veh_file(modname, veh_filename, scn_short_filename, vehdir, teamdir, fix, errors, fout):
     # resolve scn_filename to a proper path
     scn_filename = find_file_backwards(os.path.dirname(veh_filename), scn_short_filename)
     if not scn_filename:
         raise Exception("error: couldn't find .gen file '%s' '%s'" % (veh_filename, scn_short_filename))
 
-    print("gen:", scn_filename)
+    fout.write("gen: %s\n" % scn_filename)
 
     info = rfactortools.InfoScnParser()
     rfactortools.process_scnfile(scn_filename, info)
 
-    print("  SearchPath:", info.search_path)
-    print("    MasFiles:", info.mas_files)
-    print()
+    fout.write("  SearchPath: %s\n" % info.search_path)
+    fout.write("    MasFiles: %s\n" % info.mas_files)
+    fout.write("\n")
 
     if not fix:
         orig_errs, orig_warns = rfactortools.gen_check_errors(info.search_path, info.mas_files, vehdir, teamdir)
@@ -185,25 +185,25 @@ def process_scn_veh_file(modname, veh_filename, scn_short_filename, vehdir, team
             rfactortools.modify_vehicle_file(scn_filename, info.search_path, info.mas_files, vehdir, teamdir)
 
 
-def process_veh_file(veh_filename, fix, errors):
+def process_veh_file(veh_filename, fix, errors, fout):
     teamdir = os.path.dirname(veh_filename)
     modname = find_modname(os.path.dirname(veh_filename))
 
     vehdir = find_vehdir(os.path.dirname(veh_filename))
     veh_obj = parse_vehfile(rfactortools.lookup_path_icase(veh_filename))
 
-    print("[Vehicle]")
-    print("veh:", veh_filename)
-    print("    <VEHDIR>:", vehdir)
-    print("   <TEAMDIR>:", teamdir)
-    print("    graphics:", veh_obj.graphics_file)
-    print("     spinner:", veh_obj.spinner_file)
+    fout.write("[Vehicle]\n")
+    fout.write("veh: %s\n" % veh_filename)
+    fout.write("    <VEHDIR>: %s\n" % vehdir)
+    fout.write("   <TEAMDIR>: %s\n" % teamdir)
+    fout.write("    graphics: %s\n" % veh_obj.graphics_file)
+    fout.write("     spinner: %s\n" % veh_obj.spinner_file)
 
     if veh_obj.graphics_file is not None:
-        process_scn_veh_file(modname, veh_filename, veh_obj.graphics_file, vehdir, teamdir, fix, errors)
+        process_scn_veh_file(modname, veh_filename, veh_obj.graphics_file, vehdir, teamdir, fix, errors, fout)
 
     if veh_obj.spinner_file is not None:
-        process_scn_veh_file(modname, veh_filename, veh_obj.spinner_file, vehdir, teamdir, fix, errors)
+        process_scn_veh_file(modname, veh_filename, veh_obj.spinner_file, vehdir, teamdir, fix, errors, fout)
 
 
 class Tree(defaultdict):
@@ -216,7 +216,7 @@ class Tree(defaultdict):
         self.content = []
 
 
-def _print_tree_rec(tree, indent=""):
+def _print_tree_rec(tree, indent, fout):
     for i, (k, v) in enumerate(sorted(tree.items())):
         if indent == "":
             sym = ""
@@ -228,14 +228,14 @@ def _print_tree_rec(tree, indent=""):
             sym = "+ "
             symc = "  - "
 
-        print("%s%s[%s]" % (indent, sym, k))
+        fout.write("%s%s[%s]\n" % (indent, sym, k))
         for e in v.content:
-            #print("%s%s%-30s %-30s %s" % (indent, symc, e.driver, e.team, e.filename))
-            print("%s%s%-30s %-30s" % (indent, symc, e.driver, e.team))
-        _print_tree_rec(v, indent + "  ")
+            #fout.write("%s%s%-30s %-30s %s\n" % (indent, symc, e.driver, e.team, e.filename))
+            fout.write("%s%s%-30s %-30s\n" % (indent, symc, e.driver, e.team))
+        _print_tree_rec(v, indent + "  ", fout)
 
 
-def print_veh_tree(vehs):
+def print_veh_tree(vehs, fout):
     tree = Tree()
     for veh in vehs:
         subtree = tree
@@ -243,17 +243,17 @@ def print_veh_tree(vehs):
             subtree = subtree[cat]
         subtree.content.append(veh)
 
-    _print_tree_rec(tree)
+    _print_tree_rec(tree, "", fout)
 
 
-def print_veh_info(vehs):
+def print_veh_info(vehs, fout):
     for veh in vehs:
-        print("    file:", veh.filename)
-        print(" classes:", veh.classes)
-        print("graphics:", veh.graphics_file)
-        print("category:", veh.category)
-        print("    team:", veh.team)
-        print()
+        fout.write("    file: %s\n" % veh.filename)
+        fout.write(" classes: %s\n" % veh.classes)
+        fout.write("graphics: %s\n" % veh.graphics_file)
+        fout.write("category: %s\n" % veh.category)
+        fout.write("    team: %s\n" % veh.team)
+        fout.write("\n")
 
 
 # EOF #

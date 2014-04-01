@@ -21,9 +21,10 @@ import logging
 import os
 import sys
 
+from .converter_thread import ConverterThread
 from .main_window import MainWindow
 from .progress_window import ProgressWindow
-from .converter_thread import ConverterThread
+from .text_window import TextWindow
 
 
 class Application:
@@ -48,6 +49,11 @@ class Application:
         if self.converter_thread is not None:
             self.converter_thread.cancel()
             self.converter_thread.join()
+
+    def show_text_window(self, title, text):
+        text_window = TextWindow(self.gui_main_window)
+        text_window.title(title)
+        text_window.set_text(text)
 
     def main(self):
         logger = logging.getLogger()

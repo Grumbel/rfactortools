@@ -20,6 +20,7 @@ import os
 import pathlib
 import re
 import shutil
+import sys
 
 import rfactortools
 
@@ -171,12 +172,8 @@ class rFactorToGSC2013:
     def report_progress(self, *args):
         self.progress_cb(*args)
 
-    def print_info(self):
-        #vehicle_count = len(self.files_by_type['.veh'])
-        #track_count = len(self.files_by_type['.gdb'])
-        #print("Vehicles: %d" % vehicle_count)
-        #print("  Tracks: %d" % track_count)
-        print("GameData: \"%s\"" % self.source_gamedata_directories)
+    def print_info(self, fout=sys.stdout):
+        fout.write("GameData: \"%s\"\n" % self.source_gamedata_directories)
 
     def convert_gdb(self, filename, target_file):
         with rfactortools.open_read(filename) as fin:
