@@ -35,7 +35,7 @@ def modify_vehicle_file(gen, search_path, mas_files, vehdir, teamdir):
         fout.write(strio.getvalue())
 
 
-def gen_check_errors(search_path, mas_files, vehdir, teamdir, fout=sys.stdout):
+def gen_check_errors(search_path, mas_files, vehdir, teamdir, fout):
     def expand_path(p):
         p = re.sub(r'<VEHDIR>', (vehdir + "/").replace("\\", "\\\\"), p)
         p = re.sub(r'<TEAMDIR>', (teamdir + "/").replace("\\", "\\\\"), p)
@@ -66,7 +66,7 @@ def gen_check_errors(search_path, mas_files, vehdir, teamdir, fout=sys.stdout):
     return errors, warnings
 
 
-def process_gen_directory(directory, fix, fout=sys.stdout):
+def process_gen_directory(directory, fix, fout):
     gen_files = []
     veh_files = []
     gdb_files = []

@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import io
 import logging
 import os
 import pathlib
@@ -172,7 +173,7 @@ class rFactorToGSC2013:
     def report_progress(self, *args):
         self.progress_cb(*args)
 
-    def print_info(self, fout=sys.stdout):
+    def print_info(self):
         fout.write("GameData: \"%s\"\n" % self.source_gamedata_directories)
 
     def convert_gdb(self, filename, target_file):
@@ -447,7 +448,7 @@ class rFactorToGSC2013:
             self.convert_gamedata(self.source_gamedata_directory, target_gamedata_directory)
 
             try:
-                rfactortools.process_gen_directory(target_gamedata_directory, True)
+                rfactortools.process_gen_directory(target_gamedata_directory, True, io.StringIO())
             except Exception:
                 logging.exception("rfactortools.process_gen_directory")
 

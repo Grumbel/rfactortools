@@ -146,7 +146,7 @@ def process_scn_veh_file(modname, veh_filename, scn_short_filename, vehdir, team
     fout.write("\n")
 
     if not fix:
-        orig_errs, orig_warns = rfactortools.gen_check_errors(info.search_path, info.mas_files, vehdir, teamdir)
+        orig_errs, orig_warns = rfactortools.gen_check_errors(info.search_path, info.mas_files, vehdir, teamdir, fout)
         append_errors(scn_filename, orig_errs, orig_warns, errors)
     else:
         # if there is a cmaps in the mod, use that instead of the one in <VEHDIR>
@@ -157,7 +157,7 @@ def process_scn_veh_file(modname, veh_filename, scn_short_filename, vehdir, team
                 if m.lower() == "cmaps.mas":
                     info.mas_files[i] = cmaps
 
-        orig_errs, orig_warns = rfactortools.gen_check_errors(info.search_path, info.mas_files, vehdir, teamdir)
+        orig_errs, orig_warns = rfactortools.gen_check_errors(info.search_path, info.mas_files, vehdir, teamdir, fout)
 
         if orig_errs:
             # add modname to the SearchPath to avoid errors
@@ -174,7 +174,7 @@ def process_scn_veh_file(modname, veh_filename, scn_short_filename, vehdir, team
         # make list items unique
         search_path = sorted(set(search_path))
 
-        new_errs, new_warns = rfactortools.gen_check_errors(search_path, info.mas_files, vehdir, teamdir)
+        new_errs, new_warns = rfactortools.gen_check_errors(search_path, info.mas_files, vehdir, teamdir, fout)
 
         append_errors(scn_filename, new_errs, new_warns, errors)
 
