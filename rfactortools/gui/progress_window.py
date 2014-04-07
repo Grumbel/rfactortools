@@ -131,24 +131,24 @@ class ProgressWindow(tk.Toplevel):
 
         elif msg == "file_ignored":
             self.text.config(state=tk.NORMAL)
-            self.text.insert(tk.END, " ignored\n")
+            self.text.insert(tk.END, "ignored\n")
             self.text.config(state=tk.DISABLED)
 
         elif msg == "file_error":
             self.text.config(state=tk.NORMAL)
-            self.text.insert(tk.END, "  error\n")
+            self.text.insert(tk.END, "error\n")
             self.text.config(state=tk.DISABLED)
             self.conversion_had_errors = True
 
         elif msg == "file_done":
             self.text.config(state=tk.NORMAL)
-            self.text.insert(tk.END, "   done\n")
+            self.text.insert(tk.END, "done\n")
             self.text.config(state=tk.DISABLED)
 
         elif msg == "file":
             modname, filename = args
 
-            txt = "%s: %-70s" % (modname, filename + "...")
+            txt = "%s: %s" % (modname, filename + "... ")
 
             self.text.config(state=tk.NORMAL)
             self.text.insert(tk.END, txt)
