@@ -18,7 +18,6 @@
 import io
 import os
 import re
-import sys
 import traceback
 
 import rfactortools

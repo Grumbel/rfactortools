@@ -19,6 +19,7 @@
 
 import argparse
 import logging
+import sys
 
 import rfactortools
 
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     if args.info:
         for source_directory in args.DIRECTORY:
             converter = rfactortools.rFactorToGSC2013(source_directory, cfg)
-            converter.print_info()
+            converter.print_info(sys.stdout)
     else:
         if not target_directory:
             raise Exception("--output DIR must be set")
