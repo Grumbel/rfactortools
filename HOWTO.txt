@@ -8,35 +8,29 @@ fix or work around some of them.
 
 To convert a mod:
 
-1) Download and install the base mod gsc2013-missing-track-textures.7z,
-   it contains sky textures necessary to run converted tracks. It's 
-   available at:
-
-   https://mega.co.nz/#!zlRFTAjD!byvxHGBi-19Cj9maG4bSTUqMX19lJuULKCAQbQ7Lr0g
-
-2) Extract your mod into an empty directory. If your mod comes as .exe
+1) Extract your mod into an empty directory. If your mod comes as .exe
    install it into an empty directory. Do not install it directly into
    the rFactor or GSC2013 directory.
 
-3) Select the directory where you unpacked the mod as "Input".
+2) Select the directory where you unpacked the mod as "Input".
 
-4) Select the directory where you want the conversion to be copied to
+3) Select the directory where you want the conversion to be copied to
    as "Output". Installing directly into the GSC2013 is not
    recommended, use an empty directory instead.
 
-5) Hit the "Convert" button and wait a minute or two while the
+4) Hit the "Convert" button and wait a minute or two while the
    conversion takes place.
 
-6) Once the conversion is finished copy the mod from the "Output"
+5) Once the conversion is finished copy the mod from the "Output"
    directory over to the GSC2013 directory.
 
-7) If something goes wrong, full conversion logs are saved to the
+6) If something goes wrong, full conversion logs are saved to the
    logs/ directory.
 
    For further tweaking, minised-gui.exe, a tool that allows you to
    search&replace across multiple files is included with rfactortools.
 
-8) If you want to report a bug, request a feature or report a mod that
+7) If you want to report a bug, request a feature or report a mod that
    doesn't convert properly, you can do so at:
 
    https://github.com/Grumbel/rfactortools/issues
@@ -99,6 +93,23 @@ The input directory can contain multiple mods at once, if this option is
 selected only a single GameData/ directory containing all the mods
 will be created, otherwise all the mods will be stored in their own
 directories.
+
+Fix Light Intensity:
+Some rFactor tracks have a light intensity >1.0, this makes them look
+far to bright and washes out most details, this setting will force the
+light intensity below 1.0.
+
+Copy Missing Textures:
+Game Stock Car is missing a few textures that some, but not all,
+tracks require, namely:
+
+* racegroove.dds
+* skidhard.dds
+* sky00.dds, sky01.dds, sky02.dds, sky03.dds, sky04.dds
+
+If this option is enabled, the textures will be added to the track. In
+case the track already does include those textures itself, you can
+disable addition of the textures to the track and save a few MB.
 
 
 Disclaimer:

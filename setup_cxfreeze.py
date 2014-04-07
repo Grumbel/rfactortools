@@ -21,7 +21,7 @@ from cx_Freeze import setup, Executable
 from distutils.core import Extension
 
 setup(name='rfactortools',
-      version='0.3.0',
+      version='0.3.1',
       executables=[
           # Executable("aiwtool.py"),
           # Executable("dirtool.py"),
@@ -47,7 +47,14 @@ setup(name='rfactortools',
                                                ('README.md', 'README.txt'),
                                                ('COPYING', 'COPYING.txt'),
                                                'checksums/GSC2013-GameData.sha1sums',
-                                               'checksums/Race07-full.sha1sums'],
+                                               'checksums/Race07-full.sha1sums',
+                                               "data/racegroove.dds",
+                                               "data/skidhard.dds",
+                                               "data/sky00.dds",
+                                               "data/sky01.dds",
+                                               "data/sky02.dds",
+                                               "data/sky03.dds",
+                                               "data/sky04.dds"],
                              'includes': ['PIL.TgaImagePlugin'],
                              'icon': 'icon.ico'}},
       requires=['PIL', 'pathlib'])

@@ -21,7 +21,6 @@ import os
 import pathlib
 import re
 import shutil
-import sys
 
 import rfactortools
 
@@ -152,6 +151,7 @@ class rFactorToGSC2013Config:
         self.track_category = ""
         self.track_filter_properties = "StockV8 *"
         self.fix_light_intensity = True
+        self.copy_missing_textures = True
 
 
 class rFactorToGSC2013:
@@ -173,7 +173,7 @@ class rFactorToGSC2013:
     def report_progress(self, *args):
         self.progress_cb(*args)
 
-    def print_info(self):
+    def print_info(self, fout):
         fout.write("GameData: \"%s\"\n" % self.source_gamedata_directories)
 
     def convert_gdb(self, filename, target_file):
@@ -192,6 +192,18 @@ class rFactorToGSC2013:
                                   line, flags=re.IGNORECASE)
 
                 fout.write(line)
+
+        if self.cfg.copy_missing_textures:
+            missing_textures = ["racegroove.dds", "skidhard.dds",
+                                "sky00.dds", "sky01.dds", "sky02.dds",
+                                "sky03.dds", "sky04.dds"]
+
+            for tex in missing_textures:
+                source_tex_file = os.path.join("data", tex)
+                target_tex_file = os.path.join(os.path.dirname(target_file), tex)
+
+                if not rfactortools.file_exists(target_tex_file):
+                    shutil.copy(source_tex_file, target_tex_file)
 
     def convert_track_scn(self, source_file, target_file, modname):
         with rfactortools.open_read(source_file) as fin:

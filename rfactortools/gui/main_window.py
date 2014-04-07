@@ -63,7 +63,7 @@ class MainWindow(tk.Tk):
 
         self.app = app
 
-        self.wm_title("rfactortools: rFactor to Game Stock Car 2013 Mod Converter V0.3.0")
+        self.wm_title("rfactortools: rFactor to Game Stock Car 2013 Mod Converter V0.3.1")
         self.minsize(640, 400)
         self.protocol("WM_DELETE_WINDOW", self.on_close_window_request)
 
@@ -136,6 +136,11 @@ class MainWindow(tk.Tk):
         self.fix_light_intensity_checkbox = tk.Checkbutton(self.option_frame, text="Fix Light Intensity",
                                                            variable=self.fix_light_intensity)
         self.fix_light_intensity_checkbox.grid(column=0, row=4, columnspan=2, sticky=W)
+
+        self.copy_missing_textures = tk.BooleanVar(value=defaults.copy_missing_textures)
+        self.copy_missing_textures_checkbox = tk.Checkbutton(self.option_frame, text="Copy Missing Textures",
+                                                             variable=self.copy_missing_textures)
+        self.copy_missing_textures_checkbox.grid(column=0, row=5, columnspan=2, sticky=W)
 
         self.vehicle_category = tk.StringVar(value=defaults.vehicle_category)
         self.vehicle_category_label = tk.Label(self.option_frame, text="Vehicle Category:")
@@ -218,6 +223,7 @@ class MainWindow(tk.Tk):
             cfg.clear_classes = self.clear_classes.get()
             cfg.single_gamedata = self.single_gamedata.get()
             cfg.fix_light_intensity = self.fix_light_intensity.get()
+            cfg.copy_missing_textures = self.copy_missing_textures.get()
 
             if self.vehicle_category.get().strip():
                 cfg.vehicle_category = self.vehicle_category.get().strip()
@@ -239,7 +245,7 @@ class MainWindow(tk.Tk):
         sout = io.StringIO()
         rfactortools.print_veh_tree(vehs, sout)
 
-        self.app.show_text_window("rfactortools: .veh tree", sout.getvalue())        
+        self.app.show_text_window("rfactortools: .veh tree", sout.getvalue())
 
     def do_veh_check(self):
         path = self.target_directory.get()
