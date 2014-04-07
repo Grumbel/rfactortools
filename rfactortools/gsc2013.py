@@ -203,7 +203,11 @@ class rFactorToGSC2013:
                 target_tex_file = os.path.join(os.path.dirname(target_file), tex)
 
                 if not rfactortools.file_exists(target_tex_file):
-                    shutil.copy(source_tex_file, target_tex_file)
+                    try:
+                        shutil.copy(source_tex_file, target_tex_file)
+                    except Exception:
+                        logging.exception("%s: %s: rfactortools.convert_gdb texture copy failed",
+                                          source_tex_file, target_tex_file)
 
     def convert_track_scn(self, source_file, target_file, modname):
         with rfactortools.open_read(source_file) as fin:
