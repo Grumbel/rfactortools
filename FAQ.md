@@ -342,3 +342,32 @@ Track complains that it can't open the `.mas`
 Check the `.scn` of the track, some tracks must be installed into a
 subdirectory and not into the toplevel `GameData/Locations/`, either
 add the directory or adopt the SearchPath in the `.scn`.
+
+Skin problem in game after a car translation :
+
+Hello  
+
+I am trying to modelize F1 from 2014 in a 2012 mod. I did like this :
+
+Step 1 - My 2012 car was composed of different parts : the main part (body, front & rear wing), different for every team, and the common elements (wheels, cockpit, helmet, driver). 
+
+I changed the body, the front & the rear wing with those of a 2014 model
+
+I changed nothing else : the wheels, the cockpit etc... are all as the were before.
+
+When I put the car in game, the main part of the car (body + wings) was not at the right place : it was a bit ahead of what it should have been. To put it in another way, the pilot, the cockpit and the wheels were not at their good place. 
+
+
+Step 2 - So i translated the main part a little bit backward on 3Ds max, in order to put everything at the right place.
+The main part was at the (0,0,0) point in 3ds max, i put it at (0,0, -0.45) : translation on the z axis.
+
+
+Step 3 - Then i tried to skin it. I had the skin of the 2014 model I used at step 1, and i put it in the right directory. Problem : my car was still black in game. i can see my skin in 3ds max. but not in game
+
+So my question is the following : is the translation the problem or not ?
+If it is, is it possible to skin a car even if it is not placed at the 0,0,0 point in 3ds max?
+
+
+Thanks a lot for your help !
+
+
