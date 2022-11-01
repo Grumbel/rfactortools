@@ -14,7 +14,8 @@
           default = rfactortools;
 
           rfactortools = pythonPackages.buildPythonPackage rec {
-            name = "rfactortools";
+            pname = "rfactortools";
+            version = "0.4.0";
 
             src = ./.;
 

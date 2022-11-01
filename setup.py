@@ -22,7 +22,7 @@ from setuptools.extension import Extension
 
 
 setup(name='rfactortools',
-      version='0.3.1',
+      version='0.4.0',
       entry_points = {
           'gui_scripts': [
               "rfactortools-gui = rfactortools.programs.rfactortools_gui:main",
