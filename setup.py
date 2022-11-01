@@ -17,8 +17,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from distutils.core import setup
-from distutils.extension import Extension
+from setuptools import setup, find_packages
+from setuptools.extension import Extension
+
 
 setup(name='rfactortools',
       version='0.3.1',
@@ -44,7 +45,7 @@ setup(name='rfactortools',
               "rft-vehtool = rfactortools.programs.vehtool:main",
           ],
       },
-      packages=['rfactortools', 'rfactortools.gui'],
+      packages=find_packages(),
       ext_modules=[Extension('rfactortools._crypt', ['rfactortools_crypt.cpp'])],
       requires=['PIL', 'pathlib'])
 
