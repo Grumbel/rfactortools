@@ -16,12 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import os
 import argparse
 
 import rfactortools
 
-if __name__ == "__main__":
+
+def main():
     parser = argparse.ArgumentParser(description='rFactor MAS packer')
     parser.add_argument('INPUTDIR', action='store', type=str,
                         help='directory to be packed')
@@ -40,5 +42,6 @@ if __name__ == "__main__":
         files = [os.path.join(args.INPUTDIR, name) for name in sorted(os.listdir(args.INPUTDIR))]
 
     rfactortools.mas_pack(files, args.MASFILE, args.type)
+
 
 # EOF #

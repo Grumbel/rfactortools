@@ -246,7 +246,7 @@ def merge_command(source, target, dry_run, force):
         os.rmdir(source)
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description='dirtool')
     parser.add_argument('COMMAND', action='store', type=str,
                         help='diff, extract-diff, merge')

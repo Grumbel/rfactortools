@@ -16,11 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import argparse
 
 import rfactortools
 
-if __name__ == "__main__":
+
+def main():
     parser = argparse.ArgumentParser(description='rFactor MAS packer')
     parser.add_argument('MASFILE', action='store', type=str,
                         help='.mas file to unpack')
@@ -38,5 +40,6 @@ if __name__ == "__main__":
         rfactortools.mas_list(args.MASFILE, args.verbose, args.with_filename)
     else:
         rfactortools.mas_unpack(args.MASFILE, args.OUTDIR, args.verbose)
+
 
 # EOF #

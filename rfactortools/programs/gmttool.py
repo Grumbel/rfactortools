@@ -177,7 +177,8 @@ def process_gmt(filename, verbose=False):
                        struct.unpack("<4s", data)[0]))
                 i += 1
 
-if __name__ == "__main__":
+
+def main():
     parser = argparse.ArgumentParser(description='rFactor .gmt processor')
     parser.add_argument('FILE', action='store', type=str, nargs='+',
                         help='.gmt files to process')
@@ -188,5 +189,6 @@ if __name__ == "__main__":
     for f in args.FILE:
         process_gmt(f, args.verbose)
         print()
+
 
 # EOF #

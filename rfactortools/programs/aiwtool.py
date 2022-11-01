@@ -22,7 +22,7 @@ import argparse
 import rfactortools
 
 
-if __name__ == "__main__":
+def main():
     def size(s):
         return [int(x) for x in s.split('x', 1)]
 

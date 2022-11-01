@@ -24,7 +24,7 @@ import sys
 import rfactortools
 
 
-if __name__ == "__main__":
+def main():
     cfg = rfactortools.rFactorToGSC2013Config()
 
     parser = argparse.ArgumentParser(description='rFactor to GSC2013 converter')

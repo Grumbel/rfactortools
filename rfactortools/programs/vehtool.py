@@ -24,7 +24,7 @@ import sys
 import rfactortools
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description='rFactor .veh/.gen processor')
     parser.add_argument('FILE', action='store', type=str, nargs='+',
                         help='.veh file or directory containing .veh files')
@@ -45,5 +45,6 @@ if __name__ == "__main__":
         rfactortools.print_veh_tree(vehs, sys.stdout)
     else:
         rfactortools.print_veh_info(vehs, sys.stdout)
+
 
 # EOF #

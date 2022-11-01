@@ -23,7 +23,7 @@ import sys
 import rfactortools
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description='rFactor .veh/.gen processor')
     parser.add_argument('DIRECTORY', action='store', type=str,
                         help='directory containing .gen and .veh files')

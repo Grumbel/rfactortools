@@ -37,7 +37,7 @@ def process_directory(directory):
                 rfactortools.resize_to_fit_img_file(img, 252, 249)
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description='rFactor thumbnail image resizer')
     parser.add_argument('DIRECTORY', action='store', type=str,
                         help='images in DIRECTORY will be resized to GSC2013 standards')

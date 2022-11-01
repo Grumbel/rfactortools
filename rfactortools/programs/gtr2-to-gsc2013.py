@@ -23,7 +23,7 @@ import logging
 import rfactortools
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description='GTR2 to GSC2013 converter')
     parser.add_argument('DIRECTORY', action='store', type=str, nargs=1,
                         help='directory containing the mod')
@@ -42,5 +42,6 @@ if __name__ == "__main__":
 
     conv = rfactortools.GTR2ToGSC2013(args.datadir, args.DIRECTORY[0])
     conv.convert_all(args.output)
+
 
 # EOF #
