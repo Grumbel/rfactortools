@@ -25,11 +25,9 @@ setup(name='rfactortools',
       version='0.3.1',
       entry_points = {
           'gui_scripts': [
-              "minised-gui = rfactortools.programs.minised_gui:main",
               "rfactortools-gui = rfactortools.programs.rfactortools_gui:main",
           ],
           'console_scripts': [
-              "minised = rfactortools.programs.minised:main",
               "rft-aiwtool = rfactortools.programs.aiwtool:main",
               "rft-dirtool = rfactortools.programs.dirtool:main",
               "rft-gentool = rfactortools.programs.gentool:main",
